@@ -9,7 +9,12 @@ router = APIRouter(prefix="/api", tags=["Resume Customization"])
 
 @router.get("/health", response_model=HealthResponse)
 def health_check():
-    """Health check endpoint providing status and LLM configuration info."""
+    """Health check endpoint providing minimal service information in production."""
+    if settings.ENVIRONMENT.lower() == "production":
+        return HealthResponse(
+            status="healthy",
+            version=settings.VERSION
+        )
     has_gemini = bool(settings.GEMINI_API_KEY.strip())
     return HealthResponse(
         status="healthy",

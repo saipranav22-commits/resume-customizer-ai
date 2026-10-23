@@ -123,7 +123,7 @@ def extract_json_from_response(raw_text: str) -> Dict[str, Any]:
 async def call_gemini_api(prompt: str, api_key: str, model_name: str) -> str:
     """Call Google Gemini API using direct REST endpoint for maximum reliability."""
     # List of candidate models to try
-    models_to_try = [model_name, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    models_to_try = [model_name, "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash"]
     # Deduplicate while preserving order
     seen = set()
     models = [m for m in models_to_try if not (m in seen or seen.add(m))]
@@ -330,7 +330,9 @@ Sincerely,
         ),
         raw_parsed_resume_text=resume_text[:2000],
         job_description_summary=jd_text[:200] + "..." if len(jd_text) > 200 else jd_text,
-        generated_cover_letter=cover_letter
+        generated_cover_letter=cover_letter,
+        is_llm_generated=False,
+        customization_engine="deterministic_fallback"
     )
 
 async def customize_resume(
@@ -388,6 +390,9 @@ Remember: Return ONLY valid JSON adhering strictly to the schema. Do not include
         if not parsed_dict.get("job_description_summary"):
             parsed_dict["job_description_summary"] = jd_text[:200] + "..."
             
+        parsed_dict["is_llm_generated"] = True
+        parsed_dict["customization_engine"] = "gemini"
+        
         validated_response = TailoredResumeResponse(**parsed_dict)
         return validated_response
     except Exception as e:

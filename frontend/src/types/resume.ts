@@ -72,6 +72,8 @@ export interface TailoredResumeResponse {
   raw_parsed_resume_text?: string | null;
   job_description_summary?: string | null;
   generated_cover_letter?: string | null;
+  is_llm_generated?: boolean;
+  customization_engine?: string;
 }
 
 export interface HealthResponse {

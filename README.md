@@ -47,8 +47,8 @@
 | **Backend** | Python 3.11+, FastAPI, Uvicorn | Async REST API microservices |
 | **Parsing** | `pypdf`, `python-docx` | PDF and Word document extraction |
 | **Generation** | `reportlab`, `python-docx` | Server-side PDF and DOCX export |
-| **LLM Engine** | Google Gemini (Gemini 2.5 Flash / 1.5 Flash) | Context-aware resume tailoring |
-| **Testing** | `pytest`, `httpx`, `TestClient` | 23 automated integration and unit tests |
+| **LLM Engine** | Google Gemini (`gemini-3.5-flash-lite` / `gemini-3.5-flash`) | Context-aware resume tailoring |
+| **Testing** | `pytest`, `httpx`, `TestClient` | 26 automated integration, unit, and live tests |
 | **Deployment** | Render (Backend), Vercel (Frontend), Docker | Cloud deployment readiness |
 
 ---
@@ -116,7 +116,7 @@ Visit **http://localhost:3000** in your browser to interact with the application
 
 ## 🧪 Testing Suite
 
-The backend includes 23 automated tests covering parsers, validators, exporters, anti-fabrication constraints, and API routes:
+The backend includes 26 automated tests covering parsers, validators, exporters, anti-fabrication constraints, section toggles, and live API routes:
 
 ```bash
 cd backend
@@ -129,6 +129,7 @@ pytest tests -v
 - `test_customizer.py`: Validates JSON schema parsing, markdown fence removal, and asserts that **missing keywords are never injected into genuine candidate qualifications**.
 - `test_api.py`: FastAPI endpoint tests for health check, validation errors (missing/short JD), PDF customization, and file exports.
 - `test_real_fixtures.py`: End-to-end parsing and customization using real resume documents.
+- `test_live_api.py`: Full bonus features verification including section toggles, diff view structures, cover letter generation and export.
 
 ---
 
@@ -140,9 +141,11 @@ pytest tests -v
    - **Root Directory**: `backend`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Health Check Path**: `/api/health`
    - **Environment Variables**:
      - `GEMINI_API_KEY`: `<Your Gemini Key>`
-     - `LLM_MODEL`: `gemini-2.5-flash`
+     - `LLM_MODEL`: `gemini-3.5-flash-lite`
+     - `ENVIRONMENT`: `production`
 
 ### Deploying the Frontend to Vercel
 1. In [Vercel Dashboard](https://vercel.com/), import the repository.
