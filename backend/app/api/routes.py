@@ -1,9 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response
 from app.config import settings
-from app.models.schemas import TailoredResumeResponse, HealthResponse
+from app.models.schemas import TailoredResumeResponse, HealthResponse, CoverLetterRequest
 from app.services.parser import validate_and_extract_resume
 from app.services.customizer import customize_resume
-from app.services.exporter import export_pdf, export_docx, export_txt
+from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
 
 router = APIRouter(prefix="/api", tags=["Resume Customization"])
 
@@ -22,15 +22,18 @@ def health_check():
 @router.post("/customize", response_model=TailoredResumeResponse)
 async def customize_resume_endpoint(
     resume: UploadFile = File(..., description="Uploaded resume file (PDF or DOCX)"),
-    job_description: str = Form(..., description="Target Job Description text")
+    job_description: str = Form(..., description="Target Job Description text"),
+    customize_summary: bool = Form(True, description="Whether to tailor summary section"),
+    customize_skills: bool = Form(True, description="Whether to align skills section"),
+    customize_experience: bool = Form(True, description="Whether to rephrase experience bullets")
 ):
     """
     Main customization endpoint:
     - Validates resume file format and size
     - Validates job description length
     - Parses text from resume
-    - Calls LLM customization engine
-    - Returns structured tailored resume
+    - Calls LLM customization engine with section customization controls
+    - Returns structured tailored resume with diff info and tailored cover letter
     """
     # Validate job description
     cleaned_jd = job_description.strip()
@@ -59,7 +62,13 @@ async def customize_resume_endpoint(
     parsed_resume_text, file_size_bytes = validate_and_extract_resume(resume.filename, content)
     
     # Process customization
-    tailored_result = await customize_resume(parsed_resume_text, cleaned_jd)
+    tailored_result = await customize_resume(
+        parsed_resume_text,
+        cleaned_jd,
+        customize_summary=customize_summary,
+        customize_skills=customize_skills,
+        customize_experience=customize_experience
+    )
     return tailored_result
 
 @router.post("/export/pdf")
@@ -118,3 +127,34 @@ def export_txt_endpoint(resume_data: TailoredResumeResponse):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate text file: {str(e)}"
         )
+
+@router.post("/export/cover-letter/pdf")
+def export_cover_letter_pdf_endpoint(req: CoverLetterRequest):
+    """Export tailored cover letter as styled executive letterhead PDF."""
+    try:
+        contact_line = " • ".join(filter(None, [
+            req.contact_info.email,
+            req.contact_info.phone,
+            req.contact_info.location,
+            req.contact_info.linkedin
+        ]))
+        pdf_bytes = export_cover_letter_pdf(
+            candidate_name=req.candidate_name,
+            contact_info_line=contact_line,
+            cover_letter_text=req.cover_letter_text,
+            target_role=req.target_role or "Target Role"
+        )
+        safe_name = "".join(c for c in req.candidate_name if c.isalnum() or c in (' ', '_', '-')).strip() or "Tailored"
+        filename = f"{safe_name.replace(' ', '_')}_Cover_Letter.pdf"
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate Cover Letter PDF: {str(e)}"
+        )
+

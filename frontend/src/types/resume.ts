@@ -13,6 +13,7 @@ export interface ExperienceItem {
   duration?: string | null;
   location?: string | null;
   bullets: string[];
+  original_bullets?: string[];
 }
 
 export interface EducationItem {
@@ -47,6 +48,14 @@ export interface AtsCompatibility {
   improvements: string[];
 }
 
+export interface CoverLetterRequest {
+  candidate_name: string;
+  contact_info: ContactInfo;
+  target_role?: string;
+  company_name?: string;
+  cover_letter_text: string;
+}
+
 export interface TailoredResumeResponse {
   candidate_name: string;
   contact_info: ContactInfo;
@@ -62,6 +71,7 @@ export interface TailoredResumeResponse {
   ats_compatibility: AtsCompatibility;
   raw_parsed_resume_text?: string | null;
   job_description_summary?: string | null;
+  generated_cover_letter?: string | null;
 }
 
 export interface HealthResponse {

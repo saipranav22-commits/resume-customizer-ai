@@ -14,10 +14,14 @@ import {
   Award,
   GraduationCap,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  GitCompare,
+  Mail
 } from "lucide-react";
 import { TailoredResumeResponse } from "@/types/resume";
 import { downloadExport } from "@/lib/api";
+import DiffView from "@/components/DiffView";
+import CoverLetterView from "@/components/CoverLetterView";
 
 interface TailoredResumeViewProps {
   resume: TailoredResumeResponse;
@@ -26,7 +30,7 @@ interface TailoredResumeViewProps {
 export default function TailoredResumeView({ resume }: TailoredResumeViewProps) {
   const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"resume" | "gaps">("resume");
+  const [activeTab, setActiveTab] = useState<"resume" | "diff" | "cover_letter" | "gaps">("resume");
 
   const handleDownload = async (format: "pdf" | "docx" | "txt") => {
     try {
@@ -229,12 +233,13 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
         </div>
       </div>
 
-      {/* Tabs: Resume Preview vs Missing Keywords Gap Analysis */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+      {/* Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
         <button
+          id="tab-resume-btn"
           type="button"
           onClick={() => setActiveTab("resume")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "resume"
               ? "bg-blue-600 text-white shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -245,16 +250,45 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
         </button>
 
         <button
+          id="tab-diff-btn"
+          type="button"
+          onClick={() => setActiveTab("diff")}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            activeTab === "diff"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <GitCompare className="w-3.5 h-3.5" />
+          Diff View (Before vs After)
+        </button>
+
+        <button
+          id="tab-cl-btn"
+          type="button"
+          onClick={() => setActiveTab("cover_letter")}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            activeTab === "cover_letter"
+              ? "bg-indigo-600 text-white shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5" />
+          Cover Letter
+        </button>
+
+        <button
+          id="tab-gaps-btn"
           type="button"
           onClick={() => setActiveTab("gaps")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "gaps"
               ? "bg-purple-600 text-white shadow-sm"
               : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
-          Missing Keywords & Gap Analysis ({resume.missing_keywords.length})
+          Missing Keywords Gap Analysis ({resume.missing_keywords.length})
         </button>
       </div>
 
@@ -438,7 +472,13 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
         </div>
       )}
 
-      {/* TAB 2: MISSING KEYWORDS GAP ANALYSIS */}
+      {/* TAB 2: DIFF VIEW */}
+      {activeTab === "diff" && <DiffView resume={resume} />}
+
+      {/* TAB 3: COVER LETTER */}
+      {activeTab === "cover_letter" && <CoverLetterView resume={resume} />}
+
+      {/* TAB 4: MISSING KEYWORDS GAP ANALYSIS */}
       {activeTab === "gaps" && (
         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
           <div className="p-4 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/60 flex items-start gap-3">

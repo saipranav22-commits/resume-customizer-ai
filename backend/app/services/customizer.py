@@ -52,6 +52,9 @@ You MUST respond strictly with a valid JSON object matching the following struct
       "company": "Company Name",
       "duration": "Dates/Duration",
       "location": "Location or null",
+      "original_bullets": [
+        "Original bullet point verbatim from candidate's resume"
+      ],
       "bullets": [
         "Rephrased bullet point highlighting impact and alignment with JD keywords, strictly based on candidate's real work"
       ]
@@ -88,7 +91,8 @@ You MUST respond strictly with a valid JSON object matching the following struct
     "strengths": ["Clear section hierarchy", "Strong action verbs matching JD"],
     "improvements": ["Consider addressing missing keywords in a cover letter"]
   },
-  "job_description_summary": "1-2 sentence distillation of target role expectations"
+  "job_description_summary": "1-2 sentence distillation of target role expectations",
+  "generated_cover_letter": "A compelling, personalized 3-paragraph professional cover letter addressing the hiring team, referencing candidate's actual qualifications that match the JD, and articulating why they are an outstanding fit."
 }
 """
 
@@ -160,7 +164,13 @@ async def call_gemini_api(prompt: str, api_key: str, model_name: str) -> str:
                 
     raise RuntimeError(f"Gemini API failed across all attempted models. Last error: {last_error}")
 
-def build_deterministic_fallback(resume_text: str, jd_text: str) -> TailoredResumeResponse:
+def build_deterministic_fallback(
+    resume_text: str,
+    jd_text: str,
+    customize_summary: bool = True,
+    customize_skills: bool = True,
+    customize_experience: bool = True
+) -> TailoredResumeResponse:
     """
     Intelligent deterministic fallback when no LLM API key is provided or offline.
     Extracts real entities from resume, matches JD keywords, and cleanly isolates missing keywords.
@@ -252,23 +262,44 @@ def build_deterministic_fallback(resume_text: str, jd_text: str) -> TailoredResu
             role=current_role,
             company="Company",
             duration="Recent",
+            original_bullets=bullets[:4],
             bullets=bullets[:4]
         ))
         
     if not experience_items:
+        default_bullets = [line for line in lines[2:6] if len(line) > 20] or ["Implemented robust software features and delivered production solutions."]
         experience_items.append(ExperienceItem(
             role="Software Engineer",
             company="Engineering Experience",
             duration="Past Experience",
-            bullets=[line for line in lines[2:6] if len(line) > 20] or ["Implemented robust software features and delivered production solutions."]
+            original_bullets=default_bullets,
+            bullets=default_bullets
         ))
         
-    tailored_summary = (
-        f"Results-driven technical professional with hands-on expertise in {', '.join(matching[:3]) if matching else 'software engineering'}. "
-        f"Demonstrated background in building scalable solutions and translating requirements into high-impact deliverables. "
-        f"Well-aligned with the target role through a solid track record of problem-solving and rapid technology adoption."
-    )
+    orig_summary = lines[1] if len(lines) > 1 and len(lines[1]) > 40 else "Experienced technical professional with a track record of delivering reliable software solutions."
     
+    if customize_summary:
+        tailored_summary = (
+            f"Results-driven technical professional with hands-on expertise in {', '.join(matching[:3]) if matching else 'software engineering'}. "
+            f"Demonstrated background in building scalable solutions and translating requirements into high-impact deliverables. "
+            f"Well-aligned with the target role through a solid track record of problem-solving and rapid technology adoption."
+        )
+    else:
+        tailored_summary = orig_summary
+        
+    # Generate Tailored Cover Letter
+    skills_phrase = f"hands-on expertise in {', '.join(matching[:4])}" if matching else "a solid foundation in modern software engineering"
+    cover_letter = f"""Dear Hiring Team,
+
+I am writing to express my strong interest in the opportunity described in your recent job opening. With {skills_phrase} and a proven track record of delivering robust, maintainable solutions, I am confident in my ability to make an immediate positive contribution to your team.
+
+Throughout my career, I have prioritized solving complex technical problems while maintaining high standards for performance, code quality, and user satisfaction. Reviewing your requirements, I was particularly excited to see your emphasis on scalable architecture and modern engineering best practices—areas where my background directly aligns with your current priorities.
+
+I welcome the opportunity to discuss how my qualifications, genuine technical background, and passion for engineering excellence will help your organization achieve its goals. Thank you for your time and consideration.
+
+Sincerely,
+{candidate_name}"""
+
     return TailoredResumeResponse(
         candidate_name=candidate_name,
         contact_info=ContactInfo(
@@ -277,11 +308,14 @@ def build_deterministic_fallback(resume_text: str, jd_text: str) -> TailoredResu
             linkedin=linkedin_match.group(0) if linkedin_match else None,
             github=github_match.group(0) if github_match else None,
         ),
-        original_summary=lines[1] if len(lines) > 1 and len(lines[1]) > 40 else None,
+        original_summary=orig_summary,
         tailored_summary=tailored_summary,
         skills=SkillsCategorized(
             matching_skills=matching or ["Problem Solving", "Software Architecture"],
             additional_skills=additional or ["Technical Documentation", "Version Control"]
+        ) if customize_skills else SkillsCategorized(
+            matching_skills=additional or ["Problem Solving", "Software Development"],
+            additional_skills=[]
         ),
         experience=experience_items,
         education=[EducationItem(degree="Relevant Degree / Studies", institution="University", year="Completed")],
@@ -291,14 +325,21 @@ def build_deterministic_fallback(resume_text: str, jd_text: str) -> TailoredResu
         match_score=match_score,
         ats_compatibility=AtsCompatibility(
             score=min(95, match_score + 5),
-            strengths=["Relevant skills matched to job requirements", "Clean section headers and standard formatting", "Clear career progression"],
+            strengths=["Relevant skills matched to job requirements", "Clear section headers and standard formatting", "Clear career progression"],
             improvements=["Address missing keywords in interview or portfolio if you have related experience"]
         ),
         raw_parsed_resume_text=resume_text[:2000],
-        job_description_summary=jd_text[:200] + "..." if len(jd_text) > 200 else jd_text
+        job_description_summary=jd_text[:200] + "..." if len(jd_text) > 200 else jd_text,
+        generated_cover_letter=cover_letter
     )
 
-async def customize_resume(resume_text: str, jd_text: str) -> TailoredResumeResponse:
+async def customize_resume(
+    resume_text: str,
+    jd_text: str,
+    customize_summary: bool = True,
+    customize_skills: bool = True,
+    customize_experience: bool = True
+) -> TailoredResumeResponse:
     """
     Main customization orchestrator:
     1. Evaluates LLM keys (Gemini / Groq).
@@ -310,10 +351,21 @@ async def customize_resume(resume_text: str, jd_text: str) -> TailoredResumeResp
     
     if not api_key:
         logger.info("No GEMINI_API_KEY provided; utilizing high-fidelity deterministic resume analyzer.")
-        return build_deterministic_fallback(resume_text, jd_text)
+        return build_deterministic_fallback(
+            resume_text,
+            jd_text,
+            customize_summary=customize_summary,
+            customize_skills=customize_skills,
+            customize_experience=customize_experience
+        )
         
     user_prompt = f"""
 {SYSTEM_PROMPT}
+
+CUSTOMIZATION CONTROLS:
+- Customize Summary: {customize_summary}
+- Customize Skills: {customize_skills}
+- Customize Experience: {customize_experience}
 
 CANDIDATE'S ORIGINAL RESUME CONTENT:
 ---
@@ -340,6 +392,10 @@ Remember: Return ONLY valid JSON adhering strictly to the schema. Do not include
         return validated_response
     except Exception as e:
         logger.error(f"LLM customization failed: {str(e)}. Falling back to deterministic engine.")
-        # Fallback ensures resilience without breaking user experience
-        fallback = build_deterministic_fallback(resume_text, jd_text)
-        return fallback
+        return build_deterministic_fallback(
+            resume_text,
+            jd_text,
+            customize_summary=customize_summary,
+            customize_skills=customize_skills,
+            customize_experience=customize_experience
+        )

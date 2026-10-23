@@ -27,7 +27,12 @@
    - **DOCX Export**: Generates editable Microsoft Word documents with standard styles.
    - **Plain Text Export & Copy to Clipboard**: Clean ASCII-formatted output.
 
-5. **ATS Compatibility & Match Score Dashboard**:
+5. **Bonus Features Implemented**:
+   - 🔍 **Diff View (Before vs After)**: Side-by-side comparative inspection highlighting exactly how the AI rephrased bullets, tailored summaries, and mapped skills while preserving truthful credentials.
+   - ✉️ **Tailored Cover Letter Generator**: Generates an executive, role-aligned cover letter highlighting genuine matching qualifications, with 1-click clipboard copy and executive letterhead PDF download.
+   - 🎛️ **Section-Wise Customization**: Granular toggles allowing users to choose whether to customize the Summary, Skills, and/or Experience sections independently.
+
+6. **ATS Compatibility & Match Score Dashboard**:
    - Computes a percentage match score between genuine resume qualifications and JD requirements.
    - Evaluates ATS friendliness and outlines strengths and areas for improvement.
 

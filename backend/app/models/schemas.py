@@ -15,6 +15,7 @@ class ExperienceItem(BaseModel):
     duration: Optional[str] = None
     location: Optional[str] = None
     bullets: List[str] = Field(default_factory=list, description="Tailored experience bullet points aligning with JD without fabricating accomplishments")
+    original_bullets: Optional[List[str]] = Field(default_factory=list, description="Original bullet points before tailoring for diff comparison")
 
 class EducationItem(BaseModel):
     degree: str
@@ -49,6 +50,13 @@ class AtsCompatibility(BaseModel):
     strengths: List[str] = Field(default_factory=list)
     improvements: List[str] = Field(default_factory=list)
 
+class CoverLetterRequest(BaseModel):
+    candidate_name: str
+    contact_info: ContactInfo
+    target_role: Optional[str] = "Position"
+    company_name: Optional[str] = "Hiring Team"
+    cover_letter_text: str
+
 class TailoredResumeResponse(BaseModel):
     candidate_name: str
     contact_info: ContactInfo
@@ -67,6 +75,10 @@ class TailoredResumeResponse(BaseModel):
     ats_compatibility: AtsCompatibility
     raw_parsed_resume_text: Optional[str] = None
     job_description_summary: Optional[str] = None
+    generated_cover_letter: Optional[str] = Field(
+        default=None,
+        description="Tailored cover letter aligning candidate's background with the job description"
+    )
 
 class HealthResponse(BaseModel):
     status: str

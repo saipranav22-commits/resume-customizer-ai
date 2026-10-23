@@ -15,6 +15,7 @@ import Header from "@/components/Header";
 import ResumeUpload from "@/components/ResumeUpload";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
 import TailoredResumeView from "@/components/TailoredResumeView";
+import SectionControls from "@/components/SectionControls";
 import { customizeResume } from "@/lib/api";
 import { TailoredResumeResponse } from "@/types/resume";
 
@@ -25,6 +26,11 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState<string>("Analyzing documents...");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tailoredResult, setTailoredResult] = useState<TailoredResumeResponse | null>(null);
+
+  // Section customization controls (Bonus Feature)
+  const [customizeSummary, setCustomizeSummary] = useState<boolean>(true);
+  const [customizeSkills, setCustomizeSkills] = useState<boolean>(true);
+  const [customizeExperience, setCustomizeExperience] = useState<boolean>(true);
 
   const canSubmit = Boolean(file) && jobDescription.trim().length >= 50 && !isLoading;
 
@@ -58,7 +64,11 @@ export default function Home() {
     }, 2200);
 
     try {
-      const result = await customizeResume(file, jobDescription);
+      const result = await customizeResume(file, jobDescription, {
+        customizeSummary,
+        customizeSkills,
+        customizeExperience,
+      });
       setTailoredResult(result);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -133,6 +143,15 @@ export default function Home() {
                 <JobDescriptionInput
                   value={jobDescription}
                   onChange={setJobDescription}
+                />
+
+                <SectionControls
+                  customizeSummary={customizeSummary}
+                  setCustomizeSummary={setCustomizeSummary}
+                  customizeSkills={customizeSkills}
+                  setCustomizeSkills={setCustomizeSkills}
+                  customizeExperience={customizeExperience}
+                  setCustomizeExperience={setCustomizeExperience}
                 />
 
                 <div className="pt-2">

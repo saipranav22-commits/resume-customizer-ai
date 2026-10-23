@@ -379,3 +379,73 @@ def export_pdf(resume: TailoredResumeResponse) -> bytes:
     doc.build(elements)
     buffer.seek(0)
     return buffer.getvalue()
+
+def export_cover_letter_pdf(
+    candidate_name: str,
+    contact_info_line: str,
+    cover_letter_text: str,
+    target_role: str = "Position"
+) -> bytes:
+    """Generate executive letterhead PDF for tailored cover letter."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=0.75 * inch,
+        rightMargin=0.75 * inch,
+        topMargin=0.75 * inch,
+        bottomMargin=0.75 * inch
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CLName',
+        parent=styles['Normal'],
+        fontSize=18,
+        leading=22,
+        fontName='Helvetica-Bold',
+        textColor=COLOR_PRIMARY,
+        alignment=0, # Left
+        spaceAfter=2
+    )
+    
+    contact_style = ParagraphStyle(
+        'CLContact',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=12,
+        fontName='Helvetica',
+        textColor=COLOR_MUTED,
+        spaceAfter=8
+    )
+    
+    body_style = ParagraphStyle(
+        'CLBody',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=15,
+        fontName='Helvetica',
+        textColor=COLOR_TEXT,
+        spaceAfter=12
+    )
+    
+    elements = []
+    
+    # Header Letterhead
+    elements.append(Paragraph(candidate_name, title_style))
+    if contact_info_line:
+        elements.append(Paragraph(contact_info_line, contact_style))
+    elements.append(HRFlowable(width="100%", thickness=1.5, color=COLOR_SECONDARY, spaceAfter=18))
+    
+    # Body paragraphs
+    paragraphs = cover_letter_text.strip().split("\n\n")
+    for para in paragraphs:
+        cleaned_para = para.strip().replace("\n", "<br/>")
+        if cleaned_para:
+            elements.append(Paragraph(cleaned_para, body_style))
+            
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
+

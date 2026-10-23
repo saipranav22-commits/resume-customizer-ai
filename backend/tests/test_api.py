@@ -83,3 +83,39 @@ def test_export_txt_endpoint(sample_tailored_resume):
     assert response.status_code == 200
     assert "text/plain" in response.headers["content-type"]
     assert "ALEX MORGAN" in response.text
+
+def test_export_cover_letter_pdf_endpoint():
+    payload = {
+        "candidate_name": "Taylor Swift",
+        "contact_info": {
+            "email": "taylor@example.com",
+            "phone": "+1 555-1234",
+            "location": "Nashville, TN"
+        },
+        "target_role": "Lead Software Architect",
+        "company_name": "Acme Innovations",
+        "cover_letter_text": "Dear Hiring Team,\n\nI am thrilled to submit my application for the Lead Software Architect position. With extensive experience in cloud-native platforms, I look forward to contributing.\n\nSincerely,\nTaylor Swift"
+    }
+    response = client.post("/api/export/cover-letter/pdf", json=payload)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert "attachment;" in response.headers["content-disposition"]
+    assert response.content.startswith(b"%PDF")
+
+def test_customize_with_section_controls():
+    pdf_bytes = create_dummy_pdf()
+    files = {"resume": ("resume.pdf", pdf_bytes, "application/pdf")}
+    data = {
+        "job_description": "We are seeking a senior full-stack developer with experience in Python and React.",
+        "customize_summary": "false",
+        "customize_skills": "true",
+        "customize_experience": "false"
+    }
+    response = client.post("/api/customize", files=files, data=data)
+    assert response.status_code == 200
+    res_data = response.json()
+    assert res_data["generated_cover_letter"]
+    assert len(res_data["generated_cover_letter"]) > 100
+    assert "experience" in res_data
+    assert len(res_data["experience"][0]["original_bullets"]) > 0
+
