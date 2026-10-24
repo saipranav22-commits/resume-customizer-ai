@@ -168,7 +168,7 @@ def verify_supabase_jwt(token: str) -> AuthenticatedUser:
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail='Cannot verify asymmetric token signature: No JWKS or Supabase URL configured'
+                detail='Authentication service is temporarily unavailable. Please sign in again or customize as a guest.'
             )
 
     # 2. Symmetric key verification (HS256) via shared secret

@@ -230,6 +230,7 @@ def test_auth_rejects_unconfigured_asymmetric_without_bypass(monkeypatch):
     token = jwt.encode(payload, pem, algorithm='RS256')
     res = client.get('/api/auth/me', headers={'Authorization': f'Bearer {token}'})
     assert res.status_code == 401
+    assert 'temporarily unavailable' in res.json()['detail'].lower()
 
 def test_auth_malformed_header():
     """Verify bad token header triggers 401."""
@@ -277,3 +278,29 @@ def test_cors_production_mode_restricts_local_origins(monkeypatch):
     assert 'https://resume-customizer-ai-cyan.vercel.app' in origins
     assert 'http://localhost:3000' not in origins
     assert 'http://127.0.0.1:3000' not in origins
+
+
+def test_config_dynamic_alias_and_url_derivation(monkeypatch):
+    """Verify Settings dynamically derives URLs and supports full-stack environment variable aliases."""
+    from app.config import Settings
+
+    test_settings = Settings()
+
+    # 1. Alias: NEXT_PUBLIC_SUPABASE_URL
+    monkeypatch.delenv('SUPABASE_URL', raising=False)
+    monkeypatch.delenv('SUPABASE_JWKS_URL', raising=False)
+    monkeypatch.setenv('NEXT_PUBLIC_SUPABASE_URL', 'https://xyz123.supabase.co/')
+    assert test_settings.SUPABASE_URL == 'https://xyz123.supabase.co'
+    assert test_settings.SUPABASE_JWKS_URL == 'https://xyz123.supabase.co/auth/v1/.well-known/jwks.json'
+
+    # 2. Derivation: SUPABASE_URL derived from SUPABASE_JWKS_URL
+    monkeypatch.delenv('NEXT_PUBLIC_SUPABASE_URL', raising=False)
+    monkeypatch.setenv('SUPABASE_JWKS_URL', '"https://project-abc.supabase.co/auth/v1/.well-known/jwks.json"')
+    assert test_settings.SUPABASE_JWKS_URL == 'https://project-abc.supabase.co/auth/v1/.well-known/jwks.json'
+    assert test_settings.SUPABASE_URL == 'https://project-abc.supabase.co'
+
+    # 3. Key alias: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY with quotation stripping
+    monkeypatch.delenv('SUPABASE_KEY', raising=False)
+    monkeypatch.delenv('SUPABASE_PUBLISHABLE_KEY', raising=False)
+    monkeypatch.setenv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', "'sb_publishable_test_key_123'")
+    assert test_settings.SUPABASE_KEY == 'sb_publishable_test_key_123'
