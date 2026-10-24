@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import {
@@ -10,14 +10,20 @@ import {
   Cpu,
   Layers,
   ShieldCheck,
+  Bookmark,
+  Check,
+  Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
 import ResumeUpload from "@/components/ResumeUpload";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
 import TailoredResumeView from "@/components/TailoredResumeView";
 import SectionControls from "@/components/SectionControls";
-import { customizeResume } from "@/lib/api";
-import { TailoredResumeResponse } from "@/types/resume";
+import HistoryDrawer from "@/components/HistoryDrawer";
+import AuthModal from "@/components/AuthModal";
+import { customizeResume, saveHistory } from "@/lib/api";
+import { TailoredResumeResponse, CustomizationHistoryDetail } from "@/types/resume";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,10 +33,17 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tailoredResult, setTailoredResult] = useState<TailoredResumeResponse | null>(null);
 
-  // Section customization controls (Bonus Feature)
+  // Section customization controls
   const [customizeSummary, setCustomizeSummary] = useState<boolean>(true);
   const [customizeSkills, setCustomizeSkills] = useState<boolean>(true);
   const [customizeExperience, setCustomizeExperience] = useState<boolean>(true);
+
+  // Phase 5A: Auth & History UI States
+  const { user, token } = useAuth();
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSaved, setIsSaved] = useState<boolean>(false);
 
   const canSubmit = Boolean(file) && jobDescription.trim().length >= 50 && !isLoading;
 
@@ -47,6 +60,7 @@ export default function Home() {
 
     setErrorMessage(null);
     setIsLoading(true);
+    setIsSaved(false);
 
     // Progressive step indicator for UX
     const steps = [
@@ -64,11 +78,16 @@ export default function Home() {
     }, 2200);
 
     try {
-      const result = await customizeResume(file, jobDescription, {
-        customizeSummary,
-        customizeSkills,
-        customizeExperience,
-      });
+      const result = await customizeResume(
+        file,
+        jobDescription,
+        {
+          customizeSummary,
+          customizeSkills,
+          customizeExperience,
+        },
+        token
+      );
       setTailoredResult(result);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -82,11 +101,45 @@ export default function Home() {
   const handleReset = () => {
     setTailoredResult(null);
     setErrorMessage(null);
+    setIsSaved(false);
+  };
+
+  const handleSaveToHistory = async () => {
+    if (!tailoredResult) return;
+    if (!user || !token) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const jdFirstLine = jobDescription.split("\n")[0].trim().slice(0, 40);
+      const title = `${tailoredResult.candidate_name || "Tailored"} - ${jdFirstLine || "Customized Resume"}`;
+      await saveHistory(token, {
+        title,
+        job_description: jobDescription,
+        target_role: jdFirstLine || "Target Position",
+        tailored_result: tailoredResult,
+      });
+      setIsSaved(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save history";
+      alert(msg);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadHistory = (detail: CustomizationHistoryDetail) => {
+    setTailoredResult(detail.tailored_result);
+    setJobDescription(detail.job_description);
+    setIsSaved(true);
+    window.scrollTo({ top: 150, behavior: "smooth" });
   };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
-      <Header />
+      <Header onOpenHistory={() => setIsHistoryDrawerOpen(true)} />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Banner */}
@@ -192,14 +245,57 @@ export default function Home() {
                 <li>Strict factual accuracy — no fake companies, degrees, or tools.</li>
                 <li>Missing job keywords are provided as transparent gap recommendations.</li>
                 <li>ReportLab executive PDF & Microsoft Word DOCX formatting.</li>
+                <li>Persistent history saved securely with Supabase Row Level Security.</li>
               </ul>
             </div>
           </div>
 
           {/* RIGHT: Tailored Resume or Empty Placeholder (7 cols) */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 space-y-4">
             {tailoredResult ? (
-              <TailoredResumeView resume={tailoredResult} />
+              <>
+                {/* Save to History Action Banner */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {tailoredResult.candidate_name}
+                    </span>
+                    <span>•</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                      Tailoring Complete
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleSaveToHistory}
+                    disabled={isSaving || isSaved}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isSaved
+                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default"
+                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    }`}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : isSaved ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Saved in History</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-3.5 h-3.5" />
+                        <span>Save to History</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <TailoredResumeView resume={tailoredResult} />
+              </>
             ) : (
               <div className="p-10 rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-800 text-center flex flex-col items-center justify-center min-h-[500px]">
                 <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
@@ -241,10 +337,10 @@ export default function Home() {
                       Step 3
                     </span>
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
-                      1-Click Export
+                      1-Click Export & Save
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
-                      Download PDF, Word, or plain text.
+                      Download PDF, Word, or save to history.
                     </p>
                   </div>
                 </div>
@@ -271,9 +367,26 @@ export default function Home() {
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
               Gemini AI
             </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              Supabase Auth & RLS
+            </span>
           </div>
         </div>
       </footer>
+
+      {/* Slide-over Resume History Drawer */}
+      <HistoryDrawer
+        isOpen={isHistoryDrawerOpen}
+        onClose={() => setIsHistoryDrawerOpen(false)}
+        onLoadHistory={handleLoadHistory}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }

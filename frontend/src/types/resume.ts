@@ -83,3 +83,39 @@ export interface HealthResponse {
   llm_configured: boolean;
   gemini_key_present: boolean;
 }
+
+// --- Phase 5A: Authentication & History Types ---
+
+export interface UserProfile {
+  id: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+  created_at?: string;
+}
+
+export interface CustomizationHistoryItem {
+  id: string;
+  user_id: string;
+  resume_id?: string | null;
+  title: string;
+  target_role?: string;
+  match_score?: number;
+  ats_score?: number;
+  customization_engine: string;
+  is_llm_generated: boolean;
+  created_at: string;
+}
+
+export interface CustomizationHistoryDetail extends CustomizationHistoryItem {
+  job_description: string;
+  tailored_result: TailoredResumeResponse;
+}
+
+export interface SaveHistoryRequest {
+  title: string;
+  job_description: string;
+  target_role?: string;
+  tailored_result: TailoredResumeResponse;
+  resume_id?: string | null;
+}

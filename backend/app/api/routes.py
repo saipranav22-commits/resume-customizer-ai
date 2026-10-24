@@ -1,6 +1,22 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response, Depends, Header
+from typing import List, Optional
 from app.config import settings
-from app.models.schemas import TailoredResumeResponse, HealthResponse, CoverLetterRequest
+from app.models.schemas import (
+    TailoredResumeResponse,
+    HealthResponse,
+    CoverLetterRequest,
+    UserProfile,
+    CustomizationHistoryItem,
+    CustomizationHistoryDetail,
+    SaveHistoryRequest
+)
+from app.services.auth import (
+    AuthenticatedUser,
+    get_current_user,
+    get_current_user_optional,
+    extract_bearer_token
+)
+from app.services.history_service import history_service
 from app.services.parser import validate_and_extract_resume
 from app.services.customizer import customize_resume
 from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
@@ -30,7 +46,8 @@ async def customize_resume_endpoint(
     job_description: str = Form(..., description="Target Job Description text"),
     customize_summary: bool = Form(True, description="Whether to tailor summary section"),
     customize_skills: bool = Form(True, description="Whether to align skills section"),
-    customize_experience: bool = Form(True, description="Whether to rephrase experience bullets")
+    customize_experience: bool = Form(True, description="Whether to rephrase experience bullets"),
+    current_user: Optional[AuthenticatedUser] = Depends(get_current_user_optional)
 ):
     """
     Main customization endpoint:
@@ -163,3 +180,70 @@ def export_cover_letter_pdf_endpoint(req: CoverLetterRequest):
             detail=f"Failed to generate Cover Letter PDF: {str(e)}"
         )
 
+
+
+# --- Phase 5A: Authenticated Profile & History Endpoints ---
+
+@router.get('/auth/me', response_model=UserProfile, tags=['Authentication'])
+async def get_current_user_profile(current_user: AuthenticatedUser = Depends(get_current_user)):
+    """Return authenticated user profile extracted from verified Supabase JWT."""
+    meta = current_user.user_metadata or {}
+    full_name = meta.get('full_name') or meta.get('name') or ''
+    avatar_url = meta.get('avatar_url') or ''
+    return UserProfile(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=full_name,
+        avatar_url=avatar_url
+    )
+
+@router.get('/history', response_model=List[CustomizationHistoryItem], tags=['Resume History'])
+async def list_resume_history(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """List all customization history records owned by the authenticated user."""
+    token = extract_bearer_token(authorization)
+    return await history_service.list_history(current_user.id, token)
+
+@router.post('/history', response_model=CustomizationHistoryItem, status_code=status.HTTP_201_CREATED, tags=['Resume History'])
+async def save_resume_history(
+    req: SaveHistoryRequest,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Save a tailored resume customization result to the user history."""
+    token = extract_bearer_token(authorization)
+    return await history_service.save_history(current_user.id, req, token)
+
+@router.get('/history/{history_id}', response_model=CustomizationHistoryDetail, tags=['Resume History'])
+async def get_resume_history_detail(
+    history_id: str,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Get detail of a specific saved resume customization. Enforces strict user ownership."""
+    token = extract_bearer_token(authorization)
+    item = await history_service.get_history_detail(current_user.id, history_id, token)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Customization history item not found or you are not authorized to access it'
+        )
+    return item
+
+@router.delete('/history/{history_id}', tags=['Resume History'])
+async def delete_resume_history(
+    history_id: str,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete a saved resume customization record. Enforces strict user ownership."""
+    token = extract_bearer_token(authorization)
+    success = await history_service.delete_history(current_user.id, history_id, token)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Customization history item not found or you are not authorized to delete it'
+        )
+    return {'message': 'Customization history item deleted successfully'}

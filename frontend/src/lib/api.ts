@@ -1,4 +1,12 @@
-import { TailoredResumeResponse, HealthResponse, CoverLetterRequest } from "@/types/resume";
+﻿import {
+  TailoredResumeResponse,
+  HealthResponse,
+  CoverLetterRequest,
+  CustomizationHistoryItem,
+  CustomizationHistoryDetail,
+  SaveHistoryRequest,
+  UserProfile,
+} from "@/types/resume";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -38,7 +46,8 @@ export async function customizeResume(
     customizeSummary?: boolean;
     customizeSkills?: boolean;
     customizeExperience?: boolean;
-  }
+  },
+  token?: string | null
 ): Promise<TailoredResumeResponse> {
   const formData = new FormData();
   formData.append("resume", file);
@@ -47,9 +56,15 @@ export async function customizeResume(
   formData.append("customize_skills", String(options?.customizeSkills ?? true));
   formData.append("customize_experience", String(options?.customizeExperience ?? true));
 
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/customize`, {
       method: "POST",
+      headers,
       body: formData,
     });
 
@@ -102,8 +117,6 @@ export async function downloadExport(
     }
 
     const blob = await res.blob();
-    
-    // Extract filename from header if available
     let filename = `Tailored_Resume.${format}`;
     const disposition = res.headers.get("Content-Disposition");
     if (disposition && disposition.includes("filename=")) {
@@ -162,3 +175,125 @@ export async function downloadCoverLetterPdf(
   }
 }
 
+// --- Phase 5A: Resume History & Auth API Services ---
+
+export async function fetchHistory(token: string): Promise<CustomizationHistoryItem[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new ApiError(`Failed to fetch history (${res.status})`, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to load resume history";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function fetchHistoryDetail(
+  token: string,
+  historyId: string
+): Promise<CustomizationHistoryDetail> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/${historyId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new ApiError(`Failed to fetch history detail (${res.status})`, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to load history details";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function saveHistory(
+  token: string,
+  payload: SaveHistoryRequest
+): Promise<CustomizationHistoryItem> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let errorMsg = `Save history failed (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson.detail) errorMsg = errJson.detail;
+      } catch {
+        // default
+      }
+      throw new ApiError(errorMsg, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to save to history";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function deleteHistory(token: string, historyId: string): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/${historyId}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new ApiError(`Failed to delete history item (${res.status})`, res.status);
+    }
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to delete history item";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function fetchUserProfile(token: string): Promise<UserProfile> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new ApiError(`Failed to load profile (${res.status})`, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to load user profile";
+    throw new ApiError(msg, 0);
+  }
+}

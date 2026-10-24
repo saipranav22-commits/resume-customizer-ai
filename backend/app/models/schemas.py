@@ -98,3 +98,44 @@ class HealthResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
     code: Optional[str] = None
+
+
+# --- Phase 5A: Authentication & Resume History Schemas ---
+
+class UserProfile(BaseModel):
+    id: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    created_at: Optional[str] = None
+
+class CustomizationHistoryItem(BaseModel):
+    id: str
+    user_id: str
+    resume_id: Optional[str] = None
+    title: str
+    target_role: Optional[str] = None
+    match_score: Optional[int] = None
+    ats_score: Optional[int] = None
+    customization_engine: str = 'gemini'
+    is_llm_generated: bool = True
+    created_at: str
+
+class CustomizationHistoryDetail(CustomizationHistoryItem):
+    job_description: str
+    tailored_result: TailoredResumeResponse
+
+class SaveHistoryRequest(BaseModel):
+    title: str
+    job_description: str
+    target_role: Optional[str] = None
+    tailored_result: TailoredResumeResponse
+    resume_id: Optional[str] = None
+
+class SavedResumeItem(BaseModel):
+    id: str
+    user_id: str
+    title: str
+    original_filename: Optional[str] = None
+    candidate_name: Optional[str] = None
+    created_at: str
