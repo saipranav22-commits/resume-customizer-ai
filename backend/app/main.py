@@ -9,13 +9,12 @@ app = FastAPI(
     description="Intelligent LLM-powered resume customization and ATS optimization backend."
 )
 
-# CORS configuration
+# CORS configuration - strict explicit allowlist without open wildcard regexes
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
     allow_headers=["*"],
 )
 

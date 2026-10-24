@@ -119,3 +119,36 @@ def test_customize_with_section_controls():
     assert "experience" in res_data
     assert len(res_data["experience"][0]["original_bullets"]) > 0
 
+def test_cors_preflight_trusted_production_origin():
+    """Verify that OPTIONS preflight from the trusted Vercel production origin is allowed."""
+    headers = {
+        "Origin": "https://resume-customizer-ai-cyan.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+    }
+    response = client.options("/api/customize", headers=headers)
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "https://resume-customizer-ai-cyan.vercel.app"
+    assert "POST" in response.headers.get("access-control-allow-methods", "")
+
+def test_cors_preflight_untrusted_vercel_subdomain():
+    """Verify that unauthorized arbitrary Vercel subdomains are blocked by CORS allowlist."""
+    headers = {
+        "Origin": "https://malicious-attacker.vercel.app",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+    }
+    response = client.options("/api/customize", headers=headers)
+    assert "access-control-allow-origin" not in response.headers
+
+def test_cors_preflight_arbitrary_untrusted_domain():
+    """Verify that arbitrary external domains are blocked by CORS allowlist."""
+    headers = {
+        "Origin": "https://evil-phishing-site.com",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+    }
+    response = client.options("/api/customize", headers=headers)
+    assert "access-control-allow-origin" not in response.headers
+
+
