@@ -61,3 +61,8 @@ temp/
 *.swo
 .DS_Store
 Thumbs.db
+
+backups/
+*.dump
+*.backup
+
