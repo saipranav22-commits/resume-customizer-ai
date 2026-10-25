@@ -102,9 +102,9 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-[#15283B] flex items-center gap-2">
+        <label className="text-sm font-semibold text-[#291B32] flex items-center gap-2">
           <span>1. Upload Your Resume</span>
-          <span className="text-xs font-normal text-[#64748B]">(PDF or DOCX, max 5MB)</span>
+          <span className="text-xs font-normal text-[#674E61]">(PDF or DOCX, max 5MB)</span>
         </label>
         <div className="flex items-center gap-3">
           {!file && (
@@ -112,15 +112,15 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
               id="load-sample-resume-button"
               type="button"
               onClick={handleLoadSampleResume}
-              className="text-xs text-[#087F66] hover:text-[#066350] font-medium flex items-center gap-1 transition-colors"
+              className="text-xs text-[#C45D39] hover:text-[#AF4F2E] font-medium flex items-center gap-1.5 transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39] rounded"
             >
               <FileText className="w-3.5 h-3.5" />
               Load Sample Resume
             </button>
           )}
           {file && (
-            <span className="inline-flex items-center gap-1 text-xs text-[#087F66] font-semibold bg-[#DCEDE5] px-2.5 py-0.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-xs text-[#291B32] font-semibold bg-[#E8D9E8] border border-[#DDD0D7] px-2.5 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#C45D39]" />
               Ready for Analysis
             </span>
           )}
@@ -134,10 +134,10 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`cursor-pointer border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all ${
+          className={`cursor-pointer border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all ${
             isDragging
-              ? "border-[#087F66] bg-[#DCEDE5]/30 scale-[1.01]"
-              : "border-[#E2E8E4] hover:border-[#087F66] bg-[#F8F7F3]/70 hover:bg-[#F8F7F3]"
+              ? "border-[#C45D39] bg-[#E8D9E8]/40 scale-[1.01]"
+              : "border-[#DDD0D7] hover:border-[#C45D39]/60 bg-[#F7F2EB]/50 hover:bg-[#F7F2EB]"
           }`}
         >
           <input
@@ -149,30 +149,30 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             className="hidden"
           />
           <div className="flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#DCEDE5] text-[#087F66] flex items-center justify-center shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-[#E8D9E8] text-[#C45D39] flex items-center justify-center shadow-xs border border-[#DDD0D7]">
               <UploadCloud className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#15283B]">
-                Click to browse or drag and drop your resume
+              <p className="text-sm font-semibold text-[#291B32]">
+                Click to browse or drag and drop candidate resume
               </p>
-              <p className="text-xs text-[#64748B] mt-1">
-                Executive Adobe PDF (.pdf) and Microsoft Word (.docx)
+              <p className="text-xs text-[#674E61] mt-1 font-serif italic">
+                Compatible with executive Adobe PDF (.pdf) and Microsoft Word (.docx)
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#DCEDE5] bg-[#DCEDE5]/25">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#DDD0D7] bg-[#F7F2EB]/70 shadow-xs">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#087F66] text-white flex items-center justify-center shrink-0 shadow-xs">
-              <FileText className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-[#291B32] text-[#F7F2EB] flex items-center justify-center shrink-0 shadow-xs">
+              <FileText className="w-5 h-5 text-[#C45D39]" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#15283B] truncate">
+              <p className="text-sm font-semibold text-[#291B32] truncate">
                 {file.name}
               </p>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-[#674E61]">
                 {formatFileSize(file.size)} · {file.name.endsWith(".pdf") ? "PDF Document" : "Word Document"}
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             id="remove-resume-button"
             type="button"
             onClick={handleRemove}
-            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#15283B] hover:bg-white transition-colors"
+            className="p-1.5 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-white transition-colors"
             title="Remove and select different file"
           >
             <X className="w-5 h-5" />
@@ -190,8 +190,8 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
       )}
 
       {(validationError || error) && (
-        <div className="flex items-center gap-2 p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+        <div className="flex items-center gap-2 p-3 text-xs text-[#A82A2A] bg-[#FDF2F2] border border-[#F5C2C2] rounded-xl shadow-xs">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-[#A82A2A]" />
           <span>{validationError || error}</span>
         </div>
       )}

@@ -1,5 +1,5 @@
-﻿import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -13,18 +13,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const newsreader = Newsreader({
+  variable: "--font-editorial-serif",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "Resume Customizer AI | Intelligent ATS Resume Optimization",
-  description: "Intelligently tailor your resume to match any Job Description with anti-fabrication standards, ATS optimization, and instant PDF/DOCX downloads.",
+  title: "Resume Customizer AI — Career Atelier & Precision Optimization",
+  description: "Editorial-grade career narrative optimization powered by FastAPI and Gemini AI. Anti-fabrication verification, transparent ATS analysis, and publication-ready documents.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F8F7F3] text-[#15283B]">
+      <body className="min-h-full flex flex-col bg-[#F7F2EB] text-[#291B32] font-sans selection:bg-[#E8D9E8] selection:text-[#291B32]">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

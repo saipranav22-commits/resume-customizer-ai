@@ -53,6 +53,10 @@ frontend/.env
 .tmp/
 tmp/
 temp/
+backups/
+*.dump
+*.backup
+artifacts/
 
 # IDE & OS
 .vscode/
@@ -61,8 +65,3 @@ temp/
 *.swo
 .DS_Store
 Thumbs.db
-
-backups/
-*.dump
-*.backup
-

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { X, Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
@@ -67,20 +67,20 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#15283B]/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#291B32]/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-md bg-white  rounded-2xl shadow-2xl border border-[#E2E8E4]  overflow-hidden"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-[#DDD0D7] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E2E8E4]  bg-[#F8F7F3] ">
+        <div className="flex items-center justify-between p-6 border-b border-[#DDD0D7] bg-[#F7F2EB]">
           <div>
-            <h2 className="text-xl font-bold text-[#15283B] ">
+            <h2 className="font-editorial text-xl font-bold text-[#291B32]">
               {mode === "signin" && "Sign In"}
               {mode === "signup" && "Create an Account"}
               {mode === "reset" && "Reset Password"}
             </h2>
-            <p className="text-xs text-slate-500  mt-0.5">
+            <p className="text-xs text-[#674E61] mt-0.5">
               {mode === "signin" && "Access your saved resumes and tailored history"}
               {mode === "signup" && "Save, view and manage your customized resumes securely"}
               {mode === "reset" && "Enter your email to receive recovery instructions"}
@@ -88,7 +88,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -96,7 +96,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
 
         {/* Demo Mode Notice if Supabase keys not set */}
         {!isConfigured && (
-          <div className="mx-6 mt-4 p-3 rounded-lg bg-[#DCEDE5]/40  border border-[#DCEDE5]  text-xs text-[#087F66] ">
+          <div className="mx-6 mt-4 p-3 rounded-lg bg-[#E8D9E8]/40 border border-[#DDD0D7] text-xs text-[#291B32]">
             <strong>Development Mode:</strong> Cloud Supabase credentials are not configured in local environment. Local simulated authentication is active.
           </div>
         )}
@@ -104,15 +104,15 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         {/* Alerts */}
         <div className="px-6 pt-4 space-y-3">
           {error && (
-            <div className="flex items-center gap-2 p-3 text-xs text-rose-700  bg-rose-50  border border-rose-200  rounded-lg">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2 p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="flex items-center gap-2 p-3 text-xs text-emerald-700  bg-emerald-50  border border-emerald-200  rounded-lg">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2 p-3 text-xs text-[#291B32] bg-[#E8D9E8] border border-[#DDD0D7] rounded-lg">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#C45D39]" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -122,36 +122,36 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {mode === "signup" && (
             <div>
-              <label className="block text-xs font-semibold text-slate-700  mb-1.5">
+              <label className="block text-xs font-semibold text-[#291B32] mb-1.5">
                 Full Name
               </label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <User className="w-4 h-4 text-[#674E61] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Alex Morgan"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#DDD0D7] bg-[#F7F2EB] text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700  mb-1.5">
+            <label className="block text-xs font-semibold text-[#291B32] mb-1.5">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Mail className="w-4 h-4 text-[#674E61] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#DDD0D7] bg-[#F7F2EB] text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
               />
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
           {mode !== "reset" && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-700 ">
+                <label className="block text-xs font-semibold text-[#291B32]">
                   Password
                 </label>
                 {mode === "signin" && (
@@ -170,21 +170,21 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                       setError(null);
                       setSuccessMessage(null);
                     }}
-                    className="text-xs text-[#087F66]  hover:underline"
+                    className="text-xs text-[#C45D39] hover:underline"
                   >
                     Forgot password?
                   </button>
                 )}
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-[#674E61] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-[#DDD0D7] bg-[#F7F2EB] text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-2.5 px-4 bg-[#087F66] hover:bg-[#066B56] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            className="w-full mt-2 py-2.5 px-4 bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -214,7 +214,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         </form>
 
         {/* Footer switch mode */}
-        <div className="p-4 border-t border-[#E2E8E4]  bg-[#F8F7F3]  text-center text-xs text-slate-600 ">
+        <div className="p-4 border-t border-[#DDD0D7] bg-[#F7F2EB] text-center text-xs text-[#674E61]">
           {mode === "signin" && (
             <span>
               Don&apos;t have an account?{" "}
@@ -224,7 +224,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   setError(null);
                   setSuccessMessage(null);
                 }}
-                className="font-semibold text-[#087F66]  hover:underline"
+                className="font-semibold text-[#C45D39] hover:underline"
               >
                 Sign up
               </button>
@@ -239,7 +239,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   setError(null);
                   setSuccessMessage(null);
                 }}
-                className="font-semibold text-[#087F66]  hover:underline"
+                className="font-semibold text-[#C45D39] hover:underline"
               >
                 Sign in
               </button>
@@ -252,7 +252,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                 setError(null);
                 setSuccessMessage(null);
               }}
-              className="font-semibold text-[#087F66]  hover:underline"
+              className="font-semibold text-[#C45D39] hover:underline"
             >
               Back to Sign in
             </button>

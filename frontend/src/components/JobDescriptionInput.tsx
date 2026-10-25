@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { ChangeEvent } from "react";
 import { FileCode, Trash2, CheckCircle2 } from "lucide-react";
@@ -53,17 +53,17 @@ export default function JobDescriptionInput({
       <div className="flex items-center justify-between">
         <label
           htmlFor="job-description-textarea"
-          className="text-sm font-semibold text-[#15283B] flex items-center gap-2"
+          className="text-sm font-semibold text-[#291B32] flex items-center gap-2"
         >
           <span>2. Paste Job Description</span>
-          <span className="text-xs font-normal text-[#64748B]">(Minimum {minLength} chars)</span>
+          <span className="text-xs font-normal text-[#674E61]">(Minimum {minLength} chars)</span>
         </label>
         <div className="flex items-center gap-2.5">
           {charCount > 0 && (
             <button
               type="button"
               onClick={handleClear}
-              className="text-xs text-[#64748B] hover:text-rose-600 flex items-center gap-1 transition-colors"
+              className="text-xs text-[#674E61] hover:text-[#A82A2A] flex items-center gap-1 transition-colors"
             >
               <Trash2 className="w-3 h-3" />
               Clear
@@ -73,7 +73,7 @@ export default function JobDescriptionInput({
             id="load-sample-jd-btn"
             type="button"
             onClick={handleLoadSample}
-            className="text-xs text-[#087F66] hover:text-[#066B56] hover:underline flex items-center gap-1 font-semibold"
+            className="text-xs text-[#C45D39] hover:text-[#AF4F2E] flex items-center gap-1.5 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39] rounded"
           >
             <FileCode className="w-3.5 h-3.5" />
             Load Sample Role
@@ -88,35 +88,35 @@ export default function JobDescriptionInput({
           value={value}
           onChange={handleChange}
           placeholder="Paste the full job description here (responsibilities, required qualifications, technical stack, etc.)..."
-          className={`w-full rounded-xl border p-4 text-sm text-[#15283B] placeholder:text-[#64748B]/70 bg-[#F8F7F3]/70 focus:bg-white focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
+          className={`w-full rounded-2xl border p-4 text-sm text-[#291B32] placeholder:text-[#674E61]/60 bg-[#F7F2EB]/50 focus:bg-white focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
             error
-              ? "border-rose-400 focus:ring-rose-400"
+              ? "border-[#F5C2C2] focus:ring-[#A82A2A]/20"
               : isSatisfied
-              ? "border-[#E2E8E4] focus:border-[#087F66] focus:ring-[#087F66]/20"
-              : "border-[#E2E8E4] focus:border-[#087F66] focus:ring-[#087F66]/20"
+              ? "border-[#DDD0D7] focus:border-[#C45D39] focus:ring-[#C45D39]/20"
+              : "border-[#DDD0D7] focus:border-[#C45D39] focus:ring-[#C45D39]/20"
           }`}
         />
-        <div className="flex items-center justify-between px-1 text-xs mt-1">
+        <div className="flex items-center justify-between px-1 text-xs mt-1.5">
           <div className="flex items-center gap-1.5">
             {isSatisfied ? (
-              <span className="text-[#087F66] flex items-center gap-1 font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                JD meets requirements ({charCount} characters)
+              <span className="text-[#291B32] flex items-center gap-1.5 font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C45D39]" />
+                Job description verified ({charCount} characters)
               </span>
             ) : charCount > 0 ? (
-              <span className="text-amber-700 font-medium">
+              <span className="text-[#B85C2A] font-medium">
                 Needs {minLength - charCount} more characters for thorough analysis
               </span>
             ) : (
-              <span className="text-[#64748B]">Please provide target job description</span>
+              <span className="text-[#674E61]">Please provide target job description</span>
             )}
           </div>
-          <span className="text-[#64748B] font-mono">{charCount} chars</span>
+          <span className="text-[#674E61] font-mono">{charCount} chars</span>
         </div>
       </div>
 
       {error && (
-        <p className="text-xs text-rose-700">{error}</p>
+        <p className="text-xs text-[#A82A2A] bg-[#FDF2F2] p-2.5 rounded-lg border border-[#F5C2C2]">{error}</p>
       )}
     </div>
   );

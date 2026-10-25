@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
@@ -23,24 +23,24 @@ export default function SectionControls({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-xl border border-[#E2E8E4] bg-[#F8F7F3]/70 overflow-hidden transition-all">
+    <div className="rounded-2xl border border-[#DDD0D7] bg-[#F7F2EB]/50 overflow-hidden transition-all">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left text-xs font-semibold text-[#15283B] hover:bg-[#F8F7F3] transition-colors"
+        className="w-full px-4 py-3 flex items-center justify-between text-left text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39]"
       >
         <span className="flex items-center gap-2">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-[#087F66]" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-[#C45D39]" />
           <span>Section-Wise Customization Preferences</span>
         </span>
-        <span className="text-[#64748B]">
-          {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748B]" />}
+        <span className="text-[#674E61]">
+          {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-[#674E61]" />}
         </span>
       </button>
 
       {isOpen && (
-        <div className="p-4 pt-2 space-y-3.5 border-t border-[#E2E8E4] text-xs bg-white">
-          <p className="text-[11px] text-[#64748B]">
+        <div className="p-4 pt-2 space-y-3.5 border-t border-[#DDD0D7] text-xs bg-white">
+          <p className="text-[11px] text-[#674E61]">
             Select which resume sections should be optimized. Unchecked sections will retain their original verbatim text.
           </p>
 
@@ -51,13 +51,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeSummary}
                 onChange={(e) => setCustomizeSummary(e.target.checked)}
-                className="mt-0.5 rounded text-[#087F66] focus:ring-[#087F66] accent-[#087F66] h-4 w-4"
+                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#15283B]">
+                <span className="font-semibold text-[#291B32]">
                   Tailor Professional Summary
                 </span>
-                <p className="text-[11px] text-[#64748B]">
+                <p className="text-[11px] text-[#674E61]">
                   Craft an executive pitch aligned specifically with the target role.
                 </p>
               </div>
@@ -69,13 +69,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeSkills}
                 onChange={(e) => setCustomizeSkills(e.target.checked)}
-                className="mt-0.5 rounded text-[#087F66] focus:ring-[#087F66] accent-[#087F66] h-4 w-4"
+                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#15283B]">
+                <span className="font-semibold text-[#291B32]">
                   Align Core Skills & Match Keywords
                 </span>
-                <p className="text-[11px] text-[#64748B]">
+                <p className="text-[11px] text-[#674E61]">
                   Highlight candidate qualifications matching the JD while isolating missing gaps.
                 </p>
               </div>
@@ -87,13 +87,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeExperience}
                 onChange={(e) => setCustomizeExperience(e.target.checked)}
-                className="mt-0.5 rounded text-[#087F66] focus:ring-[#087F66] accent-[#087F66] h-4 w-4"
+                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#15283B]">
+                <span className="font-semibold text-[#291B32]">
                   Rephrase Experience Bullets
                 </span>
-                <p className="text-[11px] text-[#64748B]">
+                <p className="text-[11px] text-[#674E61]">
                   Enhance bullet points with action verbs and impact metrics while preserving factual accuracy.
                 </p>
               </div>

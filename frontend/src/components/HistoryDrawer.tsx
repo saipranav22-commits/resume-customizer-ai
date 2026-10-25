@@ -423,24 +423,24 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
         />
 
         <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-          <div className="w-screen max-w-2xl bg-white  border-l border-[#E2E8E4]  shadow-2xl flex flex-col">
+          <div className="w-screen max-w-2xl bg-white border-l border-[#DDD0D7] shadow-2xl flex flex-col">
             {/* Header */}
-            <div className="p-5 border-b border-[#E2E8E4] flex items-center justify-between bg-[#F8F7F3]">
+            <div className="p-5 border-b border-[#DDD0D7] flex items-center justify-between bg-[#F7F2EB]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#DCEDE5] text-[#087F66] rounded-xl">
-                  <History className="w-5 h-5" />
+                <div className="p-2 bg-[#E8D9E8] text-[#291B32] rounded-xl">
+                  <History className="w-5 h-5 text-[#C45D39]" />
                 </div>
                 <div>
                   <h2
                     id="history-drawer-title"
-                    className="text-base font-bold text-[#15283B] flex items-center gap-2"
+                    className="font-editorial text-base font-bold text-[#291B32] flex items-center gap-2"
                   >
                     <span>Resume Version History</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#DCEDE5] text-[#087F66] border border-[#DCEDE5] font-mono font-bold">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] font-mono font-bold">
                       {items.length} {items.length === 1 ? "version" : "versions"}
                     </span>
                   </h2>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-[#674E61]">
                     {user?.email || "Manage revision families, restore, and compare versions"}
                   </p>
                 </div>
@@ -451,7 +451,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   type="button"
                   onClick={loadData}
                   title="Refresh history"
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600  hover:bg-slate-100  transition-colors"
+                  className="p-2 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-white transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </button>
@@ -459,7 +459,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   type="button"
                   onClick={onClose}
                   aria-label="Close history drawer"
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600  hover:bg-slate-100  transition-colors"
+                  className="p-2 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-white transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -468,8 +468,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
             {/* Notification feedback banners */}
             {error && (
-              <div className="m-4 mb-0 flex items-start gap-2.5 p-3.5 text-xs text-rose-700 dark:text-rose-400 bg-rose-50  border border-rose-200  rounded-xl">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="m-4 mb-0 flex items-start gap-2.5 p-3.5 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-xl">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
                 <div className="flex-1">
                   <p className="font-bold">Error</p>
                   <p className="mt-0.5">{error}</p>
@@ -485,28 +485,28 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
             )}
 
             {successMsg && (
-              <div className="m-4 mb-0 flex items-center gap-2 p-3 text-xs text-emerald-800  bg-emerald-50  border border-emerald-200  rounded-xl">
-                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="m-4 mb-0 flex items-center gap-2 p-3 text-xs text-[#291B32] bg-[#E8D9E8] border border-[#DDD0D7] rounded-xl">
+                <Check className="w-4 h-4 text-[#C45D39] shrink-0" />
                 <span className="font-medium">{successMsg}</span>
               </div>
             )}
 
             {/* Search and Filter Bar */}
-            <div className="p-4 border-b border-[#E2E8E4]  space-y-3 bg-white ">
+            <div className="p-4 border-b border-[#DDD0D7] space-y-3 bg-white">
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#674E61] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by title, version name, role, tag, or notes..."
-                  className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-[#F8F7F3] /80 border border-[#E2E8E4]  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#674E61] hover:text-[#291B32]"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -519,13 +519,13 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   onClick={() => setFilterStarredOnly(!filterStarredOnly)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors ${
                     filterStarredOnly
-                      ? "bg-amber-50  text-amber-700  border-amber-300 "
-                      : "bg-[#F8F7F3] /60 text-slate-600  border-[#E2E8E4]  hover:border-slate-300"
+                      ? "bg-amber-50 text-amber-900 border-amber-300"
+                      : "bg-[#F7F2EB] text-[#674E61] border-[#DDD0D7] hover:border-[#674E61]/40"
                   }`}
                 >
                   <Star
                     className={`w-3.5 h-3.5 ${
-                      filterStarredOnly ? "fill-amber-400 text-amber-500" : "text-slate-400"
+                      filterStarredOnly ? "fill-amber-400 text-amber-500" : "text-[#674E61]"
                     }`}
                   />
                   <span>Favorites Only</span>
@@ -538,8 +538,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                     onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                       selectedTag === tag
-                        ? "bg-[#DCEDE5] text-[#087F66] border-[#087F66]/30 font-semibold"
-                        : "bg-[#F8F7F3] text-[#64748B] border-[#E2E8E4] hover:border-slate-300"
+                        ? "bg-[#E8D9E8] text-[#291B32] border-[#DDD0D7] font-semibold"
+                        : "bg-[#F7F2EB] text-[#674E61] border-[#DDD0D7] hover:border-[#674E61]/40"
                     }`}
                   >
                     <Tag className="w-3 h-3" />
@@ -555,7 +555,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                       setFilterStarredOnly(false);
                       setSelectedTag(null);
                     }}
-                    className="text-xs text-[#087F66]  hover:underline ml-auto font-medium"
+                    className="text-xs text-[#C45D39] hover:underline ml-auto font-medium"
                   >
                     Clear Filters
                   </button>
@@ -566,19 +566,19 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
               {loading ? (
-                <div className="flex flex-col items-center justify-center h-48 gap-3 text-slate-400">
-                  <Loader2 className="w-6 h-6 animate-spin text-[#087F66]" />
+                <div className="flex flex-col items-center justify-center h-48 gap-3 text-[#674E61]">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#C45D39]" />
                   <span className="text-xs font-medium">Loading resume versions...</span>
                 </div>
               ) : familyGroups.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center p-6 border-2 border-dashed border-[#E2E8E4]  rounded-2xl">
-                  <History className="w-10 h-10 text-slate-300 dark:text-slate-700 mb-3" />
-                  <h3 className="text-sm font-semibold text-slate-700 ">
+                <div className="flex flex-col items-center justify-center h-64 text-center p-6 border-2 border-dashed border-[#DDD0D7] rounded-2xl">
+                  <History className="w-10 h-10 text-[#DDD0D7] mb-3" />
+                  <h3 className="text-sm font-semibold text-[#291B32]">
                     {searchQuery || filterStarredOnly || selectedTag
                       ? "No Matching Resume Versions"
                       : "No Saved Resumes Yet"}
                   </h3>
-                  <p className="text-xs text-slate-500  mt-1 max-w-sm">
+                  <p className="text-xs text-[#674E61] mt-1 max-w-sm">
                     {searchQuery || filterStarredOnly || selectedTag
                       ? "Try adjusting your search criteria or resetting filters."
                       : "Tailor a resume and click 'Save to History' to manage revision families, compare versions, and export anytime."}
@@ -594,18 +594,18 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                     return (
                       <div
                         key={family.rootId}
-                        className="rounded-2xl border border-[#E2E8E4]  bg-white  overflow-hidden shadow-sm"
+                        className="rounded-2xl border border-[#DDD0D7] bg-white overflow-hidden shadow-sm"
                       >
                         {/* Family Header */}
                         <div
                           onClick={() => toggleFamilyCollapse(family.rootId)}
-                          className="p-3.5 bg-[#F8F7F3] /60 border-b border-[#E2E8E4]  flex items-center justify-between cursor-pointer hover:bg-slate-100  transition-colors"
+                          className="p-3.5 bg-[#F7F2EB] border-b border-[#DDD0D7] flex items-center justify-between cursor-pointer hover:bg-[#E8D9E8]/30 transition-colors"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <button
                               type="button"
                               aria-label={isCollapsed ? "Expand revision family" : "Collapse revision family"}
-                              className="text-slate-400 hover:text-slate-600 "
+                              className="text-[#674E61] hover:text-[#291B32]"
                             >
                               {isCollapsed ? (
                                 <ChevronRight className="w-4 h-4" />
@@ -615,27 +615,27 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200  text-slate-700  uppercase tracking-wider font-mono">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-stone-200 text-stone-800 uppercase tracking-wider font-mono">
                                   Family
                                 </span>
-                                <span className="font-bold text-xs text-[#15283B]  truncate">
+                                <span className="font-bold text-xs text-[#291B32] truncate">
                                   {rootItem?.title || rootItem?.version_name || "Revision Family"}
                                 </span>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCEDE5] text-[#087F66]">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#E8D9E8] text-[#291B32]">
                                   {count} {count === 1 ? "version" : "revisions"}
                                 </span>
                               </div>
                             </div>
                           </div>
 
-                          <span className="text-[11px] text-slate-400 font-mono">
+                          <span className="text-[11px] text-[#674E61] font-mono">
                             Root #{family.rootId.slice(0, 8)}
                           </span>
                         </div>
 
                         {/* Family Items */}
                         {!isCollapsed && (
-                          <div className="p-3 space-y-3 divide-y divide-slate-100 dark:divide-slate-800">
+                          <div className="p-3 space-y-3 divide-y divide-[#DDD0D7]/40">
                             {family.items.map((item) => {
                               const isSelectedForCompare = selectedForCompare.includes(item.id);
                               const compareIndex = selectedForCompare.indexOf(item.id);
@@ -645,8 +645,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                   key={item.id}
                                   className={`pt-3 first:pt-0 group relative p-3 rounded-xl border transition-all ${
                                     isSelectedForCompare
-                                      ? "border-blue-500 bg-[#DCEDE5]/40/20 "
-                                      : "border-transparent hover:border-[#E2E8E4] dark:hover:border-slate-700 bg-white "
+                                      ? "border-[#C45D39] bg-[#E8D9E8]/30"
+                                      : "border-transparent hover:border-[#DDD0D7] bg-white"
                                   }`}
                                 >
                                   {/* Card Top Row: Checkbox, Name/Number, Actions */}
@@ -663,8 +663,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         }
                                         className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${
                                           isSelectedForCompare
-                                            ? "bg-[#087F66] border-blue-600 text-white font-bold text-[10px]"
-                                            : "border-slate-300  hover:border-blue-500"
+                                            ? "bg-[#C45D39] border-[#C45D39] text-white font-bold text-[10px]"
+                                            : "border-[#DDD0D7] hover:border-[#C45D39]"
                                         }`}
                                       >
                                         {isSelectedForCompare ? (compareIndex === 0 ? "A" : "B") : null}
@@ -673,12 +673,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                           {/* Version Number Badge */}
-                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase font-mono bg-slate-100  text-slate-700  border border-[#E2E8E4] ">
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase font-mono bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7]">
                                             v{item.version_number ?? 1}
                                           </span>
 
                                           {/* Version Name */}
-                                          <h4 className="text-xs font-bold text-[#15283B]  truncate">
+                                          <h4 className="text-xs font-bold text-[#291B32] truncate">
                                             {getVersionDisplayName(item)}
                                           </h4>
 
@@ -688,13 +688,13 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                             onClick={(e) => handleToggleStar(item, e)}
                                             disabled={togglingStarId === item.id}
                                             title={item.is_starred ? "Remove favorite" : "Mark as favorite"}
-                                            className="text-slate-300 hover:text-amber-400 p-0.5 transition-colors"
+                                            className="text-stone-300 hover:text-amber-500 p-0.5 transition-colors"
                                           >
                                             <Star
                                               className={`w-3.5 h-3.5 ${
                                                 item.is_starred
                                                   ? "fill-amber-400 text-amber-500"
-                                                  : "text-slate-300 dark:text-slate-600"
+                                                  : "text-stone-300"
                                               }`}
                                             />
                                           </button>
@@ -703,13 +703,13 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         {/* Target Role & Title */}
                                         <div className="space-y-0.5 mt-0.5">
                                           {item.target_role && (
-                                            <div className="flex items-center gap-1 text-[11px] text-slate-500  truncate">
+                                            <div className="flex items-center gap-1 text-[11px] text-[#674E61] truncate">
                                               <Briefcase className="w-3 h-3 shrink-0" />
                                               <span className="truncate">{item.target_role}</span>
                                             </div>
                                           )}
                                           {item.title && (
-                                            <div className="flex items-center gap-1 text-[11px] text-slate-400  truncate" title={item.title}>
+                                            <div className="flex items-center gap-1 text-[11px] text-[#674E61]/70 truncate" title={item.title}>
                                               <span className="truncate">{`Title: ${item.title}`}</span>
                                             </div>
                                           )}
@@ -717,7 +717,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
                                         {/* Version Notes */}
                                         {item.version_notes && (
-                                          <p className="text-[11px] text-slate-600  mt-1 italic line-clamp-1">
+                                          <p className="text-[11px] text-[#674E61] mt-1 italic line-clamp-1">
                                             &ldquo;{item.version_notes}&rdquo;
                                           </p>
                                         )}
@@ -728,7 +728,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                             {item.version_tags.map((t, idx) => (
                                               <span
                                                 key={idx}
-                                                className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100  text-slate-600  border border-[#E2E8E4] "
+                                                className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#F7F2EB] text-[#674E61] border border-[#DDD0D7]"
                                               >
                                                 {t}
                                               </span>
@@ -744,7 +744,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         type="button"
                                         onClick={(e) => handleOpenRenameModal(item, e)}
                                         title="Rename or edit metadata"
-                                        className="p-1.5 text-slate-400 hover:text-[#087F66] rounded-lg hover:bg-slate-100 transition-colors"
+                                        className="p-1.5 text-[#674E61] hover:text-[#C45D39] rounded-lg hover:bg-[#F7F2EB] transition-colors"
                                       >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
@@ -753,7 +753,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         type="button"
                                         onClick={(e) => handleOpenForkModal(item, e)}
                                         title="Fork / Duplicate version"
-                                        className="p-1.5 text-slate-400 hover:text-[#087F66] rounded-lg hover:bg-slate-100 transition-colors"
+                                        className="p-1.5 text-[#674E61] hover:text-[#C45D39] rounded-lg hover:bg-[#F7F2EB] transition-colors"
                                       >
                                         <GitFork className="w-3.5 h-3.5" />
                                       </button>
@@ -765,7 +765,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           setConfirmDeleteId(item.id);
                                         }}
                                         title="Delete version"
-                                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                                        className="p-1.5 text-[#674E61] hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
@@ -773,19 +773,19 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                   </div>
 
                                   {/* Card Bottom Row: Metadata, Scores, Load Button, Export */}
-                                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2 border-t border-slate-100  text-[11px]">
-                                    <div className="flex items-center gap-2 text-slate-400">
+                                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 mt-2 border-t border-[#DDD0D7]/40 text-[11px]">
+                                    <div className="flex items-center gap-2 text-[#674E61]">
                                       <div className="flex items-center gap-1">
                                         <Calendar className="w-3 h-3" />
                                         <span>{formatDate(item.created_at)}</span>
                                       </div>
                                       {item.ats_score !== undefined && item.ats_score !== null && (
-                                        <span className="font-semibold text-[#087F66]">
+                                        <span className="font-semibold text-[#C45D39]">
                                           ATS {item.ats_score}%
                                         </span>
                                       )}
                                       {item.match_score !== undefined && item.match_score !== null && (
-                                        <span className="font-semibold text-[#087F66]">
+                                        <span className="font-semibold text-[#C45D39]">
                                           Match {item.match_score}%
                                         </span>
                                       )}
@@ -793,13 +793,13 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
                                     <div className="flex items-center gap-2">
                                       {/* Export Format Dropdown / Buttons */}
-                                      <div className="flex items-center gap-1 border border-[#E2E8E4] rounded-lg p-0.5 bg-[#F8F7F3]">
+                                      <div className="flex items-center gap-1 border border-[#DDD0D7] rounded-lg p-0.5 bg-[#F7F2EB]">
                                         <button
                                           type="button"
                                           onClick={(e) => handleExport(item, "pdf", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export PDF"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-[#291B32] transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "pdf" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -812,7 +812,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           onClick={(e) => handleExport(item, "docx", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export DOCX"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-[#291B32] transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "docx" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -825,7 +825,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           onClick={(e) => handleExport(item, "txt", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export TXT"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-[#291B32] transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "txt" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -840,7 +840,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         type="button"
                                         onClick={() => handleSelect(item.id)}
                                         disabled={loadingDetailId === item.id}
-                                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-xs bg-[#087F66] hover:bg-[#066B56] text-white transition-colors"
+                                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-xs bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white transition-colors"
                                       >
                                         {loadingDetailId === item.id ? (
                                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -867,14 +867,14 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
             {/* Sticky Compare Action Footer Bar */}
             {selectedForCompare.length > 0 && (
-              <div className="p-4 border-t border-[#E2E8E4]  bg-[#F8F7F3] /90 flex items-center justify-between">
+              <div className="p-4 border-t border-[#DDD0D7] bg-[#F7F2EB] flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs">
-                  <GitCompare className="w-4 h-4 text-[#087F66]" />
-                  <span className="font-semibold text-slate-800 ">
+                  <GitCompare className="w-4 h-4 text-[#C45D39]" />
+                  <span className="font-semibold text-[#291B32]">
                     {selectedForCompare.length} of 2 selected for comparison
                   </span>
                   {selectedForCompare.length < 2 && (
-                    <span className="text-slate-400 italic">(select 1 more)</span>
+                    <span className="text-[#8E7087] italic">(select 1 more)</span>
                   )}
                 </div>
 
@@ -882,7 +882,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   <button
                     type="button"
                     onClick={() => setSelectedForCompare([])}
-                    className="px-2.5 py-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    className="px-2.5 py-1 text-xs text-[#674E61] hover:text-[#291B32]"
                   >
                     Clear
                   </button>
@@ -893,8 +893,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                     onClick={() => setIsCompareModalOpen(true)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
                       selectedForCompare.length === 2
-                        ? "bg-[#087F66] hover:bg-[#066B56] text-white shadow-md shadow-blue-500/20"
-                        : "bg-slate-200  text-slate-400 cursor-not-allowed"
+                        ? "bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white shadow-sm"
+                        : "bg-[#E8D9E8]/50 text-[#8E7087] cursor-not-allowed"
                     }`}
                   >
                     <GitCompare className="w-3.5 h-3.5" />
@@ -909,21 +909,21 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
       {/* Delete Confirmation Modal */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#15283B]/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white  border border-[#E2E8E4]  rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-600">
-              <div className="p-2 bg-rose-100 dark:bg-rose-950/80 rounded-xl">
-                <AlertCircle className="w-5 h-5" />
+        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#291B32]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#DDD0D7] rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-[#C45D39]">
+              <div className="p-2 bg-[#FDF2F0] rounded-xl border border-[#FDBA74]">
+                <AlertCircle className="w-5 h-5 text-[#C45D39]" />
               </div>
-              <h3 className="font-bold text-base text-[#15283B] ">
+              <h3 className="font-editorial text-lg text-[#291B32]">
                 Confirm Version Deletion
               </h3>
             </div>
 
-            <p className="text-xs text-slate-600  leading-relaxed">
+            <p className="text-xs text-[#674E61] leading-relaxed">
               Are you sure you want to delete this saved resume version?
               <br />
-              <strong className="text-slate-800  font-semibold mt-1 block">
+              <strong className="text-[#291B32] font-semibold mt-1 block">
                 Any existing child versions will not be deleted; they will be safely reparented.
               </strong>
             </p>
@@ -932,7 +932,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
               <button
                 type="button"
                 onClick={() => setConfirmDeleteId(null)}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600  hover:bg-slate-100 "
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#674E61] hover:bg-[#E8D9E8]/50"
               >
                 Cancel
               </button>
@@ -940,7 +940,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                 type="button"
                 onClick={() => handleConfirmDelete(confirmDeleteId)}
                 disabled={deletingId === confirmDeleteId}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white transition-colors"
               >
                 {deletingId === confirmDeleteId ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -956,32 +956,32 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
       {/* Fork Modal */}
       {forkingItem && (
-        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#15283B]/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white  border border-[#E2E8E4]  rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E2E8E4] ">
+        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#291B32]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#DDD0D7] rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <GitFork className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-sm text-[#15283B] ">
+                <GitFork className="w-5 h-5 text-[#C45D39]" />
+                <h3 className="font-editorial text-lg text-[#291B32]">
                   Duplicate / Fork Version
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setForkingItem(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[#8E7087] hover:text-[#291B32]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#674E61]">
               Create a child branch in this revision family originating from{" "}
-              <strong>{getVersionDisplayName(forkingItem)} (v{forkingItem.version_number ?? 1})</strong>.
+              <strong className="text-[#291B32]">{getVersionDisplayName(forkingItem)} (v{forkingItem.version_number ?? 1})</strong>.
             </p>
 
             <form onSubmit={handleSubmitFork} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   New Version Name *
                 </label>
                 <input
@@ -990,12 +990,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={forkName}
                   onChange={(e) => setForkName(e.target.value)}
                   placeholder="e.g. Senior Backend Role Variant"
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   Version Notes (Optional)
                 </label>
                 <textarea
@@ -1003,7 +1003,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={forkNotes}
                   onChange={(e) => setForkNotes(e.target.value)}
                   placeholder="e.g. Targeted toward AWS / Kubernetes focus"
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39] resize-none"
                 />
               </div>
 
@@ -1011,14 +1011,14 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                 <button
                   type="button"
                   onClick={() => setForkingItem(null)}
-                  className="px-3 py-1.5 rounded-xl font-semibold text-slate-600  hover:bg-slate-100 "
+                  className="px-3 py-1.5 rounded-xl font-semibold text-[#674E61] hover:bg-[#E8D9E8]/50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingFork || !forkName.trim()}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl font-bold bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white transition-colors disabled:opacity-50"
                 >
                   {isSubmittingFork ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1035,19 +1035,19 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
       {/* Rename / Edit Metadata Modal */}
       {renamingItem && (
-        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#15283B]/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white  border border-[#E2E8E4]  rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E2E8E4] ">
+        <div className="fixed inset-0 z-60 overflow-y-auto bg-[#291B32]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#DDD0D7] rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-[#087F66]" />
-                <h3 className="font-bold text-sm text-[#15283B] ">
+                <Edit3 className="w-5 h-5 text-[#C45D39]" />
+                <h3 className="font-editorial text-lg text-[#291B32]">
                   Edit Version Metadata
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setRenamingItem(null)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[#8E7087] hover:text-[#291B32]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1055,7 +1055,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
             <form onSubmit={handleSubmitRename} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   Version Name
                 </label>
                 <input
@@ -1063,12 +1063,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={renameVersionName}
                   onChange={(e) => setRenameVersionName(e.target.value)}
                   placeholder="e.g. Fintech Tech Lead Draft"
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   Title
                 </label>
                 <input
@@ -1076,12 +1076,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={renameTitle}
                   onChange={(e) => setRenameTitle(e.target.value)}
                   placeholder="e.g. Jane Doe - Tech Lead Resume"
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   Notes
                 </label>
                 <textarea
@@ -1089,12 +1089,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={renameNotes}
                   onChange={(e) => setRenameNotes(e.target.value)}
                   placeholder="Add notes about this iteration..."
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39] resize-none"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700  mb-1">
+                <label className="block font-bold text-[#291B32] mb-1">
                   Tags (comma-separated)
                 </label>
                 <input
@@ -1102,7 +1102,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                   value={renameTagsInput}
                   onChange={(e) => setRenameTagsInput(e.target.value)}
                   placeholder="e.g. backend, remote, fintech"
-                  className="w-full p-2.5 rounded-xl bg-[#F8F7F3]  border border-[#E2E8E4]  text-[#15283B]  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] placeholder:text-[#8E7087] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 focus:border-[#C45D39]"
                 />
               </div>
 
@@ -1110,14 +1110,14 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                 <button
                   type="button"
                   onClick={() => setRenamingItem(null)}
-                  className="px-3 py-1.5 rounded-xl font-semibold text-slate-600  hover:bg-slate-100 "
+                  className="px-3 py-1.5 rounded-xl font-semibold text-[#674E61] hover:bg-[#E8D9E8]/50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingRename}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl font-bold bg-[#087F66] hover:bg-[#066B56] text-white transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl font-bold bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white transition-colors disabled:opacity-50"
                 >
                   {isSubmittingRename ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />

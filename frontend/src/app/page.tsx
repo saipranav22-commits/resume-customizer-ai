@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   FileCheck2,
   RefreshCw,
-  Cpu,
   ShieldCheck,
   Bookmark,
   Check,
@@ -238,7 +237,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7F3] flex flex-col font-sans text-[#15283B]">
+    <div className="min-h-screen bg-[#F7F2EB] flex flex-col font-sans text-[#291B32]">
       {/* 1. Header and account controls */}
       <Header onOpenHistory={() => setIsHistoryDrawerOpen(true)} />
 
@@ -246,46 +245,46 @@ export default function Home() {
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
         {/* 2. Hero / introduction section */}
         <section className="text-center max-w-3xl mx-auto pt-2 pb-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#DCEDE5] text-[#087F66] border border-[#087F66]/20 mb-4 shadow-xs">
-            <Cpu className="w-3.5 h-3.5" />
-            <span>Next-Gen Full Stack Resume Customizer & Optimizer</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#E8D9E8]/70 text-[#291B32] border border-[#DDD0D7] mb-4 shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
+            <span>Editorial Career Atelier & Precision AI Optimization</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#15283B] tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#291B32] tracking-tight leading-tight">
             Elevate Your Resume for Every Target Role
           </h1>
-          <p className="mt-3.5 text-sm sm:text-base text-[#64748B] leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 text-sm sm:text-base text-[#674E61] leading-relaxed max-w-2xl mx-auto font-sans">
             Powered by FastAPI and Gemini AI. Rephrases experience, matches core skills,
             and pinpoints missing keywords with strict anti-fabrication standards.
           </p>
 
           {/* Workflow Sequence Indicator */}
-          <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-[#64748B] bg-white border border-[#E2E8E4] px-4 py-2 rounded-xl shadow-xs">
-            <span className="text-[#087F66] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">1</span>
-              Upload Resume
+          <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-2.5 text-xs font-semibold text-[#674E61] bg-white border border-[#DDD0D7] px-4 py-2 rounded-xl shadow-xs">
+            <span className="text-[#291B32] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">01</span>
+              <span>Upload Resume</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
-            <span className="text-[#087F66] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">2</span>
-              Job Description
+            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
+            <span className="text-[#291B32] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">02</span>
+              <span>Job Description</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
-            <span className="text-[#087F66] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">3</span>
-              Preferences
+            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
+            <span className="text-[#291B32] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">03</span>
+              <span>Preferences</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
-            <span className="text-[#087F66] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">4</span>
-              AI Optimize & Export
+            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
+            <span className="text-[#291B32] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">04</span>
+              <span>AI Optimize & Export</span>
             </span>
           </div>
         </section>
 
         {/* Global Error Banner */}
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 shadow-xs">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" />
+          <div className="p-4 rounded-xl bg-[#FDF2F2] border border-[#F5C2C2] text-[#A82A2A] flex items-start gap-3 shadow-xs">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-[#A82A2A]" />
             <div className="text-sm">
               <p className="font-bold">Customization Error</p>
               <p className="mt-0.5">{errorMessage}</p>
@@ -294,17 +293,17 @@ export default function Home() {
         )}
 
         {/* 3. Upload Resume Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#E2E8E4]">
+        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#DCEDE5] text-[#087F66] uppercase tracking-wider">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
                 Step 1
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#15283B]">
+              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
                 Upload Candidate Resume
               </h2>
             </div>
-            <span className="text-xs text-[#64748B] hidden sm:inline">
+            <span className="text-xs text-[#674E61] hidden sm:inline">
               Accepts PDF (.pdf) & Word (.docx)
             </span>
           </div>
@@ -312,17 +311,17 @@ export default function Home() {
         </section>
 
         {/* 4. Paste Job Description Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#E2E8E4]">
+        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#DCEDE5] text-[#087F66] uppercase tracking-wider">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
                 Step 2
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#15283B]">
+              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
                 Target Job Description
               </h2>
             </div>
-            <span className="text-xs text-[#64748B] hidden sm:inline">
+            <span className="text-xs text-[#674E61] hidden sm:inline">
               Extracts requirements & skills
             </span>
           </div>
@@ -333,17 +332,17 @@ export default function Home() {
         </section>
 
         {/* 5. Tailoring Controls Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#E2E8E4]">
+        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#DCEDE5] text-[#087F66] uppercase tracking-wider">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
                 Step 3
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#15283B]">
+              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
                 Customization Preferences
               </h2>
             </div>
-            <span className="text-xs text-[#64748B] hidden sm:inline">
+            <span className="text-xs text-[#674E61] hidden sm:inline">
               Select target sections to optimize
             </span>
           </div>
@@ -358,13 +357,13 @@ export default function Home() {
         </section>
 
         {/* 6. Generate / AI Processing Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[#E2E8E4]">
+        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#DCEDE5] text-[#087F66] uppercase tracking-wider">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
                 Step 4
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#15283B]">
+              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
                 Run AI Optimization
               </h2>
             </div>
@@ -372,7 +371,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#087F66] hover:underline flex items-center gap-1 font-semibold"
+                className="text-xs text-[#C45D39] hover:text-[#AF4F2E] hover:underline flex items-center gap-1 font-semibold transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Reset Form
@@ -385,10 +384,10 @@ export default function Home() {
               id="submit-customize-btn"
               type="submit"
               disabled={!canSubmit}
-              className={`w-full py-4 px-6 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-sm ${
+              className={`w-full py-4 px-6 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-[#C45D39] ${
                 canSubmit
-                  ? "bg-[#087F66] hover:bg-[#066B56] text-white cursor-pointer hover:shadow-md"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                  ? "bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white cursor-pointer hover:shadow-md"
+                  : "bg-[#DDD0D7]/60 text-[#674E61]/60 cursor-not-allowed shadow-none"
               }`}
             >
               {isLoading ? (
@@ -407,12 +406,12 @@ export default function Home() {
           </form>
 
           {/* Quality Standards Card */}
-          <div className="p-4 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4] text-xs text-[#64748B] space-y-2">
-            <div className="font-bold text-[#15283B] flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#087F66]" />
+          <div className="p-4 rounded-xl bg-[#F7F2EB]/60 border border-[#DDD0D7] text-xs text-[#674E61] space-y-2">
+            <div className="font-bold text-[#291B32] flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-[#C45D39]" />
               <span>Executive Recruiter & Anti-Fabrication Standards</span>
             </div>
-            <ul className="space-y-1 pl-4 list-disc text-[11px] leading-relaxed text-[#64748B]">
+            <ul className="space-y-1 pl-4 list-disc text-[11px] leading-relaxed text-[#674E61]">
               <li>Strict factual accuracy — no fake companies, degrees, tools, or fabricated metrics.</li>
               <li>Missing job keywords are provided as transparent gap recommendations, never invented.</li>
               <li>ReportLab executive PDF & Microsoft Word DOCX formatting standard.</li>
@@ -425,23 +424,23 @@ export default function Home() {
         {tailoredResult ? (
           <section id="workspace-results-section" className="space-y-8 pt-4 scroll-mt-20">
             {/* Version Family & Lineage Status Bar */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#DCEDE5] text-[#087F66]">
+                <div className="p-2 rounded-xl bg-[#E8D9E8] text-[#291B32]">
                   <GitBranch className="w-4 h-4" />
                 </div>
                 {activeVersionId ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#64748B]">Active:</span>
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F8F7F3] text-[#15283B] border border-[#E2E8E4]">
+                    <span className="text-xs text-[#674E61]">Active:</span>
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7]">
                       {activeVersionName}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#DCEDE5] text-[#087F66]">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#E8D9E8] text-[#291B32]">
                       v{activeVersionNumber ?? 1}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs font-bold text-[#15283B]">
+                  <span className="text-xs font-bold text-[#291B32]">
                     New Unsaved Tailored Version
                   </span>
                 )}
@@ -452,8 +451,8 @@ export default function Home() {
                     <span>Unsaved Modifications</span>
                   </span>
                 ) : activeVersionId ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEDE5] text-[#087F66] border border-[#087F66]/20">
-                    <Check className="w-3 h-3 text-[#087F66]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]">
+                    <Check className="w-3 h-3 text-[#C45D39]" />
                     <span>Saved Snapshot (Immutable)</span>
                   </span>
                 ) : null}
@@ -465,7 +464,7 @@ export default function Home() {
                     type="button"
                     onClick={handleDetachActiveVersion}
                     title="Detach from this revision family to save future modifications as an independent root (v1)"
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#15283B] hover:bg-[#F8F7F3] border border-[#E2E8E4] transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] border border-[#DDD0D7] transition-colors"
                   >
                     Detach Family
                   </button>
@@ -475,7 +474,7 @@ export default function Home() {
                   type="button"
                   onClick={handleOpenSaveModal}
                   disabled={isSaving}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#087F66] hover:bg-[#066B56] text-white shadow-sm transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white shadow-sm transition-all"
                 >
                   {isSaving ? (
                     <>
@@ -503,7 +502,7 @@ export default function Home() {
             </div>
 
             {activeVersionId && isDirty && (
-              <div className="text-xs text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200">
+              <div className="text-xs text-amber-900 bg-amber-50/80 p-3 rounded-xl border border-amber-200">
                 Active snapshot <strong>{activeVersionName}</strong> is preserved and immutable. Saving creates a new tracked revision without overwriting past history.
               </div>
             )}
@@ -513,48 +512,48 @@ export default function Home() {
           </section>
         ) : (
           /* Placeholder State Before Optimization */
-          <section className="p-8 sm:p-12 rounded-2xl bg-white border border-dashed border-[#E2E8E4] text-center flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-[#DCEDE5] text-[#087F66] flex items-center justify-center mb-4 shadow-xs">
-              <FileCheck2 className="w-7 h-7" />
+          <section className="p-8 sm:p-12 rounded-2xl bg-white border border-dashed border-[#DDD0D7] text-center flex flex-col items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-[#E8D9E8] text-[#291B32] flex items-center justify-center mb-4 shadow-xs">
+              <FileCheck2 className="w-7 h-7 text-[#C45D39]" />
             </div>
-            <h3 className="text-lg font-bold text-[#15283B]">
+            <h3 className="font-editorial text-xl font-bold text-[#291B32]">
               Your Tailored Resume & Optimization Analysis Will Appear Here
             </h3>
-            <p className="mt-1.5 text-xs sm:text-sm text-[#64748B] max-w-lg leading-relaxed">
+            <p className="mt-1.5 text-xs sm:text-sm text-[#674E61] max-w-lg leading-relaxed">
               Complete steps 1 through 3 above and click &quot;Tailor Resume for this Job&quot; to review your full-width optimization breakdown, document preview, diff view, and cover letter.
             </p>
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl text-left">
-              <div className="p-4 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4]">
-                <span className="text-[10px] font-bold text-[#087F66] uppercase">
+              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
                   Step 1
                 </span>
-                <p className="text-xs font-bold text-[#15283B] mt-1">
+                <p className="text-xs font-bold text-[#291B32] mt-1">
                   PDF / DOCX Parsing
                 </p>
-                <p className="text-[11px] text-[#64748B] mt-1 leading-snug">
+                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
                   Extracts authentic candidate history with anti-fabrication standards.
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4]">
-                <span className="text-[10px] font-bold text-[#087F66] uppercase">
+              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
                   Step 2
                 </span>
-                <p className="text-xs font-bold text-[#15283B] mt-1">
+                <p className="text-xs font-bold text-[#291B32] mt-1">
                   LLM Matching & Scoring
                 </p>
-                <p className="text-[11px] text-[#64748B] mt-1 leading-snug">
+                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
                   Multi-factor explainable score breakdown and evidence-grounded suggestions.
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4]">
-                <span className="text-[10px] font-bold text-[#087F66] uppercase">
+              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
                   Step 3
                 </span>
-                <p className="text-xs font-bold text-[#15283B] mt-1">
+                <p className="text-xs font-bold text-[#291B32] mt-1">
                   1-Click Export & History
                 </p>
-                <p className="text-[11px] text-[#64748B] mt-1 leading-snug">
+                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
                   Download PDF or DOCX, fork new revisions, and restore past versions.
                 </p>
               </div>
@@ -564,24 +563,24 @@ export default function Home() {
       </main>
 
       {/* 12. Footer */}
-      <footer className="mt-auto border-t border-[#E2E8E4] bg-white py-5 text-center text-xs text-[#64748B]">
+      <footer className="mt-auto border-t border-[#DDD0D7] bg-white py-5 text-center text-xs text-[#674E61]">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-medium text-[#15283B]">Resume Customizer AI Assessment Project</span>
+          <span className="font-medium text-[#291B32]">Resume Customizer AI Assessment Project</span>
           <div className="flex items-center gap-3.5 font-medium">
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#087F66]" />
+              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
               Next.js 16 App Router
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#087F66]" />
+              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
               FastAPI
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#087F66]" />
+              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
               Gemini AI
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#087F66]" />
+              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
               Supabase Auth & RLS
             </span>
           </div>
