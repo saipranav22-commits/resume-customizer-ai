@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sparkles,
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   Bookmark,
   Check,
   Loader2,
+  GitBranch,
 } from "lucide-react";
 import Header from "@/components/Header";
 import ResumeUpload from "@/components/ResumeUpload";
@@ -21,6 +22,7 @@ import TailoredResumeView from "@/components/TailoredResumeView";
 import SectionControls from "@/components/SectionControls";
 import HistoryDrawer from "@/components/HistoryDrawer";
 import AuthModal from "@/components/AuthModal";
+import SaveVersionModal from "@/components/SaveVersionModal";
 import { customizeResume, saveHistory } from "@/lib/api";
 import { TailoredResumeResponse, CustomizationHistoryDetail } from "@/types/resume";
 import { useAuth } from "@/context/AuthContext";
@@ -38,17 +40,52 @@ export default function Home() {
   const [customizeSkills, setCustomizeSkills] = useState<boolean>(true);
   const [customizeExperience, setCustomizeExperience] = useState<boolean>(true);
 
-  // Phase 5A: Auth & History UI States
+  // Phase 5A & 5B: Auth & Version Lifecycle State
   const { user, token } = useAuth();
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
+  // Phase 5B Versioning state
+  const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
+  const [activeVersionName, setActiveVersionName] = useState<string | null>(null);
+  const [activeVersionNumber, setActiveVersionNumber] = useState<number | null>(null);
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false);
+
   const canSubmit = Boolean(file) && jobDescription.trim().length >= 50 && !isLoading;
+
+  // Warn before browser window unload when there are unsaved workspace modifications
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty && tailoredResult) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty, tailoredResult]);
+
+  const handleJobDescriptionChange = (val: string) => {
+    setJobDescription(val);
+    if (tailoredResult) {
+      setIsDirty(true);
+      setIsSaved(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDirty && tailoredResult) {
+      if (
+        !confirm(
+          "You have unsaved changes in your active tailored resume. Re-tailoring will overwrite your current workspace. Continue?"
+        )
+      ) {
+        return;
+      }
+    }
     if (!file) {
       setErrorMessage("Please upload your resume (PDF or DOCX).");
       return;
@@ -89,6 +126,8 @@ export default function Home() {
         token
       );
       setTailoredResult(result);
+      // Mark as modified if we were on a saved snapshot
+      setIsDirty(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setErrorMessage(msg);
@@ -99,40 +138,96 @@ export default function Home() {
   };
 
   const handleReset = () => {
+    if (isDirty && tailoredResult) {
+      if (
+        !confirm(
+          "You have unsaved changes in your active tailored resume. Resetting the form will discard these changes. Continue?"
+        )
+      ) {
+        return;
+      }
+    }
     setTailoredResult(null);
     setErrorMessage(null);
+    setActiveVersionId(null);
+    setActiveVersionName(null);
+    setActiveVersionNumber(null);
+    setIsDirty(false);
     setIsSaved(false);
   };
 
-  const handleSaveToHistory = async () => {
+  const handleOpenSaveModal = () => {
     if (!tailoredResult) return;
     if (!user || !token) {
       setIsAuthModalOpen(true);
       return;
     }
+    setIsSaveModalOpen(true);
+  };
+
+  const handleSaveVersion = async (options: {
+    title: string;
+    version_name: string;
+    parent_id: string | null;
+    version_notes?: string;
+    version_tags?: string[];
+  }) => {
+    if (!tailoredResult || !token) return;
 
     setIsSaving(true);
     try {
       const jdFirstLine = jobDescription.split("\n")[0].trim().slice(0, 40);
-      const title = `${tailoredResult.candidate_name || "Tailored"} - ${jdFirstLine || "Customized Resume"}`;
-      await saveHistory(token, {
-        title,
+      const created = await saveHistory(token, {
+        title: options.title,
         job_description: jobDescription,
         target_role: jdFirstLine || "Target Position",
         tailored_result: tailoredResult,
+        version_name: options.version_name,
+        parent_id: options.parent_id,
+        version_notes: options.version_notes,
+        version_tags: options.version_tags,
       });
+
+      setActiveVersionId(created.id);
+      setActiveVersionName(created.version_name || created.title);
+      setActiveVersionNumber(created.version_number ?? 1);
+      setIsDirty(false);
       setIsSaved(true);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save history";
-      alert(msg);
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleDetachActiveVersion = () => {
+    if (
+      confirm(
+        "Detach from this revision family? Your current workspace content will remain, but subsequent saves will create a brand-new independent root (v1)."
+      )
+    ) {
+      setActiveVersionId(null);
+      setActiveVersionName(null);
+      setActiveVersionNumber(null);
+      setIsDirty(true);
+      setIsSaved(false);
+    }
+  };
+
   const handleLoadHistory = (detail: CustomizationHistoryDetail) => {
+    if (isDirty && tailoredResult) {
+      if (
+        !confirm(
+          "You have unsaved changes in your active tailored resume. Loading another version will discard your current modifications. Continue?"
+        )
+      ) {
+        return;
+      }
+    }
     setTailoredResult(detail.tailored_result);
     setJobDescription(detail.job_description);
+    setActiveVersionId(detail.id);
+    setActiveVersionName(detail.version_name || detail.title);
+    setActiveVersionNumber(detail.version_number ?? 1);
+    setIsDirty(false);
     setIsSaved(true);
     window.scrollTo({ top: 150, behavior: "smooth" });
   };
@@ -195,7 +290,7 @@ export default function Home() {
 
                 <JobDescriptionInput
                   value={jobDescription}
-                  onChange={setJobDescription}
+                  onChange={handleJobDescriptionChange}
                 />
 
                 <SectionControls
@@ -254,44 +349,89 @@ export default function Home() {
           <div className="lg:col-span-7 space-y-4">
             {tailoredResult ? (
               <>
-                {/* Save to History Action Banner */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {tailoredResult.candidate_name}
-                    </span>
-                    <span>•</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                      Tailoring Complete
-                    </span>
+                {/* Active Version & Lifecycle Management Banner */}
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">
+                        {tailoredResult.candidate_name}
+                      </span>
+                      <span className="text-slate-300 dark:text-slate-700">•</span>
+
+                      {activeVersionId ? (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+                          <GitBranch className="w-3.5 h-3.5 text-blue-600" />
+                          <span>
+                            Active: <strong>{activeVersionName}</strong> (v{activeVersionNumber ?? 1})
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          Tailoring Complete
+                        </span>
+                      )}
+
+                      {isDirty ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-850">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Unsaved Modifications</span>
+                        </span>
+                      ) : isSaved ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-850">
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Saved Snapshot (Immutable)</span>
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {activeVersionId && (
+                        <button
+                          type="button"
+                          onClick={handleDetachActiveVersion}
+                          title="Detach from this revision family to save future modifications as an independent root (v1)"
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors"
+                        >
+                          Detach Family
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleOpenSaveModal}
+                        disabled={isSaving}
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Saving...</span>
+                          </>
+                        ) : isDirty ? (
+                          <>
+                            <Bookmark className="w-3.5 h-3.5" />
+                            <span>{activeVersionId ? "Save New Revision" : "Save as Version"}</span>
+                          </>
+                        ) : isSaved ? (
+                          <>
+                            <Bookmark className="w-3.5 h-3.5" />
+                            <span>Save Another Revision</span>
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark className="w-3.5 h-3.5" />
+                            <span>Save Version</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
-                  <button
-                    onClick={handleSaveToHistory}
-                    disabled={isSaving || isSaved}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isSaved
-                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default"
-                        : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                    }`}
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Saving...</span>
-                      </>
-                    ) : isSaved ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span>Saved in History</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="w-3.5 h-3.5" />
-                        <span>Save to History</span>
-                      </>
-                    )}
-                  </button>
+                  {activeVersionId && isDirty && (
+                    <div className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30 p-2.5 rounded-lg border border-amber-200/60 dark:border-amber-900/40">
+                      Active snapshot <strong>{activeVersionName}</strong> is preserved and immutable. Saving creates a new tracked revision (child revision or new root) without overwriting past history.
+                    </div>
+                  )}
                 </div>
 
                 <TailoredResumeView resume={tailoredResult} />
@@ -381,6 +521,21 @@ export default function Home() {
         onClose={() => setIsHistoryDrawerOpen(false)}
         onLoadHistory={handleLoadHistory}
       />
+
+      {/* Save Resume Version Modal */}
+      {tailoredResult && (
+        <SaveVersionModal
+          isOpen={isSaveModalOpen}
+          onClose={() => setIsSaveModalOpen(false)}
+          candidateName={tailoredResult.candidate_name}
+          jobDescription={jobDescription}
+          activeVersionId={activeVersionId}
+          activeVersionName={activeVersionName}
+          activeVersionNumber={activeVersionNumber}
+          isSaving={isSaving}
+          onSave={handleSaveVersion}
+        />
+      )}
 
       {/* Authentication Modal */}
       <AuthModal

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response, Depends, Header
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response, Depends, Header, Query
 from typing import List, Optional
+import re
 from app.config import settings
 from app.models.schemas import (
     TailoredResumeResponse,
@@ -8,7 +9,11 @@ from app.models.schemas import (
     UserProfile,
     CustomizationHistoryItem,
     CustomizationHistoryDetail,
-    SaveHistoryRequest
+    SaveHistoryRequest,
+    ForkVersionRequest,
+    UpdateVersionMetadataRequest,
+    CompareVersionsRequest,
+    VersionComparisonResponse,
 )
 from app.services.auth import (
     AuthenticatedUser,
@@ -199,12 +204,29 @@ async def get_current_user_profile(current_user: AuthenticatedUser = Depends(get
 
 @router.get('/history', response_model=List[CustomizationHistoryItem], tags=['Resume History'])
 async def list_resume_history(
+    resume_id: Optional[str] = Query(None, description="Filter versions by base resume ID"),
+    root_id: Optional[str] = Query(None, description="Filter versions by revision tree root ID"),
+    is_starred: Optional[bool] = Query(None, description="Filter versions by favorite/starred status"),
+    tag: Optional[str] = Query(None, description="Filter versions by tag"),
+    search: Optional[str] = Query(None, description="Search keyword in title or version name"),
+    limit: int = Query(50, ge=1, le=100, description="Page size limit"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
     current_user: AuthenticatedUser = Depends(get_current_user),
     authorization: Optional[str] = Header(None)
 ):
-    """List all customization history records owned by the authenticated user."""
+    """List customization history records and resume versions owned by authenticated user."""
     token = extract_bearer_token(authorization)
-    return await history_service.list_history(current_user.id, token)
+    return await history_service.list_history(
+        user_id=current_user.id,
+        user_token=token,
+        resume_id=resume_id,
+        root_id=root_id,
+        is_starred=is_starred,
+        tag=tag,
+        search=search,
+        limit=limit,
+        offset=offset
+    )
 
 @router.post('/history', response_model=CustomizationHistoryItem, status_code=status.HTTP_201_CREATED, tags=['Resume History'])
 async def save_resume_history(
@@ -212,9 +234,24 @@ async def save_resume_history(
     current_user: AuthenticatedUser = Depends(get_current_user),
     authorization: Optional[str] = Header(None)
 ):
-    """Save a tailored resume customization result to the user history."""
+    """Save a tailored resume customization result or new version to the user history."""
     token = extract_bearer_token(authorization)
     return await history_service.save_history(current_user.id, req, token)
+
+@router.post('/history/compare', response_model=VersionComparisonResponse, tags=['Resume History'])
+async def compare_resume_versions(
+    req: CompareVersionsRequest,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Compare two saved resume versions deterministically, reporting score deltas, added/removed skills, and bullet changes."""
+    token = extract_bearer_token(authorization)
+    return await history_service.compare_versions(
+        user_id=current_user.id,
+        version_a_id=req.version_a_id,
+        version_b_id=req.version_b_id,
+        user_token=token
+    )
 
 @router.get('/history/{history_id}', response_model=CustomizationHistoryDetail, tags=['Resume History'])
 async def get_resume_history_detail(
@@ -222,7 +259,7 @@ async def get_resume_history_detail(
     current_user: AuthenticatedUser = Depends(get_current_user),
     authorization: Optional[str] = Header(None)
 ):
-    """Get detail of a specific saved resume customization. Enforces strict user ownership."""
+    """Get detail of a specific saved resume customization version. Enforces strict user ownership."""
     token = extract_bearer_token(authorization)
     item = await history_service.get_history_detail(current_user.id, history_id, token)
     if not item:
@@ -232,13 +269,42 @@ async def get_resume_history_detail(
         )
     return item
 
+@router.patch('/history/{history_id}', response_model=CustomizationHistoryItem, tags=['Resume History'])
+@router.patch('/history/{history_id}/metadata', response_model=CustomizationHistoryItem, tags=['Resume History'])
+async def update_version_metadata(
+    history_id: str,
+    req: UpdateVersionMetadataRequest,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Update mutable metadata (title, version_name, notes, tags, starred status) of a version snapshot."""
+    token = extract_bearer_token(authorization)
+    updated = await history_service.update_version_metadata(current_user.id, history_id, req, token)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Customization history item not found or you are not authorized to update it'
+        )
+    return updated
+
+@router.post('/history/{history_id}/fork', response_model=CustomizationHistoryItem, status_code=status.HTTP_201_CREATED, tags=['Resume History'])
+async def fork_resume_version(
+    history_id: str,
+    req: ForkVersionRequest,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Fork an existing resume version into a new child revision in the same revision family."""
+    token = extract_bearer_token(authorization)
+    return await history_service.fork_version(current_user.id, history_id, req, token)
+
 @router.delete('/history/{history_id}', tags=['Resume History'])
 async def delete_resume_history(
     history_id: str,
     current_user: AuthenticatedUser = Depends(get_current_user),
     authorization: Optional[str] = Header(None)
 ):
-    """Delete a saved resume customization record. Enforces strict user ownership."""
+    """Delete a saved resume customization record without cascade data loss. Enforces strict user ownership."""
     token = extract_bearer_token(authorization)
     success = await history_service.delete_history(current_user.id, history_id, token)
     if not success:
@@ -247,3 +313,51 @@ async def delete_resume_history(
             detail='Customization history item not found or you are not authorized to delete it'
         )
     return {'message': 'Customization history item deleted successfully'}
+
+@router.get('/history/{history_id}/export/{format}', tags=['Resume History'])
+async def export_version_document(
+    history_id: str,
+    format: str,
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    authorization: Optional[str] = Header(None)
+):
+    """Export a saved resume version directly as PDF, DOCX, or TXT."""
+    fmt = format.lower().strip()
+    if fmt not in ('pdf', 'docx', 'txt'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported export format '{format}'. Supported formats are: pdf, docx, txt"
+        )
+
+    token = extract_bearer_token(authorization)
+    item = await history_service.get_history_detail(current_user.id, history_id, token)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Customization history item not found or you are not authorized to export it'
+        )
+
+    resume = item.tailored_result
+    safe_name = re.sub(r'[^a-zA-Z0-9_\- ]', '', resume.candidate_name).strip() or "Customized"
+    safe_name = safe_name.replace(' ', '_')
+    v_tag = f"_v{item.version_number}" if item.version_number else ""
+
+    if fmt == 'pdf':
+        content = export_pdf(resume)
+        media_type = "application/pdf"
+        filename = f"{safe_name}{v_tag}_Resume.pdf"
+    elif fmt == 'docx':
+        content = export_docx(resume)
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        filename = f"{safe_name}{v_tag}_Resume.docx"
+    else:  # txt
+        txt_str = export_txt(resume)
+        content = txt_str.encode('utf-8')
+        media_type = "text/plain; charset=utf-8"
+        filename = f"{safe_name}{v_tag}_Resume.txt"
+
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )

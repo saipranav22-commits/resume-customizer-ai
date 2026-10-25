@@ -120,6 +120,14 @@ class CustomizationHistoryItem(BaseModel):
     customization_engine: str = 'gemini'
     is_llm_generated: bool = True
     created_at: str
+    # Phase 5B: Version metadata (backward-compatible defaults)
+    version_name: Optional[str] = None
+    version_number: int = 1
+    parent_id: Optional[str] = None
+    root_id: Optional[str] = None
+    version_tags: List[str] = Field(default_factory=list)
+    version_notes: Optional[str] = None
+    is_starred: bool = False
 
 class CustomizationHistoryDetail(CustomizationHistoryItem):
     job_description: str
@@ -131,6 +139,11 @@ class SaveHistoryRequest(BaseModel):
     target_role: Optional[str] = None
     tailored_result: TailoredResumeResponse
     resume_id: Optional[str] = None
+    # Phase 5B optional versioning fields
+    version_name: Optional[str] = None
+    parent_id: Optional[str] = None
+    version_tags: List[str] = Field(default_factory=list)
+    version_notes: Optional[str] = None
 
 class SavedResumeItem(BaseModel):
     id: str
@@ -139,3 +152,83 @@ class SavedResumeItem(BaseModel):
     original_filename: Optional[str] = None
     candidate_name: Optional[str] = None
     created_at: str
+
+
+# --- Phase 5B: Explicit Version Management Schemas ---
+
+class VersionSummary(CustomizationHistoryItem):
+    """Semantic alias for CustomizationHistoryItem representing a version snapshot."""
+    pass
+
+class VersionDetail(CustomizationHistoryDetail):
+    """Semantic alias for CustomizationHistoryDetail representing full version snapshot payload."""
+    pass
+
+class CreateVersionRequest(SaveHistoryRequest):
+    """Request schema for explicitly creating a new version revision in a tree."""
+    pass
+
+class ForkVersionRequest(BaseModel):
+    """Request schema for duplicating / branching an existing version snapshot."""
+    new_version_name: str = Field(..., min_length=1, max_length=120)
+    new_title: Optional[str] = Field(None, max_length=120)
+    version_notes: Optional[str] = None
+    version_tags: List[str] = Field(default_factory=list)
+
+class UpdateVersionMetadataRequest(BaseModel):
+    """Request schema for updating mutable metadata of an immutable version snapshot."""
+    version_name: Optional[str] = Field(None, min_length=1, max_length=120)
+    title: Optional[str] = Field(None, min_length=1, max_length=120)
+    version_notes: Optional[str] = None
+    version_tags: Optional[List[str]] = None
+    is_starred: Optional[bool] = None
+
+class CompareVersionsRequest(BaseModel):
+    """Request schema for comparing two saved version snapshots."""
+    version_a_id: str = Field(..., description="ID of the baseline version (older/source)")
+    version_b_id: str = Field(..., description="ID of the comparison version (newer/target)")
+
+class ExperienceDiff(BaseModel):
+    """Structured diff of experience bullet points within a matching role/company."""
+    role: str
+    company: str
+    added_bullets: List[str] = Field(default_factory=list)
+    removed_bullets: List[str] = Field(default_factory=list)
+    unchanged_bullets: List[str] = Field(default_factory=list)
+
+class VersionComparisonResponse(BaseModel):
+    """Structured, deterministic comparison between two version snapshots."""
+    version_a_id: str
+    version_b_id: str
+    version_a_name: Optional[str] = None
+    version_b_name: Optional[str] = None
+    version_a_number: int = 1
+    version_b_number: int = 1
+
+    # Score comparison
+    match_score_a: Optional[int] = None
+    match_score_b: Optional[int] = None
+    match_score_delta: Optional[int] = None
+
+    ats_score_a: Optional[int] = None
+    ats_score_b: Optional[int] = None
+    ats_score_delta: Optional[int] = None
+
+    # Summary comparison
+    summary_a: Optional[str] = None
+    summary_b: Optional[str] = None
+    summary_changed: bool = False
+
+    # Skills comparison
+    added_skills: List[str] = Field(default_factory=list, description="Skills present in version B but not in version A")
+    removed_skills: List[str] = Field(default_factory=list, description="Skills present in version A but not in version B")
+    shared_skills: List[str] = Field(default_factory=list, description="Skills present in both versions")
+
+    # Experience bullet changes
+    experience_diffs: List[ExperienceDiff] = Field(default_factory=list)
+
+    # Metadata
+    title_a: Optional[str] = None
+    title_b: Optional[str] = None
+    created_at_a: Optional[str] = None
+    created_at_b: Optional[str] = None

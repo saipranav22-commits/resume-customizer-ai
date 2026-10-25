@@ -1,4 +1,4 @@
-﻿import {
+import {
   TailoredResumeResponse,
   HealthResponse,
   CoverLetterRequest,
@@ -6,7 +6,13 @@
   CustomizationHistoryDetail,
   SaveHistoryRequest,
   UserProfile,
+  FetchHistoryOptions,
+  ForkVersionRequest,
+  UpdateVersionMetadataRequest,
+  CompareVersionsRequest,
+  VersionComparisonResponse,
 } from "@/types/resume";
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -175,11 +181,47 @@ export async function downloadCoverLetterPdf(
   }
 }
 
-// --- Phase 5A: Resume History & Auth API Services ---
+// Helper function to extract user-friendly error messages
+function formatApiError(status: number, errJson?: unknown, defaultMsg: string = ""): string {
+  if (status === 401) return "Your session has expired. Please log in again.";
+  if (status === 403) return "You do not have permission to access or modify this version.";
+  if (status === 404) return "The requested resume version was not found.";
+  if (status === 409) {
+    if (typeof errJson === "object" && errJson !== null && "detail" in errJson) {
+      return String((errJson as { detail: unknown }).detail);
+    }
+    return "A versioning conflict occurred. Please refresh your history.";
+  }
+  if (typeof errJson === "object" && errJson !== null && "detail" in errJson) {
+    const detail = (errJson as { detail: unknown }).detail;
+    if (Array.isArray(detail)) {
+      return detail
+        .map((d: { msg?: string }) => d.msg || JSON.stringify(d))
+        .join(", ");
+    }
+    return String(detail);
+  }
+  return defaultMsg || `Request failed with status ${status}`;
+}
 
-export async function fetchHistory(token: string): Promise<CustomizationHistoryItem[]> {
+// --- Phase 5A & 5B: Resume History & Version Management API Services ---
+
+export async function fetchHistory(
+  token: string,
+  options?: FetchHistoryOptions
+): Promise<CustomizationHistoryItem[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/history`, {
+    const params = new URLSearchParams();
+    if (options?.resume_id) params.append("resume_id", options.resume_id);
+    if (options?.root_id) params.append("root_id", options.root_id);
+    if (options?.is_starred !== undefined) params.append("is_starred", String(options.is_starred));
+    if (options?.tag) params.append("tag", options.tag);
+    if (options?.search) params.append("search", options.search);
+    if (options?.limit !== undefined) params.append("limit", String(options.limit));
+    if (options?.offset !== undefined) params.append("offset", String(options.offset));
+
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    const res = await fetch(`${API_BASE_URL}/api/history${queryString}`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -188,7 +230,11 @@ export async function fetchHistory(token: string): Promise<CustomizationHistoryI
     });
 
     if (!res.ok) {
-      throw new ApiError(`Failed to fetch history (${res.status})`, res.status);
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to load resume history"), res.status);
     }
 
     return await res.json();
@@ -213,7 +259,11 @@ export async function fetchHistoryDetail(
     });
 
     if (!res.ok) {
-      throw new ApiError(`Failed to fetch history detail (${res.status})`, res.status);
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to load history details"), res.status);
     }
 
     return await res.json();
@@ -239,14 +289,11 @@ export async function saveHistory(
     });
 
     if (!res.ok) {
-      let errorMsg = `Save history failed (${res.status})`;
+      let errJson;
       try {
-        const errJson = await res.json();
-        if (errJson.detail) errorMsg = errJson.detail;
-      } catch {
-        // default
-      }
-      throw new ApiError(errorMsg, res.status);
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to save history"), res.status);
     }
 
     return await res.json();
@@ -267,7 +314,11 @@ export async function deleteHistory(token: string, historyId: string): Promise<v
     });
 
     if (!res.ok) {
-      throw new ApiError(`Failed to delete history item (${res.status})`, res.status);
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to delete history item"), res.status);
     }
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
@@ -275,6 +326,138 @@ export async function deleteHistory(token: string, historyId: string): Promise<v
     throw new ApiError(msg, 0);
   }
 }
+
+export async function forkVersion(
+  token: string,
+  versionId: string,
+  payload: ForkVersionRequest
+): Promise<CustomizationHistoryItem> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/${versionId}/fork`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to duplicate resume version"), res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to duplicate resume version";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function updateVersionMetadata(
+  token: string,
+  versionId: string,
+  payload: UpdateVersionMetadataRequest
+): Promise<CustomizationHistoryItem> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/${versionId}`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to update version metadata"), res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to update version metadata";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function compareVersions(
+  token: string,
+  payload: CompareVersionsRequest
+): Promise<VersionComparisonResponse> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/compare`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, "Failed to compare versions"), res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to compare versions";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function downloadVersionExport(
+  token: string,
+  versionId: string,
+  format: "pdf" | "docx" | "txt"
+): Promise<{ blob: Blob; filename: string }> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/history/${versionId}/export/${format}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      let errJson;
+      try {
+        errJson = await res.json();
+      } catch {}
+      throw new ApiError(formatApiError(res.status, errJson, `Export failed with status ${res.status}`), res.status);
+    }
+
+    const blob = await res.blob();
+    let filename = `Resume_v_${versionId.slice(0, 8)}.${format}`;
+    const disposition = res.headers.get("Content-Disposition");
+    if (disposition && disposition.includes("filename=")) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) {
+        filename = match[1];
+      }
+    }
+
+    return { blob, filename };
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to download export file";
+    throw new ApiError(msg, 0);
+  }
+}
+
 
 export async function fetchUserProfile(token: string): Promise<UserProfile> {
   try {
