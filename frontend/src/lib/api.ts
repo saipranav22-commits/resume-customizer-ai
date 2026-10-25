@@ -227,6 +227,7 @@ export async function fetchHistory(
         "Authorization": `Bearer ${token}`,
         "Accept": "application/json",
       },
+      cache: "no-store",
     });
 
     if (!res.ok) {
@@ -256,6 +257,7 @@ export async function fetchHistoryDetail(
         "Authorization": `Bearer ${token}`,
         "Accept": "application/json",
       },
+      cache: "no-store",
     });
 
     if (!res.ok) {

@@ -292,6 +292,66 @@ describe("HistoryDrawer Component", () => {
     );
   });
 
+  it('renaming v2 updates visible version name immediately on card while keeping v1 and family header unchanged', async () => {
+    const user = userEvent.setup();
+    const updatedV2 = {
+      ...sampleHistoryItems[1],
+      version_name: 'Backend Developer - Final Test',
+    };
+    vi.mocked(api.updateVersionMetadata).mockResolvedValueOnce(updatedV2);
+
+    render(
+      <HistoryDrawer
+        isOpen={true}
+        onClose={mockOnClose}
+        onLoadHistory={mockOnLoadHistory}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.0 - Initial Customization')).toBeInTheDocument();
+      expect(screen.getByText('v2.0 - Fintech Emphasis')).toBeInTheDocument();
+      expect(screen.getByText('Senior Backend Role')).toBeInTheDocument();
+    });
+
+    const v2Card = screen.getByText('v2.0 - Fintech Emphasis').closest('.group')!;
+    const editBtn = within(v2Card as HTMLElement).getByTitle('Rename or edit metadata');
+    await user.click(editBtn);
+
+    expect(screen.getByText('Edit Version Metadata')).toBeInTheDocument();
+
+    const versionNameInput = screen.getByDisplayValue('v2.0 - Fintech Emphasis');
+    await user.clear(versionNameInput);
+    await user.type(versionNameInput, 'Backend Developer - Final Test');
+
+    const saveBtn = screen.getByRole('button', { name: /Save Changes/i });
+    await user.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('Backend Developer - Final Test')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Title: Senior Backend Role - Fintech Emphasis')).toBeInTheDocument();
+    expect(screen.getByText('v1.0 - Initial Customization')).toBeInTheDocument();
+    expect(screen.getByText('Title: Senior Backend Role')).toBeInTheDocument();
+    expect(screen.getByText('Senior Backend Role')).toBeInTheDocument();
+    expect(screen.getAllByText('Family').length).toBeGreaterThanOrEqual(1);
+
+    vi.mocked(api.fetchHistory).mockResolvedValueOnce([
+      sampleHistoryItems[0],
+      updatedV2,
+      sampleHistoryItems[2],
+    ]);
+
+    const refreshBtn = screen.getByTitle('Refresh history');
+    await user.click(refreshBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('Backend Developer - Final Test')).toBeInTheDocument();
+      expect(screen.getByText('v1.0 - Initial Customization')).toBeInTheDocument();
+    });
+  });
+
   it("opens delete confirmation and safely deletes version with reparenting notice", async () => {
     const user = userEvent.setup();
     render(

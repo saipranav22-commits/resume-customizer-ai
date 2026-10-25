@@ -316,7 +316,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
       };
 
       const updated = await updateVersionMetadata(token, renamingItem.id, req);
-      setItems((prev) => prev.map((i) => (i.id === renamingItem.id ? updated : i)));
+      setItems((prev) => prev.map((i) => (i.id === renamingItem.id ? { ...i, ...updated } : i)));
       setSuccessMsg("Version metadata updated successfully");
       setRenamingItem(null);
     } catch (err: unknown) {
@@ -405,7 +405,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
   };
 
   const getVersionDisplayName = (item: CustomizationHistoryItem) => {
-    return item.version_name || `Revision v${item.version_number ?? 1}`;
+    return item.version_name?.trim() || item.title?.trim() || `Revision v${item.version_number ?? 1}`;
   };
 
   return (
@@ -615,8 +615,11 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                             </button>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 uppercase tracking-wider font-mono">
+                                  Family
+                                </span>
                                 <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                                  {rootItem?.title || "Revision Family"}
+                                  {rootItem?.title || rootItem?.version_name || "Revision Family"}
                                 </span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300">
                                   {count} {count === 1 ? "version" : "revisions"}
@@ -698,12 +701,19 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         </div>
 
                                         {/* Target Role & Title */}
-                                        {item.target_role && (
-                                          <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                                            <Briefcase className="w-3 h-3 shrink-0" />
-                                            <span className="truncate">{item.target_role}</span>
-                                          </div>
-                                        )}
+                                        <div className="space-y-0.5 mt-0.5">
+                                          {item.target_role && (
+                                            <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                              <Briefcase className="w-3 h-3 shrink-0" />
+                                              <span className="truncate">{item.target_role}</span>
+                                            </div>
+                                          )}
+                                          {item.title && (
+                                            <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 truncate" title={item.title}>
+                                              <span className="truncate">{`Title: ${item.title}`}</span>
+                                            </div>
+                                          )}
+                                        </div>
 
                                         {/* Version Notes */}
                                         {item.version_notes && (
