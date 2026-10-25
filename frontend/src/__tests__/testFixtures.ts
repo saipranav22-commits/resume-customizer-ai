@@ -65,6 +65,56 @@ export const sampleTailoredResume: TailoredResumeResponse = {
   },
   customization_engine: "gemini-2.5-flash",
   is_llm_generated: true,
+  job_analysis: {
+    target_role: "Senior Backend Engineer",
+    required_skills: ["Python", "FastAPI", "PostgreSQL", "Docker", "AWS"],
+    preferred_skills: ["Kubernetes", "Kafka", "Redis"],
+    tools_frameworks: ["FastAPI", "Docker", "PostgreSQL", "AWS", "Kafka"],
+    experience_level: "5+ years",
+    education_requirement: "Bachelor's degree in Computer Science or equivalent",
+    responsibilities: [
+      "Architect and scale backend distributed systems and REST APIs.",
+      "Optimize data pipelines and database query throughput."
+    ],
+    keywords: ["python", "fastapi", "postgresql", "docker", "aws", "kafka"]
+  },
+  match_breakdown: {
+    overall_score: 88,
+    required_skill_score: 100,
+    preferred_skill_score: 66,
+    experience_score: 90,
+    responsibility_score: 85,
+    keyword_score: 83,
+    structure_score: 95,
+    factor_weights: {
+      required_skills: 0.35,
+      preferred_skills: 0.15,
+      experience: 0.20,
+      responsibilities: 0.15,
+      keyword_coverage: 0.10,
+      structure: 0.05
+    },
+    explanation: "High overall match driven by complete required skills coverage and strong role alignment.",
+    disclaimer: "Match scores indicate semantic and structural alignment with the provided job description. They do not simulate or guarantee proprietary ATS screening decisions or employer interview outcomes."
+  },
+  recommendations: [
+    {
+      issue: "Preferred skill 'Kubernetes' not highlighted.",
+      requirement: "Target job lists 'Kubernetes' as preferred experience.",
+      evidence: "No verified mention in resume.",
+      proposed_improvement: "Highlight any hands-on Kubernetes container orchestration experience if authentic.",
+      priority: "medium",
+      requires_user_confirmation: true
+    },
+    {
+      issue: "Resume summary can directly mention target role.",
+      requirement: "Align opening statement with 'Senior Backend Engineer'.",
+      evidence: "Summary focuses on general backend systems.",
+      proposed_improvement: "Explicitly reference Senior Backend Engineer in the executive summary.",
+      priority: "low",
+      requires_user_confirmation: false
+    }
+  ]
 };
 
 export const sampleHistoryItems: CustomizationHistoryItem[] = [

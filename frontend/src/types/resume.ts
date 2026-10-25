@@ -48,6 +48,41 @@ export interface AtsCompatibility {
   improvements: string[];
 }
 
+// --- Phase 5C: Advanced AI Resume Optimization Types ---
+
+export interface JobDescriptionAnalysis {
+  target_role?: string | null;
+  required_skills: string[];
+  preferred_skills: string[];
+  tools_frameworks: string[];
+  experience_level?: string | null;
+  education_requirement?: string | null;
+  responsibilities: string[];
+  keywords: string[];
+}
+
+export interface MatchScoreBreakdown {
+  overall_score: number;
+  required_skill_score: number;
+  preferred_skill_score: number;
+  experience_score: number;
+  responsibility_score: number;
+  keyword_score: number;
+  structure_score: number;
+  factor_weights: Record<string, number>;
+  explanation: string;
+  disclaimer: string;
+}
+
+export interface OptimizationRecommendation {
+  issue: string;
+  requirement: string;
+  evidence: string;
+  proposed_improvement: string;
+  priority: 'high' | 'medium' | 'low';
+  requires_user_confirmation: boolean;
+}
+
 export interface CoverLetterRequest {
   candidate_name: string;
   contact_info: ContactInfo;
@@ -74,6 +109,10 @@ export interface TailoredResumeResponse {
   generated_cover_letter?: string | null;
   is_llm_generated?: boolean;
   customization_engine?: string;
+  // Phase 5C: Explainable Optimization & Analysis Fields
+  job_analysis?: JobDescriptionAnalysis | null;
+  match_breakdown?: MatchScoreBreakdown | null;
+  recommendations?: OptimizationRecommendation[];
 }
 
 export interface HealthResponse {

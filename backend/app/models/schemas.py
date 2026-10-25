@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 class ContactInfo(BaseModel):
@@ -50,6 +50,53 @@ class AtsCompatibility(BaseModel):
     strengths: List[str] = Field(default_factory=list)
     improvements: List[str] = Field(default_factory=list)
 
+# --- Phase 5C: Advanced AI Resume Optimization Schemas ---
+
+class JobDescriptionAnalysis(BaseModel):
+    target_role: Optional[str] = Field(default=None, description="Extracted target job role or title")
+    required_skills: List[str] = Field(default_factory=list, description="Mandatory technical competencies and skills required by JD")
+    preferred_skills: List[str] = Field(default_factory=list, description="Nice-to-have or preferred skills and bonus qualifications")
+    tools_frameworks: List[str] = Field(default_factory=list, description="Specific tools, libraries, frameworks and platforms mentioned")
+    experience_level: Optional[str] = Field(default=None, description="Required experience level or years of experience if specified")
+    education_requirement: Optional[str] = Field(default=None, description="Educational degrees or credential requirements if stated")
+    responsibilities: List[str] = Field(default_factory=list, description="Core responsibilities and duties defined in the role")
+    keywords: List[str] = Field(default_factory=list, description="Important domain keywords and concepts critical for matching")
+
+class MatchScoreBreakdown(BaseModel):
+    overall_score: int = Field(ge=0, le=100)
+    required_skill_score: int = Field(ge=0, le=100, description="Coverage of strictly required skills from the JD")
+    preferred_skill_score: int = Field(ge=0, le=100, description="Coverage of nice-to-have/preferred skills from the JD")
+    experience_score: int = Field(ge=0, le=100, description="Alignment with required seniority and demonstrated roles")
+    responsibility_score: int = Field(ge=0, le=100, description="Demonstrated alignment with role duties and project scopes")
+    keyword_score: int = Field(ge=0, le=100, description="Density and contextual relevance of key industry keywords")
+    structure_score: int = Field(ge=0, le=100, description="Clarity, standard section headings, and ATS-parseability")
+    factor_weights: Dict[str, float] = Field(
+        default_factory=lambda: {
+            "required_skills": 0.35,
+            "preferred_skills": 0.15,
+            "experience": 0.20,
+            "responsibilities": 0.15,
+            "keyword_coverage": 0.10,
+            "structure": 0.05
+        },
+        description="Explicit weights used to calculate the overall score"
+    )
+    explanation: str = Field(description="Transparent explanation of how scores were derived based on verifiable evidence")
+    disclaimer: str = Field(
+        default="Match scores indicate semantic and structural alignment with the provided job description. They do not simulate or guarantee proprietary ATS screening decisions or employer interview outcomes."
+    )
+
+class OptimizationRecommendation(BaseModel):
+    issue: str = Field(description="Description of the identified alignment or phrasing gap")
+    requirement: str = Field(description="The specific JD requirement or standard this addresses")
+    evidence: str = Field(description="Evidence or missing evidence found in the resume")
+    proposed_improvement: str = Field(description="Concrete, actionable improvement adhering to factual truth")
+    priority: str = Field(default="medium", description="Priority level: 'high', 'medium', or 'low'")
+    requires_user_confirmation: bool = Field(
+        default=False,
+        description="True if recommendation involves claims that must be confirmed by the candidate before inclusion"
+    )
+
 class CoverLetterRequest(BaseModel):
     candidate_name: str
     contact_info: ContactInfo
@@ -86,6 +133,19 @@ class TailoredResumeResponse(BaseModel):
     customization_engine: str = Field(
         default="gemini",
         description="Engine used: 'gemini' or 'deterministic_fallback'"
+    )
+    # Phase 5C: Explainable Optimization & Analysis Fields
+    job_analysis: Optional[JobDescriptionAnalysis] = Field(
+        default=None,
+        description="Structured extraction of job description requirements and preferences"
+    )
+    match_breakdown: Optional[MatchScoreBreakdown] = Field(
+        default=None,
+        description="Explainable match score breakdown across tested evaluation factors"
+    )
+    recommendations: List[OptimizationRecommendation] = Field(
+        default_factory=list,
+        description="Prioritized, evidence-grounded recommendations for resume optimization"
     )
 
 class HealthResponse(BaseModel):

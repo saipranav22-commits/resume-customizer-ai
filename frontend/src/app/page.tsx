@@ -100,11 +100,14 @@ export default function Home() {
     setIsSaved(false);
 
     // Progressive step indicator for UX
+    // Stage-based AI processing feedback (Phase 5C)
     const steps = [
-      "Extracting text from uploaded resume...",
-      "Analyzing job description & core requirements...",
-      "Matching candidate qualifications without fabricating credentials...",
-      "Generating ATS-optimized tailored summary and experience bullets...",
+      "Stage 1/6: Reading & validating resume document...",
+      "Stage 2/6: Analyzing job description & extracting criteria...",
+      "Stage 3/6: Evaluating resume alignment & skill coverage...",
+      "Stage 4/6: Generating evidence-grounded improvements...",
+      "Stage 5/6: Validating output & verifying factual integrity...",
+      "Stage 6/6: Preparing explainable optimization results...",
     ];
 
     let stepIndex = 0;
