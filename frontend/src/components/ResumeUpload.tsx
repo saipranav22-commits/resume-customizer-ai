@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState, DragEvent, ChangeEvent } from "react";
 import { UploadCloud, FileText, CheckCircle2, X, AlertTriangle } from "lucide-react";
@@ -85,6 +85,20 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
     }
   };
 
+  const handleLoadSampleResume = async () => {
+    try {
+      const response = await fetch("/sample_resume.pdf");
+      if (!response.ok) {
+        throw new Error("Sample resume could not be retrieved.");
+      }
+      const blob = await response.blob();
+      const sampleFile = new File([blob], "sample_resume.pdf", { type: "application/pdf" });
+      onFileSelect(sampleFile);
+    } catch (err) {
+      console.error("Failed to load sample resume:", err);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
@@ -92,12 +106,25 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
           <span>1. Upload Your Resume</span>
           <span className="text-xs font-normal text-[#64748B]">(PDF or DOCX, max 5MB)</span>
         </label>
-        {file && (
-          <span className="inline-flex items-center gap-1 text-xs text-[#087F66] font-semibold bg-[#DCEDE5] px-2.5 py-0.5 rounded-full">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Ready for Analysis
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {!file && (
+            <button
+              id="load-sample-resume-button"
+              type="button"
+              onClick={handleLoadSampleResume}
+              className="text-xs text-[#087F66] hover:text-[#066350] font-medium flex items-center gap-1 transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Load Sample Resume
+            </button>
+          )}
+          {file && (
+            <span className="inline-flex items-center gap-1 text-xs text-[#087F66] font-semibold bg-[#DCEDE5] px-2.5 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Ready for Analysis
+            </span>
+          )}
+        </div>
       </div>
 
       {!file ? (

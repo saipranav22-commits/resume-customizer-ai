@@ -264,17 +264,17 @@ export default function Home() {
               <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">1</span>
               Upload Resume
             </span>
-            <span className="text-slate-300">?</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="text-[#087F66] flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">2</span>
               Job Description
             </span>
-            <span className="text-slate-300">?</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="text-[#087F66] flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">3</span>
               Preferences
             </span>
-            <span className="text-slate-300">?</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
             <span className="text-[#087F66] flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-[#DCEDE5] text-[#087F66] flex items-center justify-center font-bold text-[11px]">4</span>
               AI Optimize & Export
@@ -413,7 +413,7 @@ export default function Home() {
               <span>Executive Recruiter & Anti-Fabrication Standards</span>
             </div>
             <ul className="space-y-1 pl-4 list-disc text-[11px] leading-relaxed text-[#64748B]">
-              <li>Strict factual accuracy ? no fake companies, degrees, tools, or fabricated metrics.</li>
+              <li>Strict factual accuracy — no fake companies, degrees, tools, or fabricated metrics.</li>
               <li>Missing job keywords are provided as transparent gap recommendations, never invented.</li>
               <li>ReportLab executive PDF & Microsoft Word DOCX formatting standard.</li>
               <li>Persistent revision history secured with Supabase Row Level Security.</li>
@@ -423,7 +423,7 @@ export default function Home() {
 
         {/* 7 - 11: Output Workspace Sections (Rendered sequentially full-width when results exist) */}
         {tailoredResult ? (
-          <section id="workspace-results-section" className="space-y-8 pt-4">
+          <section id="workspace-results-section" className="space-y-8 pt-4 scroll-mt-20">
             {/* Version Family & Lineage Status Bar */}
             <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E2E8E4] shadow-sm flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2.5">

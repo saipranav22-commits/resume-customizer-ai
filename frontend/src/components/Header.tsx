@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -68,7 +68,7 @@ export default function Header({ onOpenHistory }: HeaderProps) {
                   v1.2
                 </span>
               </div>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-xs text-[#64748B] hidden sm:block">
                 Ethical AI-Powered Resume Optimization & ATS Alignment
               </p>
             </div>

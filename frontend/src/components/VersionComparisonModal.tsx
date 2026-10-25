@@ -223,12 +223,12 @@ function VersionComparisonModalContent({
                 </div>
 
                 {/* Version B (Target / Comparison) */}
-                <div className="p-4 rounded-xl border-2 border-[#087F66]/40  bg-blue-50/30 ">
+                <div className="p-4 rounded-xl border-2 border-[#087F66]/40 bg-[#DCEDE5]/25">
                   <div className="flex items-center justify-between mb-2">
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-[#087F66] text-white">
                       Comparing (Version B)
                     </span>
-                    <span className="font-mono text-xs font-bold text-[#087F66] ">
+                    <span className="font-mono text-xs font-bold text-[#087F66]">
                       v{comparison.version_b_number}
                     </span>
                   </div>
@@ -347,14 +347,14 @@ function VersionComparisonModalContent({
                   <div
                     className={`p-4 rounded-xl border ${
                       comparison.summary_changed
-                        ? "bg-blue-50/40  border-[#DCEDE5] "
-                        : "bg-[#F8F7F3] /40 border-[#E2E8E4] /60"
+                        ? "bg-[#DCEDE5]/30 border-[#DCEDE5]"
+                        : "bg-[#F8F7F3] border-[#E2E8E4]"
                     }`}
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#087F66] ">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#087F66]">
                       Comparison Summary (v{comparison.version_b_number})
                     </span>
-                    <p className="mt-2 text-xs leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                    <p className="mt-2 text-xs leading-relaxed text-[#15283B] font-medium">
                       {comparison.summary_b || "(Empty summary)"}
                     </p>
                   </div>

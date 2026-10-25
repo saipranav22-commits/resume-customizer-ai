@@ -371,11 +371,11 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             </h1>
             <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs text-[#64748B]">
               {resume.contact_info.email && <span>{resume.contact_info.email}</span>}
-              {resume.contact_info.phone && <span>? {resume.contact_info.phone}</span>}
-              {resume.contact_info.location && <span>? {resume.contact_info.location}</span>}
+              {resume.contact_info.phone && <span>• {resume.contact_info.phone}</span>}
+              {resume.contact_info.location && <span>• {resume.contact_info.location}</span>}
               {resume.contact_info.linkedin && (
                 <span>
-                  ?{" "}
+                  •{" "}
                   <a
                     href={resume.contact_info.linkedin}
                     target="_blank"
@@ -388,7 +388,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
               )}
               {resume.contact_info.github && (
                 <span>
-                  ?{" "}
+                  •{" "}
                   <a
                     href={resume.contact_info.github}
                     target="_blank"
@@ -499,7 +499,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                   <div key={idx} className="flex items-baseline justify-between text-xs sm:text-sm">
                     <div>
                       <span className="font-semibold text-[#15283B]">{edu.degree}</span>
-                      <span className="text-[#64748B]"> ? {edu.institution}</span>
+                      <span className="text-[#64748B]"> — {edu.institution}</span>
                       {edu.details && <p className="text-xs text-[#64748B] mt-0.5">{edu.details}</p>}
                     </div>
                     {edu.year && <span className="text-xs text-[#64748B] font-mono">{edu.year}</span>}

@@ -425,22 +425,22 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
         <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
           <div className="w-screen max-w-2xl bg-white  border-l border-[#E2E8E4]  shadow-2xl flex flex-col">
             {/* Header */}
-            <div className="p-5 border-b border-[#E2E8E4]  flex items-center justify-between bg-[#F8F7F3] dark:bg-[#F8F7F3]">
+            <div className="p-5 border-b border-[#E2E8E4] flex items-center justify-between bg-[#F8F7F3]">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100  text-[#087F66]  rounded-xl">
+                <div className="p-2 bg-[#DCEDE5] text-[#087F66] rounded-xl">
                   <History className="w-5 h-5" />
                 </div>
                 <div>
                   <h2
                     id="history-drawer-title"
-                    className="text-base font-bold text-[#15283B]  flex items-center gap-2"
+                    className="text-base font-bold text-[#15283B] flex items-center gap-2"
                   >
                     <span>Resume Version History</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#DCEDE5]/40 text-[#087F66] dark:bg-blue-950/60  border border-[#DCEDE5]  font-mono">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[#DCEDE5] text-[#087F66] border border-[#DCEDE5] font-mono font-bold">
                       {items.length} {items.length === 1 ? "version" : "versions"}
                     </span>
                   </h2>
-                  <p className="text-xs text-slate-500 ">
+                  <p className="text-xs text-[#64748B]">
                     {user?.email || "Manage revision families, restore, and compare versions"}
                   </p>
                 </div>
@@ -538,8 +538,8 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                     onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                       selectedTag === tag
-                        ? "bg-[#DCEDE5]/40 dark:bg-blue-950/60 text-[#087F66]  border-blue-300 "
-                        : "bg-[#F8F7F3] /60 text-slate-600  border-[#E2E8E4]  hover:border-slate-300"
+                        ? "bg-[#DCEDE5] text-[#087F66] border-[#087F66]/30 font-semibold"
+                        : "bg-[#F8F7F3] text-[#64748B] border-[#E2E8E4] hover:border-slate-300"
                     }`}
                   >
                     <Tag className="w-3 h-3" />
@@ -621,7 +621,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                 <span className="font-bold text-xs text-[#15283B]  truncate">
                                   {rootItem?.title || rootItem?.version_name || "Revision Family"}
                                 </span>
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100  text-[#087F66] ">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCEDE5] text-[#087F66]">
                                   {count} {count === 1 ? "version" : "revisions"}
                                 </span>
                               </div>
@@ -744,7 +744,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         type="button"
                                         onClick={(e) => handleOpenRenameModal(item, e)}
                                         title="Rename or edit metadata"
-                                        className="p-1.5 text-slate-400 hover:text-[#087F66] dark:hover:text-blue-400 rounded-lg hover:bg-slate-100  transition-colors"
+                                        className="p-1.5 text-slate-400 hover:text-[#087F66] rounded-lg hover:bg-slate-100 transition-colors"
                                       >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
@@ -753,7 +753,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         type="button"
                                         onClick={(e) => handleOpenForkModal(item, e)}
                                         title="Fork / Duplicate version"
-                                        className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-100  transition-colors"
+                                        className="p-1.5 text-slate-400 hover:text-[#087F66] rounded-lg hover:bg-slate-100 transition-colors"
                                       >
                                         <GitFork className="w-3.5 h-3.5" />
                                       </button>
@@ -765,7 +765,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           setConfirmDeleteId(item.id);
                                         }}
                                         title="Delete version"
-                                        className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
+                                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
@@ -780,12 +780,12 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                         <span>{formatDate(item.created_at)}</span>
                                       </div>
                                       {item.ats_score !== undefined && item.ats_score !== null && (
-                                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                        <span className="font-semibold text-[#087F66]">
                                           ATS {item.ats_score}%
                                         </span>
                                       )}
                                       {item.match_score !== undefined && item.match_score !== null && (
-                                        <span className="font-semibold text-[#087F66] ">
+                                        <span className="font-semibold text-[#087F66]">
                                           Match {item.match_score}%
                                         </span>
                                       )}
@@ -793,13 +793,13 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
 
                                     <div className="flex items-center gap-2">
                                       {/* Export Format Dropdown / Buttons */}
-                                      <div className="flex items-center gap-1 border border-[#E2E8E4]  rounded-lg p-0.5 bg-[#F8F7F3] ">
+                                      <div className="flex items-center gap-1 border border-[#E2E8E4] rounded-lg p-0.5 bg-[#F8F7F3]">
                                         <button
                                           type="button"
                                           onClick={(e) => handleExport(item, "pdf", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export PDF"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white dark:hover:bg-slate-700 text-slate-600  transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "pdf" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -812,7 +812,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           onClick={(e) => handleExport(item, "docx", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export DOCX"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white dark:hover:bg-slate-700 text-slate-600  transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "docx" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
@@ -825,7 +825,7 @@ export default function HistoryDrawer({ isOpen, onClose, onLoadHistory }: Histor
                                           onClick={(e) => handleExport(item, "txt", e)}
                                           disabled={downloadingExport?.id === item.id}
                                           title="Export TXT"
-                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white dark:hover:bg-slate-700 text-slate-600  transition-colors disabled:opacity-50"
+                                          className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:bg-white text-slate-600 transition-colors disabled:opacity-50"
                                         >
                                           {downloadingExport?.id === item.id && downloadingExport.format === "txt" ? (
                                             <Loader2 className="w-2.5 h-2.5 animate-spin" />
