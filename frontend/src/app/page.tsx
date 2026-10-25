@@ -11,19 +11,38 @@ import {
   Bookmark,
   Check,
   Loader2,
-  GitBranch
+  GitBranch,
+  Target,
+  Edit3,
+  Layers,
+  FileText,
+  Sliders,
 } from "lucide-react";
 import Header from "@/components/Header";
 import ResumeUpload from "@/components/ResumeUpload";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
-import TailoredResumeView from "@/components/TailoredResumeView";
 import SectionControls from "@/components/SectionControls";
+import OptimizationDashboard from "@/components/OptimizationDashboard";
+import InteractiveResumeEditor from "@/components/InteractiveResumeEditor";
+import DiffView from "@/components/DiffView";
+import CoverLetterView from "@/components/CoverLetterView";
 import HistoryDrawer from "@/components/HistoryDrawer";
 import AuthModal from "@/components/AuthModal";
 import SaveVersionModal from "@/components/SaveVersionModal";
-import { customizeResume, saveHistory } from "@/lib/api";
-import { TailoredResumeResponse, CustomizationHistoryDetail } from "@/types/resume";
+import {
+  customizeResume,
+  saveHistory,
+  downloadExport,
+} from "@/lib/api";
+import {
+  TailoredResumeResponse,
+  CustomizationHistoryDetail,
+  MatchScoreBreakdown,
+  OptimizationRecommendation,
+} from "@/types/resume";
 import { useAuth } from "@/context/AuthContext";
+
+type WorkspaceTab = "editor" | "audit" | "diff" | "cover-letter";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -32,6 +51,9 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState<string>("Analyzing documents...");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tailoredResult, setTailoredResult] = useState<TailoredResumeResponse | null>(null);
+
+  // Active workspace tab
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>("editor");
 
   // Section customization controls
   const [customizeSummary, setCustomizeSummary] = useState<boolean>(true);
@@ -45,7 +67,7 @@ export default function Home() {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
-  // Phase 5B Versioning state
+  // Versioning state
   const [activeVersionId, setActiveVersionId] = useState<string | null>(null);
   const [activeVersionName, setActiveVersionName] = useState<string | null>(null);
   const [activeVersionNumber, setActiveVersionNumber] = useState<number | null>(null);
@@ -97,14 +119,14 @@ export default function Home() {
     setIsLoading(true);
     setIsSaved(false);
 
-    // Progressive step indicator for UX
+    // 6 Meaningful Processing Stages
     const steps = [
-      "Stage 1/6: Reading & validating resume document...",
-      "Stage 2/6: Analyzing job description & extracting criteria...",
-      "Stage 3/6: Evaluating resume alignment & skill coverage...",
-      "Stage 4/6: Generating evidence-grounded improvements...",
-      "Stage 5/6: Validating output & verifying factual integrity...",
-      "Stage 6/6: Preparing explainable optimization results...",
+      "Stage 1/6: Reading & validating candidate resume document...",
+      "Stage 2/6: Parsing job description & extracting key competencies...",
+      "Stage 3/6: Evaluating multi-factor ATS alignment & keyword coverage...",
+      "Stage 4/6: Generating evidence-grounded role optimizations...",
+      "Stage 5/6: Validating factual integrity against source resume...",
+      "Stage 6/6: Finalizing interactive studio workspace...",
     ];
 
     let stepIndex = 0;
@@ -127,10 +149,13 @@ export default function Home() {
       );
       setTailoredResult(result);
       setIsDirty(true);
+      setActiveTab("editor");
       // Smooth scroll to results
       setTimeout(() => {
-        const el = document.getElementById("workspace-results-section");
-        if (el && typeof el.scrollIntoView === "function") { el.scrollIntoView({ behavior: "smooth" }); }
+        const el = document.getElementById("studio-workspace-section");
+        if (el && typeof el.scrollIntoView === "function") {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
       }, 100);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
@@ -145,7 +170,7 @@ export default function Home() {
     if (isDirty && tailoredResult) {
       if (
         !confirm(
-          "You have unsaved changes in your active tailored resume. Resetting the form will discard these changes. Continue?"
+          "You have unsaved changes in your active tailored resume. Resetting will discard these changes. Continue?"
         )
       ) {
         return;
@@ -233,96 +258,233 @@ export default function Home() {
     setActiveVersionNumber(detail.version_number ?? 1);
     setIsDirty(false);
     setIsSaved(true);
-    window.scrollTo({ top: 150, behavior: "smooth" });
+    setActiveTab("editor");
+    setTimeout(() => {
+      const el = document.getElementById("studio-workspace-section");
+      if (el && typeof el.scrollIntoView === "function") {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
   };
 
+  // Sync score updates when user re-checks score in the Interactive Resume Editor
+  const handleScoreUpdated = (
+    updatedScore: number,
+    breakdown: MatchScoreBreakdown,
+    recommendations: OptimizationRecommendation[]
+  ) => {
+    if (!tailoredResult) return;
+    setTailoredResult((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        match_score: updatedScore,
+        match_breakdown: breakdown,
+        recommendations: recommendations,
+        ats_compatibility: {
+          ...prev.ats_compatibility,
+          score: updatedScore,
+        },
+      };
+    });
+  };
+
+  // Direct export handler for current draft
+  const handleExportDraft = async (
+    format: "pdf" | "docx" | "txt",
+    currentDraft: TailoredResumeResponse
+  ) => {
+    try {
+      const result = await downloadExport(currentDraft, format);
+      const url = window.URL.createObjectURL(result.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Export failed";
+      alert(msg);
+    }
+  };
+
+  const atsScoreDisplay = tailoredResult
+    ? tailoredResult.ats_compatibility?.score ?? tailoredResult.match_score ?? 80
+    : 0;
+
   return (
-    <div className="min-h-screen bg-[#F7F2EB] flex flex-col font-sans text-[#291B32]">
-      {/* 1. Header and account controls */}
+    <div className="min-h-screen bg-[#0B101A] text-[#F7F7FA] flex flex-col font-sans selection:bg-[#7C4DFF]/30 selection:text-white studio-mesh-grid">
+      {/* 1. Header and Account Controls */}
       <Header onOpenHistory={() => setIsHistoryDrawerOpen(true)} />
 
-      {/* Primary centered vertical workflow container */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
-        {/* 2. Hero / introduction section */}
-        <section className="text-center max-w-3xl mx-auto pt-2 pb-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-[#E8D9E8]/70 text-[#291B32] border border-[#DDD0D7] mb-4 shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
-            <span>Editorial Career Atelier & Precision AI Optimization</span>
+      {/* Primary Centered Vertical Workflow Container */}
+      <main className="flex-1 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+        {/* 2. Hero Section with Radial Glow and Visual Composition */}
+        <section className="relative text-center max-w-3xl mx-auto pt-6 pb-2">
+          {/* Subtle radial ambient glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#7C4DFF]/15 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 mb-5 shadow-inner">
+            <Sparkles className="w-3.5 h-3.5 text-[#7C4DFF] animate-pulse" />
+            <span>AI Resume Studio & Precision ATS Optimization</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-[#291B32] tracking-tight leading-tight">
-            Elevate Your Resume for Every Target Role
+
+          <h1 className="relative font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#F7F7FA] tracking-tight leading-[1.15]">
+            Engineered for High-Impact Roles.{" "}
+            <span className="bg-gradient-to-r from-[#7C4DFF] via-[#B89AFF] to-[#FDBB83] bg-clip-text text-transparent">
+              Tailored by True AI.
+            </span>
           </h1>
-          <p className="mt-3.5 text-sm sm:text-base text-[#674E61] leading-relaxed max-w-2xl mx-auto font-sans">
-            Powered by FastAPI and Gemini AI. Rephrases experience, matches core skills,
-            and pinpoints missing keywords with strict anti-fabrication standards.
+
+          <p className="relative mt-4 text-sm sm:text-base text-[#B8B9D0] leading-relaxed max-w-2xl mx-auto">
+            Analyze job descriptions against authentic candidate evidence. Align hard skills,
+            enhance experience bullets inline with grounded AI suggestions, and re-check scores in real time.
           </p>
 
+          {/* Quick Jump Action Bar */}
+          <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="#upload-resume-section"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#7C4DFF] hover:bg-[#6940DE] active:bg-[#5933C4] text-white shadow-lg shadow-[#7C4DFF]/25 transition-all"
+            >
+              <span>Get Started</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href="#capabilities-section"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-[#1B2231] hover:bg-[#2C224B]/60 text-[#F7F7FA] border border-[#30384B] hover:border-[#7C4DFF]/50 transition-all"
+            >
+              <Layers className="w-4 h-4 text-[#B89AFF]" />
+              <span>Studio Capabilities</span>
+            </a>
+          </div>
+
           {/* Workflow Sequence Indicator */}
-          <div className="mt-6 inline-flex flex-wrap items-center justify-center gap-2.5 text-xs font-semibold text-[#674E61] bg-white border border-[#DDD0D7] px-4 py-2 rounded-xl shadow-xs">
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">01</span>
+          <div className="relative mt-10 inline-flex flex-wrap items-center justify-center gap-2.5 text-xs font-semibold text-[#B8B9D0] bg-[#111827] border border-[#30384B] px-4 py-2.5 rounded-2xl shadow-md">
+            <span className="text-[#F7F7FA] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#2C224B] text-[#B89AFF] flex items-center justify-center font-bold text-[10px] font-mono border border-[#7C4DFF]/30">
+                01
+              </span>
               <span>Upload Resume</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">02</span>
-              <span>Job Description</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#7C4DFF]/60" />
+            <span className="text-[#F7F7FA] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#2C224B] text-[#B89AFF] flex items-center justify-center font-bold text-[10px] font-mono border border-[#7C4DFF]/30">
+                02
+              </span>
+              <span>Target JD</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">03</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#7C4DFF]/60" />
+            <span className="text-[#F7F7FA] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#2C224B] text-[#B89AFF] flex items-center justify-center font-bold text-[10px] font-mono border border-[#7C4DFF]/30">
+                03
+              </span>
               <span>Preferences</span>
             </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[11px] font-mono">04</span>
-              <span>AI Optimize & Export</span>
+            <ArrowRight className="w-3.5 h-3.5 text-[#7C4DFF]/60" />
+            <span className="text-[#F7F7FA] flex items-center gap-1.5">
+              <span className="w-5 h-5 rounded-full bg-[#2C224B] text-[#B89AFF] flex items-center justify-center font-bold text-[10px] font-mono border border-[#7C4DFF]/30">
+                04
+              </span>
+              <span>Interactive Studio</span>
             </span>
+          </div>
+        </section>
+
+        {/* 3. Product Capability Overview (3 Professional Cards) */}
+        <section id="capabilities-section" className="space-y-4 pt-2">
+          <div className="text-center max-w-xl mx-auto">
+            <h2 className="text-xs uppercase font-mono font-bold tracking-widest text-[#B89AFF]">
+              Commercial-Grade Platform
+            </h2>
+            <p className="font-display text-xl sm:text-2xl font-bold text-[#F7F7FA] mt-1">
+              End-to-End Optimization Architecture
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] hover:border-[#7C4DFF]/50 transition-all group shadow-sm hover:shadow-md">
+              <div className="w-10 h-10 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/30 flex items-center justify-center text-[#7C4DFF] mb-4 group-hover:scale-105 transition-transform">
+                <Target className="w-5 h-5" />
+              </div>
+              <h3 className="font-display text-base font-bold text-[#F7F7FA]">
+                ATS & Alignment Audit
+              </h3>
+              <p className="text-xs text-[#B8B9D0] mt-2 leading-relaxed">
+                6-factor mathematical scoring with granular skill breakdowns, keyword density evaluation, and prioritized gap recommendations.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] hover:border-[#7C4DFF]/50 transition-all group shadow-sm hover:shadow-md">
+              <div className="w-10 h-10 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/30 flex items-center justify-center text-[#7C4DFF] mb-4 group-hover:scale-105 transition-transform">
+                <Edit3 className="w-5 h-5" />
+              </div>
+              <h3 className="font-display text-base font-bold text-[#F7F7FA]">
+                Interactive Studio & AI Improve
+              </h3>
+              <p className="text-xs text-[#B8B9D0] mt-2 leading-relaxed">
+                Inline resume editing with one-click AI bullet enhancement, side-by-side accept/reject suggestions, and live score recalculation.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] hover:border-[#7C4DFF]/50 transition-all group shadow-sm hover:shadow-md">
+              <div className="w-10 h-10 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/30 flex items-center justify-center text-[#7C4DFF] mb-4 group-hover:scale-105 transition-transform">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="font-display text-base font-bold text-[#F7F7FA]">
+                Versioning Hub & Multi-Export
+              </h3>
+              <p className="text-xs text-[#B8B9D0] mt-2 leading-relaxed">
+                Branching revision families backed by Supabase RLS. Generate executive ReportLab PDFs, Word DOCX, and plain text anytime.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Global Error Banner */}
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-[#FDF2F2] border border-[#F5C2C2] text-[#A82A2A] flex items-start gap-3 shadow-xs">
-            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-[#A82A2A]" />
+          <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-800 text-rose-200 flex items-start gap-3 shadow-lg">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-rose-400" />
             <div className="text-sm">
               <p className="font-bold">Customization Error</p>
-              <p className="mt-0.5">{errorMessage}</p>
+              <p className="mt-0.5 text-xs text-rose-300">{errorMessage}</p>
             </div>
           </div>
         )}
 
-        {/* 3. Upload Resume Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
+        {/* 4. Upload Resume Section */}
+        <section id="upload-resume-section" className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-lg space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 uppercase tracking-wider font-mono">
                 Step 1
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
+              <h2 className="font-display text-base sm:text-lg font-bold text-[#F7F7FA]">
                 Upload Candidate Resume
               </h2>
             </div>
-            <span className="text-xs text-[#674E61] hidden sm:inline">
-              Accepts PDF (.pdf) & Word (.docx)
+            <span className="text-xs text-[#B8B9D0] hidden sm:inline">
+              PDF (.pdf) & Word (.docx) supported
             </span>
           </div>
           <ResumeUpload file={file} onFileSelect={setFile} error={null} />
         </section>
 
-        {/* 4. Paste Job Description Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
+        {/* 5. Target Job Description Section */}
+        <section className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-lg space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 uppercase tracking-wider font-mono">
                 Step 2
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
+              <h2 className="font-display text-base sm:text-lg font-bold text-[#F7F7FA]">
                 Target Job Description
               </h2>
             </div>
-            <span className="text-xs text-[#674E61] hidden sm:inline">
-              Extracts requirements & skills
+            <span className="text-xs text-[#B8B9D0] hidden sm:inline">
+              Extracts competencies & required qualifications
             </span>
           </div>
           <JobDescriptionInput
@@ -331,19 +493,19 @@ export default function Home() {
           />
         </section>
 
-        {/* 5. Tailoring Controls Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
+        {/* 6. Customization Preferences Section */}
+        <section className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-lg space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 uppercase tracking-wider font-mono">
                 Step 3
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
+              <h2 className="font-display text-base sm:text-lg font-bold text-[#F7F7FA]">
                 Customization Preferences
               </h2>
             </div>
-            <span className="text-xs text-[#674E61] hidden sm:inline">
-              Select target sections to optimize
+            <span className="text-xs text-[#B8B9D0] hidden sm:inline">
+              Control which sections are tuned by AI
             </span>
           </div>
           <SectionControls
@@ -356,14 +518,14 @@ export default function Home() {
           />
         </section>
 
-        {/* 6. Generate / AI Processing Card */}
-        <section className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
+        {/* 7. Run AI Optimization Section */}
+        <section className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-lg space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] uppercase tracking-wider font-mono">
+              <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 uppercase tracking-wider font-mono">
                 Step 4
               </span>
-              <h2 className="text-base sm:text-lg font-bold text-[#291B32]">
+              <h2 className="font-display text-base sm:text-lg font-bold text-[#F7F7FA]">
                 Run AI Optimization
               </h2>
             </div>
@@ -371,7 +533,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-xs text-[#C45D39] hover:text-[#AF4F2E] hover:underline flex items-center gap-1 font-semibold transition-colors"
+                className="text-xs text-[#FDBB83] hover:text-white flex items-center gap-1 font-semibold transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Reset Form
@@ -384,10 +546,10 @@ export default function Home() {
               id="submit-customize-btn"
               type="submit"
               disabled={!canSubmit}
-              className={`w-full py-4 px-6 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-sm focus-visible:ring-2 focus-visible:ring-[#C45D39] ${
+              className={`w-full py-4 px-6 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg focus-visible:ring-2 focus-visible:ring-[#7C4DFF] ${
                 canSubmit
-                  ? "bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white cursor-pointer hover:shadow-md"
-                  : "bg-[#DDD0D7]/60 text-[#674E61]/60 cursor-not-allowed shadow-none"
+                  ? "bg-[#7C4DFF] hover:bg-[#6940DE] active:bg-[#5933C4] text-white cursor-pointer shadow-[#7C4DFF]/25 hover:shadow-[#7C4DFF]/40"
+                  : "bg-[#1B2231] text-[#B8B9D0]/50 border border-[#30384B] cursor-not-allowed shadow-none"
               }`}
             >
               {isLoading ? (
@@ -406,53 +568,53 @@ export default function Home() {
           </form>
 
           {/* Quality Standards Card */}
-          <div className="p-4 rounded-xl bg-[#F7F2EB]/60 border border-[#DDD0D7] text-xs text-[#674E61] space-y-2">
-            <div className="font-bold text-[#291B32] flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-[#C45D39]" />
-              <span>Executive Recruiter & Anti-Fabrication Standards</span>
+          <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] text-xs text-[#B8B9D0] space-y-2">
+            <div className="font-bold text-[#F7F7FA] flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-[#7C4DFF]" />
+              <span>Anti-Hallucination & Factual Integrity Safeguards</span>
             </div>
-            <ul className="space-y-1 pl-4 list-disc text-[11px] leading-relaxed text-[#674E61]">
-              <li>Strict factual accuracy — no fake companies, degrees, tools, or fabricated metrics.</li>
-              <li>Missing job keywords are provided as transparent gap recommendations, never invented.</li>
-              <li>ReportLab executive PDF & Microsoft Word DOCX formatting standard.</li>
-              <li>Persistent revision history secured with Supabase Row Level Security.</li>
+            <ul className="space-y-1 pl-4 list-disc text-[11px] leading-relaxed text-[#B8B9D0]">
+              <li>Factual verification: Never invents employers, dates, credentials, or metrics.</li>
+              <li>Missing criteria are reported as actionable candidate gaps, not falsely hallucinated.</li>
+              <li>Inline AI Improve suggestions require explicit user acceptance before updating the draft.</li>
+              <li>Version lineage preserves historical snapshots immutably with Supabase RLS.</li>
             </ul>
           </div>
         </section>
 
-        {/* 7 - 11: Output Workspace Sections (Rendered sequentially full-width when results exist) */}
+        {/* 8 - 13: Results Studio Workspace */}
         {tailoredResult ? (
-          <section id="workspace-results-section" className="space-y-8 pt-4 scroll-mt-20">
-            {/* Version Family & Lineage Status Bar */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <section id="studio-workspace-section" className="space-y-6 pt-4 scroll-mt-20">
+            {/* Version Lineage & Status Bar */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-lg flex flex-wrap items-center justify-between gap-4">
               <div className="flex flex-wrap items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#E8D9E8] text-[#291B32]">
+                <div className="p-2 rounded-xl bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30">
                   <GitBranch className="w-4 h-4" />
                 </div>
                 {activeVersionId ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#674E61]">Active:</span>
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7]">
+                    <span className="text-xs text-[#B8B9D0]">Active:</span>
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#1B2231] text-[#F7F7FA] border border-[#30384B]">
                       {activeVersionName}
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#E8D9E8] text-[#291B32]">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-[#2C224B] text-[#B89AFF]">
                       v{activeVersionNumber ?? 1}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs font-bold text-[#291B32]">
-                    New Unsaved Tailored Version
+                  <span className="text-xs font-bold text-[#F7F7FA]">
+                    Draft Resume (Unsaved)
                   </span>
                 )}
 
                 {isDirty ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/60 text-amber-300 border border-amber-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                     <span>Unsaved Modifications</span>
                   </span>
                 ) : activeVersionId ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]">
-                    <Check className="w-3 h-3 text-[#C45D39]" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30">
+                    <Check className="w-3 h-3 text-[#7C4DFF]" />
                     <span>Saved Snapshot (Immutable)</span>
                   </span>
                 ) : null}
@@ -464,7 +626,7 @@ export default function Home() {
                     type="button"
                     onClick={handleDetachActiveVersion}
                     title="Detach from this revision family to save future modifications as an independent root (v1)"
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] border border-[#DDD0D7] transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231] border border-[#30384B] transition-colors"
                   >
                     Detach Family
                   </button>
@@ -474,7 +636,7 @@ export default function Home() {
                   type="button"
                   onClick={handleOpenSaveModal}
                   disabled={isSaving}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#C45D39] hover:bg-[#AF4F2E] active:bg-[#9A4224] text-white shadow-sm transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#7C4DFF] hover:bg-[#6940DE] active:bg-[#5933C4] text-white shadow-sm transition-all"
                 >
                   {isSaving ? (
                     <>
@@ -501,60 +663,147 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Immutable Version Warning Notice */}
             {activeVersionId && isDirty && (
-              <div className="text-xs text-amber-900 bg-amber-50/80 p-3 rounded-xl border border-amber-200">
+              <div className="text-xs text-amber-300 bg-amber-950/40 p-3 rounded-xl border border-amber-800">
                 Active snapshot <strong>{activeVersionName}</strong> is preserved and immutable. Saving creates a new tracked revision without overwriting past history.
               </div>
             )}
 
-            {/* 7 - 11. Full-width Tailored Resume View (Optimization, Document Preview, Diff, Cover Letter, Exports) */}
-            <TailoredResumeView resume={tailoredResult} />
+            {/* Navigation Tabs */}
+            <div className="flex items-center gap-2 border-b border-[#30384B] pb-2 overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setActiveTab("editor")}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 ${
+                  activeTab === "editor"
+                    ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/20"
+                    : "bg-[#111827] text-[#B8B9D0] hover:text-[#F7F7FA] border border-[#30384B] hover:border-[#7C4DFF]/40"
+                }`}
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>Interactive Resume Studio</span>
+                {isDirty && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400" title="Unsaved edits" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("audit")}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 ${
+                  activeTab === "audit"
+                    ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/20"
+                    : "bg-[#111827] text-[#B8B9D0] hover:text-[#F7F7FA] border border-[#30384B] hover:border-[#7C4DFF]/40"
+                }`}
+              >
+                <Target className="w-4 h-4" />
+                <span>ATS & Alignment Audit</span>
+                <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30 font-mono">
+                  {atsScoreDisplay}%
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("diff")}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 ${
+                  activeTab === "diff"
+                    ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/20"
+                    : "bg-[#111827] text-[#B8B9D0] hover:text-[#F7F7FA] border border-[#30384B] hover:border-[#7C4DFF]/40"
+                }`}
+              >
+                <Sliders className="w-4 h-4" />
+                <span>Change Diff Analysis</span>
+              </button>
+
+              {tailoredResult.generated_cover_letter && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("cover-letter")}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shrink-0 ${
+                    activeTab === "cover-letter"
+                      ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/20"
+                      : "bg-[#111827] text-[#B8B9D0] hover:text-[#F7F7FA] border border-[#30384B] hover:border-[#7C4DFF]/40"
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Cover Letter</span>
+                </button>
+              )}
+            </div>
+
+            {/* Tab 1: Interactive Resume Editor */}
+            {activeTab === "editor" && (
+              <InteractiveResumeEditor
+                resumeData={tailoredResult}
+                jobDescription={jobDescription}
+                onSaveVersion={handleOpenSaveModal}
+                onExport={handleExportDraft}
+                onScoreUpdated={handleScoreUpdated}
+              />
+            )}
+
+            {/* Tab 2: ATS & Alignment Audit Dashboard */}
+            {activeTab === "audit" && (
+              <OptimizationDashboard resumeData={tailoredResult} />
+            )}
+
+            {/* Tab 3: Change Diff View */}
+            {activeTab === "diff" && (
+              <DiffView resume={tailoredResult} />
+            )}
+
+            {/* Tab 4: Cover Letter View */}
+            {activeTab === "cover-letter" && tailoredResult.generated_cover_letter && (
+              <CoverLetterView resume={tailoredResult} />
+            )}
           </section>
         ) : (
           /* Placeholder State Before Optimization */
-          <section className="p-8 sm:p-12 rounded-2xl bg-white border border-dashed border-[#DDD0D7] text-center flex flex-col items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-[#E8D9E8] text-[#291B32] flex items-center justify-center mb-4 shadow-xs">
-              <FileCheck2 className="w-7 h-7 text-[#C45D39]" />
+          <section className="p-8 sm:p-12 rounded-2xl bg-[#111827] border border-dashed border-[#30384B] text-center flex flex-col items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-[#2C224B] border border-[#7C4DFF]/30 text-[#7C4DFF] flex items-center justify-center mb-4 shadow-lg">
+              <FileCheck2 className="w-7 h-7" />
             </div>
-            <h3 className="font-editorial text-xl font-bold text-[#291B32]">
-              Your Tailored Resume & Optimization Analysis Will Appear Here
+            <h3 className="font-display text-xl font-bold text-[#F7F7FA]">
+              Interactive Studio & ATS Audit Will Launch Here
             </h3>
-            <p className="mt-1.5 text-xs sm:text-sm text-[#674E61] max-w-lg leading-relaxed">
-              Complete steps 1 through 3 above and click &quot;Tailor Resume for this Job&quot; to review your full-width optimization breakdown, document preview, diff view, and cover letter.
+            <p className="mt-1.5 text-xs sm:text-sm text-[#B8B9D0] max-w-lg leading-relaxed">
+              Complete steps 1 through 3 above and click &quot;Launch Optimization Studio&quot; to inspect your multi-circular score breakdown, edit bullets inline with AI, and download production-ready exports.
             </p>
 
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl text-left">
-              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
-                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
-                  Step 1
+              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B]">
+                <span className="text-[10px] font-bold text-[#7C4DFF] uppercase tracking-wider font-mono">
+                  Phase 1
                 </span>
-                <p className="text-xs font-bold text-[#291B32] mt-1">
-                  PDF / DOCX Parsing
+                <p className="text-xs font-bold text-[#F7F7FA] mt-1 font-display">
+                  PDF & DOCX Extraction
                 </p>
-                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
-                  Extracts authentic candidate history with anti-fabrication standards.
+                <p className="text-[11px] text-[#B8B9D0] mt-1 leading-snug">
+                  Extracts authentic candidate history with strict anti-fabrication standards.
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
-                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
-                  Step 2
+              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B]">
+                <span className="text-[10px] font-bold text-[#7C4DFF] uppercase tracking-wider font-mono">
+                  Phase 2
                 </span>
-                <p className="text-xs font-bold text-[#291B32] mt-1">
-                  LLM Matching & Scoring
+                <p className="text-xs font-bold text-[#F7F7FA] mt-1 font-display">
+                  Explainable ATS Audit
                 </p>
-                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
-                  Multi-factor explainable score breakdown and evidence-grounded suggestions.
+                <p className="text-[11px] text-[#B8B9D0] mt-1 leading-snug">
+                  Multi-circular scoring metrics, keyword coverage, and role alignment insights.
                 </p>
               </div>
-              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
-                <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider">
-                  Step 3
+              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B]">
+                <span className="text-[10px] font-bold text-[#7C4DFF] uppercase tracking-wider font-mono">
+                  Phase 3
                 </span>
-                <p className="text-xs font-bold text-[#291B32] mt-1">
-                  1-Click Export & History
+                <p className="text-xs font-bold text-[#F7F7FA] mt-1 font-display">
+                  Live Studio & Multi-Export
                 </p>
-                <p className="text-[11px] text-[#674E61] mt-1 leading-snug">
-                  Download PDF or DOCX, fork new revisions, and restore past versions.
+                <p className="text-[11px] text-[#B8B9D0] mt-1 leading-snug">
+                  Edit inline, AI-improve text, re-check score, and download PDF or DOCX.
                 </p>
               </div>
             </div>
@@ -562,25 +811,30 @@ export default function Home() {
         )}
       </main>
 
-      {/* 12. Footer */}
-      <footer className="mt-auto border-t border-[#DDD0D7] bg-white py-5 text-center text-xs text-[#674E61]">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-medium text-[#291B32]">Resume Customizer AI Assessment Project</span>
-          <div className="flex items-center gap-3.5 font-medium">
+      {/* 14. Footer */}
+      <footer className="mt-auto border-t border-[#30384B] bg-[#111827] py-6 text-center text-xs text-[#B8B9D0]">
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#7C4DFF]" />
+            <span className="font-semibold text-[#F7F7FA]">Resume Customizer AI Studio</span>
+            <span className="text-[#B8B9D0]/60">· Phase 6.2</span>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-[#B8B9D0]">
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C4DFF]" />
               Next.js 16 App Router
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C4DFF]" />
               FastAPI
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C4DFF]" />
               Gemini AI
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C4DFF]" />
               Supabase Auth & RLS
             </span>
           </div>

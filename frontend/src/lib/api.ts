@@ -11,6 +11,10 @@ import {
   UpdateVersionMetadataRequest,
   CompareVersionsRequest,
   VersionComparisonResponse,
+  ImproveTextRequest,
+  ImproveTextResponse,
+  RecheckScoreRequest,
+  RecheckScoreResponse,
 } from "@/types/resume";
 
 
@@ -479,6 +483,92 @@ export async function fetchUserProfile(token: string): Promise<UserProfile> {
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
     const msg = err instanceof Error ? err.message : "Failed to load user profile";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function improveResumeText(
+  req: ImproveTextRequest,
+  token?: string | null
+): Promise<ImproveTextResponse> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/improve-text`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+    });
+
+    if (!res.ok) {
+      let errorMsg = `Failed to improve text (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson.detail) {
+          errorMsg = Array.isArray(errJson.detail)
+            ? errJson.detail.map((d: { msg?: string }) => d.msg || JSON.stringify(d)).join(", ")
+            : errJson.detail;
+        }
+      } catch {
+        const rawText = await res.text();
+        if (rawText) errorMsg = rawText;
+      }
+      throw new ApiError(errorMsg, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to improve text snippet";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function recheckResumeScore(
+  req: RecheckScoreRequest,
+  token?: string | null
+): Promise<RecheckScoreResponse> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/recheck-score`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(req),
+    });
+
+    if (!res.ok) {
+      let errorMsg = `Failed to recheck score (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson.detail) {
+          errorMsg = Array.isArray(errJson.detail)
+            ? errJson.detail.map((d: { msg?: string }) => d.msg || JSON.stringify(d)).join(", ")
+            : errJson.detail;
+        }
+      } catch {
+        const rawText = await res.text();
+        if (rawText) errorMsg = rawText;
+      }
+      throw new ApiError(errorMsg, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to recheck resume score";
     throw new ApiError(msg, 0);
   }
 }

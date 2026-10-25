@@ -49,21 +49,21 @@ export default function JobDescriptionInput({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
         <label
           htmlFor="job-description-textarea"
-          className="text-sm font-semibold text-[#291B32] flex items-center gap-2"
+          className="text-sm font-semibold text-[#F7F7FA] flex items-center gap-2"
         >
-          <span>2. Paste Job Description</span>
-          <span className="text-xs font-normal text-[#674E61]">(Minimum {minLength} chars)</span>
+          <span>Paste Job Description</span>
+          <span className="text-xs font-normal text-[#B8B9D0]">(Minimum {minLength} chars)</span>
         </label>
         <div className="flex items-center gap-2.5">
           {charCount > 0 && (
             <button
               type="button"
               onClick={handleClear}
-              className="text-xs text-[#674E61] hover:text-[#A82A2A] flex items-center gap-1 transition-colors"
+              className="text-xs text-[#B8B9D0] hover:text-rose-400 flex items-center gap-1 transition-colors"
             >
               <Trash2 className="w-3 h-3" />
               Clear
@@ -73,9 +73,9 @@ export default function JobDescriptionInput({
             id="load-sample-jd-btn"
             type="button"
             onClick={handleLoadSample}
-            className="text-xs text-[#C45D39] hover:text-[#AF4F2E] flex items-center gap-1.5 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39] rounded"
+            className="text-xs text-[#B89AFF] hover:text-[#F7F7FA] flex items-center gap-1.5 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-[#7C4DFF] rounded"
           >
-            <FileCode className="w-3.5 h-3.5" />
+            <FileCode className="w-3.5 h-3.5 text-[#7C4DFF]" />
             Load Sample Role
           </button>
         </div>
@@ -88,35 +88,35 @@ export default function JobDescriptionInput({
           value={value}
           onChange={handleChange}
           placeholder="Paste the full job description here (responsibilities, required qualifications, technical stack, etc.)..."
-          className={`w-full rounded-2xl border p-4 text-sm text-[#291B32] placeholder:text-[#674E61]/60 bg-[#F7F2EB]/50 focus:bg-white focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
+          className={`w-full rounded-2xl border p-4 text-sm text-[#F7F7FA] placeholder:text-[#B8B9D0]/50 bg-[#0B101A] focus:bg-[#111827] focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
             error
-              ? "border-[#F5C2C2] focus:ring-[#A82A2A]/20"
+              ? "border-rose-500/50 focus:ring-rose-500/20"
               : isSatisfied
-              ? "border-[#DDD0D7] focus:border-[#C45D39] focus:ring-[#C45D39]/20"
-              : "border-[#DDD0D7] focus:border-[#C45D39] focus:ring-[#C45D39]/20"
+              ? "border-[#30384B] focus:border-[#7C4DFF] focus:ring-[#7C4DFF]/20"
+              : "border-[#30384B] focus:border-[#7C4DFF] focus:ring-[#7C4DFF]/20"
           }`}
         />
         <div className="flex items-center justify-between px-1 text-xs mt-1.5">
           <div className="flex items-center gap-1.5">
             {isSatisfied ? (
-              <span className="text-[#291B32] flex items-center gap-1.5 font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#C45D39]" />
+              <span className="text-[#B89AFF] flex items-center gap-1.5 font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#7C4DFF]" />
                 Job description verified ({charCount} characters)
               </span>
             ) : charCount > 0 ? (
-              <span className="text-[#B85C2A] font-medium">
+              <span className="text-amber-300 font-medium">
                 Needs {minLength - charCount} more characters for thorough analysis
               </span>
             ) : (
-              <span className="text-[#674E61]">Please provide target job description</span>
+              <span className="text-[#B8B9D0]">Please provide target job description</span>
             )}
           </div>
-          <span className="text-[#674E61] font-mono">{charCount} chars</span>
+          <span className="text-[#B8B9D0] font-mono">{charCount} chars</span>
         </div>
       </div>
 
       {error && (
-        <p className="text-xs text-[#A82A2A] bg-[#FDF2F2] p-2.5 rounded-lg border border-[#F5C2C2]">{error}</p>
+        <p className="text-xs text-rose-300 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/30">{error}</p>
       )}
     </div>
   );

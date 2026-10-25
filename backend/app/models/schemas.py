@@ -292,3 +292,35 @@ class VersionComparisonResponse(BaseModel):
     title_b: Optional[str] = None
     created_at_a: Optional[str] = None
     created_at_b: Optional[str] = None
+
+
+# --- Phase 6.2: Interactive Editor, AI Improve & Live Re-check Schemas ---
+
+class ImproveTextRequest(BaseModel):
+    text: str = Field(..., min_length=5, max_length=2000, description="The original text to improve")
+    section_type: str = Field(default="experience", description="Section type: 'summary', 'experience', 'project'")
+    job_description: str = Field(..., min_length=20, description="Target job description for alignment")
+    context: Optional[str] = Field(default=None, description="Optional surrounding context like role, company, or technologies")
+
+class ImproveTextResponse(BaseModel):
+    original_text: str
+    improved_text: str
+    rationale: str
+    impact_keywords: List[str] = Field(default_factory=list)
+    is_llm_generated: bool = True
+
+class RecheckScoreRequest(BaseModel):
+    resume_data: TailoredResumeResponse = Field(..., description="The current working draft resume")
+    job_description: str = Field(..., min_length=20, description="Target job description")
+    previous_score: Optional[int] = Field(default=None, ge=0, le=100, description="Previous overall match score")
+    previous_breakdown: Optional[MatchScoreBreakdown] = Field(default=None, description="Previous score breakdown for delta calculations")
+
+class RecheckScoreResponse(BaseModel):
+    match_score: int = Field(ge=0, le=100)
+    ats_compatibility: AtsCompatibility
+    match_breakdown: MatchScoreBreakdown
+    recommendations: List[OptimizationRecommendation] = Field(default_factory=list)
+    missing_keywords: List[MissingKeywordSuggestion] = Field(default_factory=list)
+    score_delta: int = Field(default=0, description="Difference between new score and previous score")
+    factor_deltas: Dict[str, int] = Field(default_factory=dict, description="Per-factor score deltas")
+    is_stale: bool = False

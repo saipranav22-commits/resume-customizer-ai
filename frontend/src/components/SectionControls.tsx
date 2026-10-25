@@ -23,24 +23,24 @@ export default function SectionControls({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-2xl border border-[#DDD0D7] bg-[#F7F2EB]/50 overflow-hidden transition-all">
+    <div className="rounded-2xl border border-[#30384B] bg-[#111827] overflow-hidden transition-all">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39]"
+        className="w-full px-4 py-3.5 flex items-center justify-between text-left text-xs font-semibold text-[#F7F7FA] hover:bg-[#1B2231] transition-colors focus-visible:ring-2 focus-visible:ring-[#7C4DFF]"
       >
         <span className="flex items-center gap-2">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-[#C45D39]" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-[#7C4DFF]" />
           <span>Section-Wise Customization Preferences</span>
         </span>
-        <span className="text-[#674E61]">
-          {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-[#674E61]" />}
+        <span className="text-[#B8B9D0]">
+          {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-[#B8B9D0]" />}
         </span>
       </button>
 
       {isOpen && (
-        <div className="p-4 pt-2 space-y-3.5 border-t border-[#DDD0D7] text-xs bg-white">
-          <p className="text-[11px] text-[#674E61]">
+        <div className="p-4 pt-2 space-y-3.5 border-t border-[#30384B] text-xs bg-[#0B101A]/60">
+          <p className="text-[11px] text-[#B8B9D0]">
             Select which resume sections should be optimized. Unchecked sections will retain their original verbatim text.
           </p>
 
@@ -51,13 +51,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeSummary}
                 onChange={(e) => setCustomizeSummary(e.target.checked)}
-                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
+                className="mt-0.5 rounded text-[#7C4DFF] focus:ring-[#7C4DFF] accent-[#7C4DFF] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#291B32]">
+                <span className="font-semibold text-[#F7F7FA]">
                   Tailor Professional Summary
                 </span>
-                <p className="text-[11px] text-[#674E61]">
+                <p className="text-[11px] text-[#B8B9D0]">
                   Craft an executive pitch aligned specifically with the target role.
                 </p>
               </div>
@@ -69,13 +69,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeSkills}
                 onChange={(e) => setCustomizeSkills(e.target.checked)}
-                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
+                className="mt-0.5 rounded text-[#7C4DFF] focus:ring-[#7C4DFF] accent-[#7C4DFF] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#291B32]">
+                <span className="font-semibold text-[#F7F7FA]">
                   Align Core Skills & Match Keywords
                 </span>
-                <p className="text-[11px] text-[#674E61]">
+                <p className="text-[11px] text-[#B8B9D0]">
                   Highlight candidate qualifications matching the JD while isolating missing gaps.
                 </p>
               </div>
@@ -87,13 +87,13 @@ export default function SectionControls({
                 type="checkbox"
                 checked={customizeExperience}
                 onChange={(e) => setCustomizeExperience(e.target.checked)}
-                className="mt-0.5 rounded text-[#C45D39] focus:ring-[#C45D39] accent-[#C45D39] h-4 w-4"
+                className="mt-0.5 rounded text-[#7C4DFF] focus:ring-[#7C4DFF] accent-[#7C4DFF] h-4 w-4"
               />
               <div>
-                <span className="font-semibold text-[#291B32]">
+                <span className="font-semibold text-[#F7F7FA]">
                   Rephrase Experience Bullets
                 </span>
-                <p className="text-[11px] text-[#674E61]">
+                <p className="text-[11px] text-[#B8B9D0]">
                   Enhance bullet points with action verbs and impact metrics while preserving factual accuracy.
                 </p>
               </div>

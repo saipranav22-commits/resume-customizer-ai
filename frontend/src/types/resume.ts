@@ -247,3 +247,38 @@ export interface VersionComparisonResponse {
   created_at_a?: string | null;
   created_at_b?: string | null;
 }
+
+// --- Phase 6.2: Interactive Editor, AI Improve & Re-check Types ---
+
+export interface ImproveTextRequest {
+  text: string;
+  section_type: 'summary' | 'experience' | 'project';
+  job_description: string;
+  context?: string | null;
+}
+
+export interface ImproveTextResponse {
+  original_text: string;
+  improved_text: string;
+  rationale: string;
+  impact_keywords: string[];
+  is_llm_generated: boolean;
+}
+
+export interface RecheckScoreRequest {
+  resume_data: TailoredResumeResponse;
+  job_description: string;
+  previous_score?: number | null;
+  previous_breakdown?: MatchScoreBreakdown | null;
+}
+
+export interface RecheckScoreResponse {
+  match_score: number;
+  ats_compatibility: AtsCompatibility;
+  match_breakdown: MatchScoreBreakdown;
+  recommendations: OptimizationRecommendation[];
+  missing_keywords: MissingKeywordSuggestion[];
+  score_delta: number;
+  factor_deltas: Record<string, number>;
+  is_stale: boolean;
+}

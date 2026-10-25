@@ -15,6 +15,9 @@ from app.models.schemas import (
     SkillsCategorized,
     MissingKeywordSuggestion,
     AtsCompatibility,
+    ImproveTextResponse,
+    RecheckScoreResponse,
+    MatchScoreBreakdown,
 )
 from app.services.optimization_engine import (
     COMMON_TECH_SKILLS,
@@ -445,3 +448,242 @@ Remember: Return ONLY valid JSON adhering strictly to the schema. Do not include
             customize_skills=customize_skills,
             customize_experience=customize_experience
         )
+
+
+def improve_text_deterministic(
+    text: str,
+    section_type: str,
+    job_description: str,
+    context: Optional[str] = None
+) -> ImproveTextResponse:
+    """High-quality deterministic text enhancer preserving factual evidence."""
+    cleaned = text.strip()
+    jd_lower = job_description.lower()
+    
+    # Extract keywords from JD that might be relevant
+    relevant_keywords = []
+    for kw in COMMON_TECH_SKILLS:
+        if kw in jd_lower and kw not in cleaned.lower():
+            relevant_keywords.append(kw.title() if len(kw) > 3 else kw.upper())
+            if len(relevant_keywords) >= 2:
+                break
+                
+    weak_verbs = [
+        (r'(?i)\bresponsible for\b', 'Spearheaded'),
+        (r'(?i)\bworked on\b', 'Engineered and delivered'),
+        (r'(?i)\bhelped with\b', 'Collaborated on the development of'),
+        (r'(?i)\bassisted in\b', 'Contributed to the implementation of'),
+        (r'(?i)\btasked with\b', 'Orchestrated'),
+        (r'(?i)\bhandled\b', 'Managed and optimized'),
+        (r'(?i)\bdid\b', 'Executed and enhanced'),
+    ]
+    
+    improved = cleaned
+    verb_replaced = False
+    for pattern, replacement in weak_verbs:
+        if re.search(pattern, improved):
+            improved = re.sub(pattern, replacement, improved, count=1)
+            verb_replaced = True
+            break
+            
+    if not verb_replaced:
+        first_word = improved.split()[0] if improved.split() else ""
+        if first_word.lower() in ["i", "my", "we", "the"]:
+            improved = " ".join(improved.split()[1:])
+        if not re.match(r'^[A-Z][a-z]+ed\b', improved) and not re.match(r'^[A-Z][a-z]+t\b', improved):
+            improved = f"Delivered and enhanced {improved[0].lower() + improved[1:]}" if len(improved) > 1 else improved
+
+    if not improved.endswith('.'):
+        improved += '.'
+
+    rationale = (
+        "Replaced passive phrasing with strong technical ownership verbs to elevate recruiter impact "
+        "and improve keyword alignment while strictly preserving factual accomplishments."
+    )
+    
+    return ImproveTextResponse(
+        original_text=text,
+        improved_text=improved,
+        rationale=rationale,
+        impact_keywords=relevant_keywords,
+        is_llm_generated=False
+    )
+
+
+async def improve_text_snippet(
+    text: str,
+    section_type: str,
+    job_description: str,
+    context: Optional[str] = None
+) -> ImproveTextResponse:
+    """Enhance a specific resume text snippet using Gemini AI with fallback."""
+    api_key = settings.GEMINI_API_KEY.strip()
+    if not api_key:
+        return improve_text_deterministic(text, section_type, job_description, context)
+
+    safe_text = sanitize_untrusted_input(text)
+    safe_jd = sanitize_untrusted_input(job_description[:1500])
+    safe_ctx = sanitize_untrusted_input(context or "")
+
+    prompt = f"""
+You are an expert executive resume writer and ATS optimization specialist.
+Improve this single resume snippet ({section_type}) to maximize ATS readability and recruiter impact for the target role.
+
+STRICT ACCURACY RULES:
+1. STRICT TRUTHFULNESS: Do NOT invent metrics (e.g. percentages, dollar amounts, headcounts) unless already present in the original snippet.
+2. PRESERVE FACTUAL GROUNDING: Keep the candidate's actual responsibilities, tools, and achievements. Do not invent companies, degrees, or tools.
+3. USE POWER VERBS: Begin with a strong action verb (e.g., Architected, Spearheaded, Engineered, Optimized, Streamlined).
+4. CONCISE & PROFESSIONAL: Eliminate filler words and passive voice.
+
+CONTEXT: {safe_ctx}
+
+ORIGINAL TEXT:
+"{safe_text}"
+
+TARGET JOB DESCRIPTION REQUIREMENTS:
+{safe_jd}
+
+Respond strictly with a valid JSON object matching this schema:
+{{
+  "improved_text": "Polished, impactful version of the original text",
+  "rationale": "1-2 sentence explanation of why this wording improves alignment and clarity",
+  "impact_keywords": ["keyword1", "keyword2"]
+}}
+"""
+    try:
+        raw_output = await call_gemini_api(prompt, api_key, settings.LLM_MODEL)
+        parsed = extract_json_from_response(raw_output)
+        improved_text = str(parsed.get("improved_text", "")).strip() or text
+        rationale = str(parsed.get("rationale", "Enhanced for clarity and active technical phrasing.")).strip()
+        impact_keywords = parsed.get("impact_keywords", [])
+        if not isinstance(impact_keywords, list):
+            impact_keywords = []
+
+        return ImproveTextResponse(
+            original_text=text,
+            improved_text=improved_text,
+            rationale=rationale,
+            impact_keywords=[str(k) for k in impact_keywords[:5]],
+            is_llm_generated=True
+        )
+    except Exception as e:
+        logger.warning(f"AI Improve failed: {str(e)}. Falling back to deterministic enhancer.")
+        return improve_text_deterministic(text, section_type, job_description, context)
+
+
+def recheck_draft_score(
+    resume_data: TailoredResumeResponse,
+    job_description: str,
+    previous_score: Optional[int] = None,
+    previous_breakdown: Optional[MatchScoreBreakdown] = None
+) -> RecheckScoreResponse:
+    """
+    Deterministically re-evaluate the working draft resume against the target JD:
+    - Reconstructs plain-text resume representation from working draft.
+    - Runs exact same explainable scoring engine.
+    - Calculates overall delta and per-factor deltas.
+    - Updates recommendations and missing keywords.
+    """
+    # 1. Reconstruct text from draft
+    parts = []
+    parts.append(f"Name: {resume_data.candidate_name}")
+    parts.append(f"Summary: {resume_data.tailored_summary}")
+    
+    all_skills = resume_data.skills.matching_skills + resume_data.skills.additional_skills
+    parts.append(f"Skills: {', '.join(all_skills)}")
+    
+    parts.append("Experience:")
+    for exp in resume_data.experience:
+        parts.append(f"{exp.role} at {exp.company} ({exp.duration or ''})")
+        for bullet in exp.bullets:
+            parts.append(f"- {bullet}")
+            
+    if resume_data.education:
+        parts.append("Education:")
+        for edu in resume_data.education:
+            parts.append(f"{edu.degree} from {edu.institution} ({edu.year or ''})")
+            
+    if resume_data.projects:
+        parts.append("Projects:")
+        for proj in resume_data.projects:
+            tech_str = f" ({', '.join(proj.technologies)})" if proj.technologies else ""
+            parts.append(f"Project: {proj.name}{tech_str}")
+            for b in proj.bullets:
+                parts.append(f"- {b}")
+                
+    if resume_data.certifications:
+        parts.append(f"Certifications: {', '.join(resume_data.certifications)}")
+        
+    reconstructed_text = "\n".join(parts)
+    
+    # 2. Analyze JD
+    jd_analysis = analyze_job_description_deterministic(job_description)
+    
+    # 3. Calculate match score breakdown
+    match_breakdown = calculate_explainable_match(
+        reconstructed_text,
+        jd_analysis,
+        all_skills
+    )
+    
+    # 4. Update missing keywords
+    resume_lower = reconstructed_text.lower()
+    missing_suggestions = []
+    for skill in jd_analysis.required_skills + jd_analysis.preferred_skills:
+        if not re.search(r'\b' + re.escape(skill.lower()) + r'\b', resume_lower):
+            missing_suggestions.append(MissingKeywordSuggestion(
+                keyword=skill,
+                category="Technical Requirement",
+                context=f"The job description highlights {skill} as a key qualification.",
+                recommendation=f"If you have experience with {skill}, add it to your skills or experience bullets."
+            ))
+            if len(missing_suggestions) >= 6:
+                break
+                
+    # 5. Generate fresh recommendations
+    recommendations = generate_optimization_recommendations(
+        reconstructed_text,
+        jd_analysis,
+        all_skills,
+        missing_suggestions
+    )
+    
+    # 6. Calculate deltas
+    base_prev = previous_score if previous_score is not None else (
+        previous_breakdown.overall_score if previous_breakdown else match_breakdown.overall_score
+    )
+    score_delta = match_breakdown.overall_score - base_prev
+    
+    factor_deltas = {}
+    if previous_breakdown:
+        factor_deltas = {
+            "required_skills": match_breakdown.required_skill_score - previous_breakdown.required_skill_score,
+            "preferred_skills": match_breakdown.preferred_skill_score - previous_breakdown.preferred_skill_score,
+            "experience": match_breakdown.experience_score - previous_breakdown.experience_score,
+            "responsibilities": match_breakdown.responsibility_score - previous_breakdown.responsibility_score,
+            "keyword_coverage": match_breakdown.keyword_score - previous_breakdown.keyword_score,
+            "structure": match_breakdown.structure_score - previous_breakdown.structure_score,
+        }
+        
+    ats_compatibility = AtsCompatibility(
+        score=min(98, max(40, match_breakdown.overall_score + 3)),
+        strengths=[
+            f"Demonstrates alignment on {len(all_skills)} relevant technical competencies",
+            "Structured experience bullets with clear functional ownership",
+            "Clear section layout compatible with standard ATS parsers"
+        ],
+        improvements=[
+            f"Consider addressing {len(missing_suggestions)} missing keywords in your portfolio or interview preparation"
+        ] if missing_suggestions else ["Excellent keyword coverage across target requirements."]
+    )
+    
+    return RecheckScoreResponse(
+        match_score=match_breakdown.overall_score,
+        ats_compatibility=ats_compatibility,
+        match_breakdown=match_breakdown,
+        recommendations=recommendations,
+        missing_keywords=missing_suggestions,
+        score_delta=score_delta,
+        factor_deltas=factor_deltas,
+        is_stale=False
+    )

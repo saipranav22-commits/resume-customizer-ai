@@ -14,6 +14,10 @@ from app.models.schemas import (
     UpdateVersionMetadataRequest,
     CompareVersionsRequest,
     VersionComparisonResponse,
+    ImproveTextRequest,
+    ImproveTextResponse,
+    RecheckScoreRequest,
+    RecheckScoreResponse,
 )
 from app.services.auth import (
     AuthenticatedUser,
@@ -23,7 +27,11 @@ from app.services.auth import (
 )
 from app.services.history_service import history_service
 from app.services.parser import validate_and_extract_resume
-from app.services.customizer import customize_resume
+from app.services.customizer import (
+    customize_resume,
+    improve_text_snippet,
+    recheck_draft_score,
+)
 from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
 
 router = APIRouter(prefix="/api", tags=["Resume Customization"])
@@ -97,6 +105,77 @@ async def customize_resume_endpoint(
         customize_experience=customize_experience
     )
     return tailored_result
+
+
+@router.post("/improve-text", response_model=ImproveTextResponse)
+async def improve_text_endpoint(
+    req: ImproveTextRequest,
+    current_user: Optional[AuthenticatedUser] = Depends(get_current_user_optional)
+):
+    """
+    Phase 6.2: Grounded AI text improvement for interactive resume editor:
+    - Analyzes a selected summary, experience bullet, or project bullet.
+    - Rewrites phrasing using powerful technical verbs aligned with target JD.
+    - Strictly preserves verified accomplishments and factual integrity.
+    - Returns improved text, rationale, and integrated keywords.
+    """
+    if not req.text.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Text snippet to improve cannot be empty."
+        )
+    if not req.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Target job description is required to perform contextual alignment."
+        )
+
+    try:
+        result = await improve_text_snippet(
+            text=req.text.strip(),
+            section_type=req.section_type,
+            job_description=req.job_description.strip(),
+            context=req.context
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to improve text snippet: {str(e)}"
+        )
+
+
+@router.post("/recheck-score", response_model=RecheckScoreResponse)
+def recheck_score_endpoint(
+    req: RecheckScoreRequest,
+    current_user: Optional[AuthenticatedUser] = Depends(get_current_user_optional)
+):
+    """
+    Phase 6.2: Deterministic re-check of working draft score:
+    - Evaluates the edited draft against target JD using exact same tested scoring methodology.
+    - Computes overall delta and factor-by-factor deltas.
+    - Returns updated recommendations and missing keywords.
+    """
+    if not req.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Target job description is required for score evaluation."
+        )
+
+    try:
+        result = recheck_draft_score(
+            resume_data=req.resume_data,
+            job_description=req.job_description.strip(),
+            previous_score=req.previous_score,
+            previous_breakdown=req.previous_breakdown
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to recheck resume score: {str(e)}"
+        )
+
 
 @router.post("/export/pdf")
 def export_pdf_endpoint(resume_data: TailoredResumeResponse):

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Newsreader } from "next/font/google";
+import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -13,24 +13,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-editorial-serif",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Resume Customizer AI — Career Atelier & Precision Optimization",
-  description: "Editorial-grade career narrative optimization powered by FastAPI and Gemini AI. Anti-fabrication verification, transparent ATS analysis, and publication-ready documents.",
+  title: "Resume Customizer AI — Premium AI Resume Studio",
+  description: "Commercial-grade AI resume studio powered by FastAPI and Gemini AI. Real-time ATS compatibility scoring, interactive inline resume editing, explainable matching analysis, and multi-version management.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#F7F2EB] text-[#291B32] font-sans selection:bg-[#E8D9E8] selection:text-[#291B32]">
+      <body className="min-h-full flex flex-col bg-[#0B101A] text-[#F7F7FA] font-sans selection:bg-[#2C224B] selection:text-[#B89AFF]">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
