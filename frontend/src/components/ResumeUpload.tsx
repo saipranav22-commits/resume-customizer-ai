@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState, DragEvent, ChangeEvent } from "react";
 import { UploadCloud, FileText, CheckCircle2, X, AlertTriangle } from "lucide-react";
@@ -88,12 +88,12 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+        <label className="text-sm font-semibold text-[#15283B] flex items-center gap-2">
           <span>1. Upload Your Resume</span>
-          <span className="text-xs font-normal text-slate-500">(PDF or DOCX, max 5MB)</span>
+          <span className="text-xs font-normal text-[#64748B]">(PDF or DOCX, max 5MB)</span>
         </label>
         {file && (
-          <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+          <span className="inline-flex items-center gap-1 text-xs text-[#087F66] font-semibold bg-[#DCEDE5] px-2.5 py-0.5 rounded-full">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Ready for Analysis
           </span>
@@ -107,10 +107,10 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`cursor-pointer border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+          className={`cursor-pointer border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-all ${
             isDragging
-              ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 scale-[1.01]"
-              : "border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60"
+              ? "border-[#087F66] bg-[#DCEDE5]/30 scale-[1.01]"
+              : "border-[#E2E8E4] hover:border-[#087F66] bg-[#F8F7F3]/70 hover:bg-[#F8F7F3]"
           }`}
         >
           <input
@@ -122,31 +122,31 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             className="hidden"
           />
           <div className="flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#DCEDE5] text-[#087F66] flex items-center justify-center shadow-xs">
               <UploadCloud className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+              <p className="text-sm font-semibold text-[#15283B]">
                 Click to browse or drag and drop your resume
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Supports Adobe PDF (.pdf) and Microsoft Word (.docx)
+              <p className="text-xs text-[#64748B] mt-1">
+                Executive Adobe PDF (.pdf) and Microsoft Word (.docx)
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#DCEDE5] bg-[#DCEDE5]/25">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-[#087F66] text-white flex items-center justify-center shrink-0 shadow-xs">
               <FileText className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-semibold text-[#15283B] truncate">
                 {file.name}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {formatFileSize(file.size)} • {file.name.endsWith(".pdf") ? "PDF Document" : "Word Document"}
+              <p className="text-xs text-[#64748B]">
+                {formatFileSize(file.size)} · {file.name.endsWith(".pdf") ? "PDF Document" : "Word Document"}
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             id="remove-resume-button"
             type="button"
             onClick={handleRemove}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#15283B] hover:bg-white transition-colors"
             title="Remove and select different file"
           >
             <X className="w-5 h-5" />
@@ -163,8 +163,8 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
       )}
 
       {(validationError || error) && (
-        <div className="flex items-center gap-2 p-3 text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-lg">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2 p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-lg">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
           <span>{validationError || error}</span>
         </div>
       )}

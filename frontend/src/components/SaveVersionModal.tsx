@@ -106,23 +106,23 @@ function SaveVersionModalContent({
       role="dialog"
       aria-modal="true"
       aria-labelledby="save-version-modal-title"
-      className="fixed inset-0 z-60 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-60 overflow-y-auto bg-[#15283B]/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
     >
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg bg-white border border-[#E2E8E4] rounded-2xl shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between">
+        <div className="p-5 border-b border-[#E2E8E4] bg-[#F8F7F3] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 rounded-xl">
+            <div className="p-2.5 bg-[#DCEDE5] text-[#087F66] rounded-xl">
               <Bookmark className="w-5 h-5" />
             </div>
             <div>
               <h2
                 id="save-version-modal-title"
-                className="text-base font-bold text-slate-900 dark:text-white"
+                className="text-base font-bold text-[#15283B]"
               >
                 Save Resume Version
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-[#64748B]">
                 Snapshots are immutable. Saving creates a new tracked revision.
               </p>
             </div>
@@ -132,7 +132,7 @@ function SaveVersionModalContent({
             onClick={onClose}
             disabled={isSaving}
             aria-label="Close save dialog"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#15283B] hover:bg-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -141,8 +141,8 @@ function SaveVersionModalContent({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           {error && (
-            <div className="flex items-center gap-2 p-3 text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2 p-3 text-rose-800 bg-rose-50 border border-rose-200 rounded-xl">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -150,7 +150,7 @@ function SaveVersionModalContent({
           {/* Lineage Choice (if active version exists) */}
           {activeVersionId && (
             <div className="space-y-2">
-              <label className="block font-bold text-slate-800 dark:text-slate-200">
+              <label className="block font-bold text-[#15283B]">
                 Revision Lineage Choice
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -158,19 +158,19 @@ function SaveVersionModalContent({
                 <button
                   type="button"
                   onClick={() => setSaveMode("child")}
-                  className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                  className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all ${
                     saveMode === "child"
-                      ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/40 ring-2 ring-blue-500/20"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                      ? "border-[#087F66] bg-[#DCEDE5]/35 ring-2 ring-[#087F66]/20"
+                      : "border-[#E2E8E4] bg-white hover:border-[#087F66]/40 hover:bg-[#F8F7F3]"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <GitBranch className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span className="font-bold text-slate-900 dark:text-white">
+                    <GitBranch className="w-4 h-4 text-[#087F66] shrink-0" />
+                    <span className="font-bold text-[#15283B]">
                       Child Revision
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                  <p className="text-[11px] text-[#64748B] leading-snug">
                     Branch from active snapshot (v{activeVersionNumber ?? 1}) in the current family.
                   </p>
                 </button>
@@ -179,28 +179,28 @@ function SaveVersionModalContent({
                 <button
                   type="button"
                   onClick={() => setSaveMode("new_root")}
-                  className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                  className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all ${
                     saveMode === "new_root"
-                      ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/40 ring-2 ring-blue-500/20"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                      ? "border-[#087F66] bg-[#DCEDE5]/35 ring-2 ring-[#087F66]/20"
+                      : "border-[#E2E8E4] bg-white hover:border-[#087F66]/40 hover:bg-[#F8F7F3]"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <FolderPlus className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <span className="font-bold text-slate-900 dark:text-white">
+                    <FolderPlus className="w-4 h-4 text-[#087F66] shrink-0" />
+                    <span className="font-bold text-[#15283B]">
                       New Root (v1)
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                  <p className="text-[11px] text-[#64748B] leading-snug">
                     Create a brand-new independent revision family.
                   </p>
                 </button>
               </div>
 
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <div className="flex items-center gap-1.5 text-[11px] text-[#64748B] mt-1">
+                <Info className="w-3.5 h-3.5 text-[#087F66] shrink-0" />
                 <span>
-                  Active snapshot: <strong>{activeVersionName}</strong> (will remain untouched).
+                  Active snapshot: <strong className="text-[#15283B]">{activeVersionName}</strong> (will remain untouched).
                 </span>
               </div>
             </div>
@@ -208,7 +208,7 @@ function SaveVersionModalContent({
 
           {/* Version Name */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-[#15283B] mb-1">
               Version Name *
             </label>
             <input
@@ -217,13 +217,13 @@ function SaveVersionModalContent({
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
               placeholder="e.g. Revision v2 or Lead Backend Focused"
-              className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4] text-[#15283B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
             />
           </div>
 
           {/* Title */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-[#15283B] mb-1">
               Title *
             </label>
             <input
@@ -232,13 +232,13 @@ function SaveVersionModalContent({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. John Doe - Staff Engineer"
-              className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2.5 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4] text-[#15283B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
             />
           </div>
 
           {/* Version Notes */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-[#15283B] mb-1">
               Version Notes (Optional)
             </label>
             <textarea
@@ -246,41 +246,41 @@ function SaveVersionModalContent({
               value={versionNotes}
               onChange={(e) => setVersionNotes(e.target.value)}
               placeholder="Document specific adjustments made in this revision..."
-              className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full p-2.5 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4] text-[#15283B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66] resize-none"
             />
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block font-bold text-[#15283B] mb-1">
               Tags (Optional, comma-separated)
             </label>
             <div className="relative">
-              <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Tag className="w-3.5 h-3.5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={versionTags}
                 onChange={(e) => setVersionTags(e.target.value)}
                 placeholder="e.g. backend, cloud, python"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#F8F7F3] border border-[#E2E8E4] text-[#15283B] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
               />
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8E4]">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-3.5 py-2 rounded-xl font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="px-3.5 py-2 rounded-xl font-semibold text-[#64748B] hover:bg-[#F8F7F3] hover:text-[#15283B] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving || !title.trim() || !versionName.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:opacity-50 shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold bg-[#087F66] hover:bg-[#066B56] text-white transition-colors disabled:opacity-50 shadow-sm"
             >
               {isSaving ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

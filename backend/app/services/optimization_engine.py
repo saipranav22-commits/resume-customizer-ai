@@ -315,9 +315,11 @@ def generate_optimization_recommendations(
     resume_lower = resume_text.lower()
     grounded_lower = [s.lower() for s in grounded_matching_skills]
 
-    # 1. Missing required skills (High priority, requires confirmation)
+    # 1. Required skills: Distinguish evidenced-in-project vs absent from resume
     for skill in jd_analysis.required_skills:
-        if skill.lower() not in resume_lower and skill.lower() not in grounded_lower:
+        skill_in_resume = bool(re.search(r'\b' + re.escape(skill.lower()) + r'\b', resume_lower))
+        skill_in_skills_section = skill.lower() in grounded_lower or any(skill.lower() == s.lower() for s in grounded_matching_skills)
+        if not skill_in_resume and not skill_in_skills_section:
             recommendations.append(OptimizationRecommendation(
                 issue=f"Required skill '{skill}' is absent from resume text.",
                 requirement=f"Job description specifies '{skill}' as a mandatory qualification.",
@@ -326,13 +328,24 @@ def generate_optimization_recommendations(
                 priority="high",
                 requires_user_confirmation=True
             ))
+        elif skill_in_resume and not skill_in_skills_section:
+            recommendations.append(OptimizationRecommendation(
+                issue=f"Skill '{skill}' is evidenced in project or experience history but omitted from your primary Skills section.",
+                requirement=f"Job description specifies '{skill}' as a mandatory qualification.",
+                evidence=f"'{skill}' was detected in your project or experience details, but is omitted from your primary technical skills list.",
+                proposed_improvement=f"Elevate '{skill}' into your primary Skills section to ensure ATS parsers and recruiters register it immediately.",
+                priority="medium",
+                requires_user_confirmation=False
+            ))
 
-    # 2. Missing preferred skills (Medium priority, requires confirmation)
+    # 2. Preferred skills: Distinguish evidenced vs absent
     req_skills_lower = [s.lower() for s in jd_analysis.required_skills]
     for skill in jd_analysis.preferred_skills:
         if skill.lower() in req_skills_lower:
             continue
-        if skill.lower() not in resume_lower and skill.lower() not in grounded_lower:
+        skill_in_resume = bool(re.search(r'\b' + re.escape(skill.lower()) + r'\b', resume_lower))
+        skill_in_skills_section = skill.lower() in grounded_lower or any(skill.lower() == s.lower() for s in grounded_matching_skills)
+        if not skill_in_resume and not skill_in_skills_section:
             recommendations.append(OptimizationRecommendation(
                 issue=f"Preferred skill '{skill}' not highlighted.",
                 requirement=f"Job description lists '{skill}' as a bonus or nice-to-have qualification.",
@@ -340,6 +353,15 @@ def generate_optimization_recommendations(
                 proposed_improvement=f"Highlight any relevant exposure to {skill} in your technical profile or cover letter.",
                 priority="medium",
                 requires_user_confirmation=True
+            ))
+        elif skill_in_resume and not skill_in_skills_section:
+            recommendations.append(OptimizationRecommendation(
+                issue=f"Preferred skill '{skill}' is evidenced in experience or projects but not featured in your Skills section.",
+                requirement=f"Job description lists '{skill}' as a bonus or nice-to-have qualification.",
+                evidence=f"'{skill}' is mentioned in resume project or experience text, but not featured in the primary skills section.",
+                proposed_improvement=f"Feature '{skill}' in your core technical profile to maximize keyword match score.",
+                priority="low",
+                requires_user_confirmation=False
             ))
 
     # 3. Quantifiable impact check (Medium priority, requires confirmation)

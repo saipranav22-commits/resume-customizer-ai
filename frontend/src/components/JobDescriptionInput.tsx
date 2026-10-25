@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { ChangeEvent } from "react";
 import { FileCode, Trash2, CheckCircle2 } from "lucide-react";
@@ -53,17 +53,17 @@ export default function JobDescriptionInput({
       <div className="flex items-center justify-between">
         <label
           htmlFor="job-description-textarea"
-          className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2"
+          className="text-sm font-semibold text-[#15283B] flex items-center gap-2"
         >
           <span>2. Paste Job Description</span>
-          <span className="text-xs font-normal text-slate-500">(Minimum {minLength} chars)</span>
+          <span className="text-xs font-normal text-[#64748B]">(Minimum {minLength} chars)</span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {charCount > 0 && (
             <button
               type="button"
               onClick={handleClear}
-              className="text-xs text-slate-400 hover:text-rose-500 flex items-center gap-1 transition-colors"
+              className="text-xs text-[#64748B] hover:text-rose-600 flex items-center gap-1 transition-colors"
             >
               <Trash2 className="w-3 h-3" />
               Clear
@@ -73,10 +73,10 @@ export default function JobDescriptionInput({
             id="load-sample-jd-btn"
             type="button"
             onClick={handleLoadSample}
-            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
+            className="text-xs text-[#087F66] hover:text-[#066B56] hover:underline flex items-center gap-1 font-semibold"
           >
             <FileCode className="w-3.5 h-3.5" />
-            Load Sample JD
+            Load Sample Role
           </button>
         </div>
       </div>
@@ -88,35 +88,35 @@ export default function JobDescriptionInput({
           value={value}
           onChange={handleChange}
           placeholder="Paste the full job description here (responsibilities, required qualifications, technical stack, etc.)..."
-          className={`w-full rounded-xl border p-4 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 bg-slate-50/50 dark:bg-slate-800/40 focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
+          className={`w-full rounded-xl border p-4 text-sm text-[#15283B] placeholder:text-[#64748B]/70 bg-[#F8F7F3]/70 focus:bg-white focus:outline-none focus:ring-2 transition-all resize-y font-sans ${
             error
-              ? "border-rose-400 focus:ring-rose-400 dark:border-rose-700"
+              ? "border-rose-400 focus:ring-rose-400"
               : isSatisfied
-              ? "border-slate-300 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20"
-              : "border-slate-300 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/20"
+              ? "border-[#E2E8E4] focus:border-[#087F66] focus:ring-[#087F66]/20"
+              : "border-[#E2E8E4] focus:border-[#087F66] focus:ring-[#087F66]/20"
           }`}
         />
-        <div className="flex items-center justify-between px-1 text-xs">
+        <div className="flex items-center justify-between px-1 text-xs mt-1">
           <div className="flex items-center gap-1.5">
             {isSatisfied ? (
-              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+              <span className="text-[#087F66] flex items-center gap-1 font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 JD meets requirements ({charCount} characters)
               </span>
             ) : charCount > 0 ? (
-              <span className="text-amber-600 dark:text-amber-400">
+              <span className="text-amber-700 font-medium">
                 Needs {minLength - charCount} more characters for thorough analysis
               </span>
             ) : (
-              <span className="text-slate-400">Please provide the JD text</span>
+              <span className="text-[#64748B]">Please provide target job description</span>
             )}
           </div>
-          <span className="text-slate-400 font-mono">{charCount} chars</span>
+          <span className="text-[#64748B] font-mono">{charCount} chars</span>
         </div>
       </div>
 
       {error && (
-        <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>
+        <p className="text-xs text-rose-700">{error}</p>
       )}
     </div>
   );

@@ -343,3 +343,44 @@ def test_preferred_skill_not_duplicated_when_in_required_skills():
     assert len(docker_recs) == 1
     assert docker_recs[0].priority == "high"
     assert "mandatory" in docker_recs[0].requirement.lower() or "required" in docker_recs[0].issue.lower()
+
+
+def test_evidenced_skill_in_project_distinguished_from_absent():
+    # Candidate mentions Redis and PostgreSQL in project experience, but only lists Python in primary skills
+    resume_text = (
+        "Alex Developer\n"
+        "Core Skills: Python\n"
+        "Experience: Built scalable caching microservice using Redis and optimized queries in PostgreSQL."
+    )
+    analysis = JobDescriptionAnalysis(
+        target_role="Backend Developer",
+        required_skills=["Python", "Redis", "Terraform"],
+        preferred_skills=["PostgreSQL", "Kubernetes"],
+        tools_frameworks=["Redis", "PostgreSQL", "Terraform", "Kubernetes"],
+        experience_level="3+ years",
+        education_requirement="B.S. in CS",
+        responsibilities=["Develop backend services."],
+        keywords=["python", "redis", "terraform", "postgresql", "kubernetes"]
+    )
+    # Python is in grounded_matching_skills, Redis & PostgreSQL are in resume text but not skills section, Terraform & Kubernetes are absent
+    recs = generate_optimization_recommendations(resume_text, analysis, ["Python"], [])
+
+    # Redis: Evidenced in experience, so it should NOT be labeled as absent or require confirmation
+    redis_recs = [r for r in recs if "redis" in r.issue.lower()]
+    assert len(redis_recs) == 1
+    assert "evidenced" in redis_recs[0].issue.lower()
+    assert redis_recs[0].requires_user_confirmation is False
+    assert redis_recs[0].priority == "medium"
+
+    # Terraform: Entirely absent from resume text, so it MUST be labeled as absent and require confirmation
+    tf_recs = [r for r in recs if "terraform" in r.issue.lower()]
+    assert len(tf_recs) == 1
+    assert "absent" in tf_recs[0].issue.lower()
+    assert tf_recs[0].requires_user_confirmation is True
+    assert tf_recs[0].priority == "high"
+
+    # PostgreSQL: Evidenced in experience, preferred skill, low priority, requires_user_confirmation=False
+    pg_recs = [r for r in recs if "postgresql" in r.issue.lower()]
+    assert len(pg_recs) == 1
+    assert "evidenced" in pg_recs[0].issue.lower()
+    assert pg_recs[0].requires_user_confirmation is False

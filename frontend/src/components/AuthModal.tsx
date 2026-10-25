@@ -67,20 +67,20 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#15283B]/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+        className="relative w-full max-w-md bg-white  rounded-2xl shadow-2xl border border-[#E2E8E4]  overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="flex items-center justify-between p-6 border-b border-[#E2E8E4]  bg-[#F8F7F3] ">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            <h2 className="text-xl font-bold text-[#15283B] ">
               {mode === "signin" && "Sign In"}
               {mode === "signup" && "Create an Account"}
               {mode === "reset" && "Reset Password"}
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500  mt-0.5">
               {mode === "signin" && "Access your saved resumes and tailored history"}
               {mode === "signup" && "Save, view and manage your customized resumes securely"}
               {mode === "reset" && "Enter your email to receive recovery instructions"}
@@ -96,7 +96,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
 
         {/* Demo Mode Notice if Supabase keys not set */}
         {!isConfigured && (
-          <div className="mx-6 mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 text-xs text-blue-700 dark:text-blue-300">
+          <div className="mx-6 mt-4 p-3 rounded-lg bg-[#DCEDE5]/40  border border-[#DCEDE5]  text-xs text-[#087F66] ">
             <strong>Development Mode:</strong> Cloud Supabase credentials are not configured in local environment. Local simulated authentication is active.
           </div>
         )}
@@ -104,14 +104,14 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         {/* Alerts */}
         <div className="px-6 pt-4 space-y-3">
           {error && (
-            <div className="flex items-center gap-2 p-3 text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-lg">
+            <div className="flex items-center gap-2 p-3 text-xs text-rose-700  bg-rose-50  border border-rose-200  rounded-lg">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="flex items-center gap-2 p-3 text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900 rounded-lg">
+            <div className="flex items-center gap-2 p-3 text-xs text-emerald-700  bg-emerald-50  border border-emerald-200  rounded-lg">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
@@ -122,7 +122,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {mode === "signup" && (
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700  mb-1.5">
                 Full Name
               </label>
               <div className="relative">
@@ -133,14 +133,14 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Alex Morgan"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700  mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -151,7 +151,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
               />
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
           {mode !== "reset" && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block text-xs font-semibold text-slate-700 ">
                   Password
                 </label>
                 {mode === "signin" && (
@@ -170,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                       setError(null);
                       setSuccessMessage(null);
                     }}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    className="text-xs text-[#087F66]  hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -184,7 +184,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300  bg-white  text-[#15283B]  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#087F66]/20 focus:border-[#087F66]"
                 />
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            className="w-full mt-2 py-2.5 px-4 bg-[#087F66] hover:bg-[#066B56] text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -214,7 +214,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
         </form>
 
         {/* Footer switch mode */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-center text-xs text-slate-600 dark:text-slate-400">
+        <div className="p-4 border-t border-[#E2E8E4]  bg-[#F8F7F3]  text-center text-xs text-slate-600 ">
           {mode === "signin" && (
             <span>
               Don&apos;t have an account?{" "}
@@ -224,7 +224,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   setError(null);
                   setSuccessMessage(null);
                 }}
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                className="font-semibold text-[#087F66]  hover:underline"
               >
                 Sign up
               </button>
@@ -239,7 +239,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                   setError(null);
                   setSuccessMessage(null);
                 }}
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                className="font-semibold text-[#087F66]  hover:underline"
               >
                 Sign in
               </button>
@@ -252,7 +252,7 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "signin" }: A
                 setError(null);
                 setSuccessMessage(null);
               }}
-              className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              className="font-semibold text-[#087F66]  hover:underline"
             >
               Back to Sign in
             </button>
