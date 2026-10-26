@@ -73,16 +73,21 @@ body {
 }
 
 /* Luxury Aubergine & Copper Ambient Utilities */
-.studio-mesh-grid {
+.studio-editorial-bg {
   background-color: #F7F2EB;
-  background-image: radial-gradient(#DDD0D7 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(196, 93, 57, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(41, 27, 50, 0.02) 1px, transparent 1px);
+  background-size: 160px 160px;
+}
+
+.studio-mesh-grid {
+  /* Legacy alias updated to warm porcelain editorial canvas without dots */
+  background-color: #F7F2EB;
 }
 
 .studio-dark-mesh-grid {
   background-color: #291B32;
-  background-image: radial-gradient(rgba(196, 93, 57, 0.12) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 .studio-radial-glow {

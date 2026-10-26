@@ -53,28 +53,29 @@ describe("Workspace Lifecycle and Version Management UX", () => {
     const user = userEvent.setup();
     render(<Home />);
 
-    // Upload a valid PDF file
-    const file = new File(["fake resume content"], "resume.pdf", { type: "application/pdf" });
-    const fileInput = document.getElementById("resume-file-input") as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
-    await user.upload(fileInput, file);
+    // Open History Drawer and restore v1.0 snapshot
+    const historyBtn = screen.getByTitle("View saved resume history");
+    await user.click(historyBtn);
 
+    await waitFor(() => {
+      expect(screen.getByText("v1.0 - Initial Customization")).toBeInTheDocument();
+    });
+
+    const card = screen.getByText("v1.0 - Initial Customization").closest(".group")!;
+    const restoreBtn = card.querySelector('button:has(svg.lucide-external-link)') || card.querySelectorAll("button")[card.querySelectorAll("button").length - 1];
+    await user.click(restoreBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Active:/i)).toBeInTheDocument();
+      expect(screen.getByText("v1.0 - Initial Customization")).toBeInTheDocument();
+    });
+
+    // Edit job description to trigger unsaved modifications state (isDirty = true)
     const jdTextarea = screen.getByPlaceholderText(/Paste the full job description here/i);
     fireEvent.change(jdTextarea, {
       target: {
         value: "We are looking for a Senior Backend Software Engineer with at least 5 years of Python and FastAPI experience.",
       },
-    });
-
-    // Submit customization
-    const tailorBtn = screen.getByRole("button", { name: /Tailor Resume for this Job/i });
-    await waitFor(() => {
-      expect(tailorBtn).not.toBeDisabled();
-    });
-    await user.click(tailorBtn);
-
-    await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Alex Morgan" })).toBeInTheDocument();
     });
 
     // Status indicator should show Unsaved Modifications

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Sparkles,
   RefreshCw,
@@ -13,16 +13,12 @@ import {
   Edit2,
   Check,
   AlertTriangle,
-  Briefcase,
   GraduationCap,
-  FolderGit2,
-  Award,
-  User,
-  Wrench,
   ChevronDown,
   ShieldCheck,
   XCircle,
   X,
+  Undo2,
 } from "lucide-react";
 import {
   TailoredResumeResponse,
@@ -59,20 +55,34 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   const [draft, setDraft] = useState<TailoredResumeResponse>(() =>
     resumeData ? JSON.parse(JSON.stringify(resumeData)) : ({} as TailoredResumeResponse)
   );
+
+  // Undo history stack
+  const [undoHistory, setUndoHistory] = useState<TailoredResumeResponse[]>([]);
+
+  // Mode: "editor" is inline editing mode; "preview" is clean recruiter document mode
   const [viewMode, setViewMode] = useState<"editor" | "preview">("editor");
+
   const [isScoreStale, setIsScoreStale] = useState<boolean>(false);
   const [isRechecking, setIsRechecking] = useState<boolean>(false);
   const [recheckMessage, setRecheckMessage] = useState<string | null>(null);
 
-  // Phase 6.2: Audit and Dual-Score Modal States
+  // Audit and Dual-Score Modal States
   const [isAuditModalOpen, setIsAuditModalOpen] = useState<boolean>(false);
   const [isAuditing, setIsAuditing] = useState<boolean>(false);
   const [showDualScoreModal, setShowDualScoreModal] = useState<boolean>(false);
 
-  // New skill input states
-  const [newMatchingSkill, setNewMatchingSkill] = useState<string>("");
-  const [newAdditionalSkill, setNewAdditionalSkill] = useState<string>("");
-  const [newCert, setNewCert] = useState<string>("");
+  // Export dropdown state
+  const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Track actively focused block for persistent toolbar AI Improve button
+  const [activeFocus, setActiveFocus] = useState<{
+    id: string;
+    text: string;
+    sectionType: "summary" | "experience" | "project";
+    context?: string;
+    onApply: (improved: string) => void;
+  } | null>(null);
 
   // AI Improve Modal Target State
   const [aiTarget, setAiTarget] = useState<{
@@ -81,6 +91,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     context?: string;
     onApply: (improved: string) => void;
   } | null>(null);
+
+  // New skill input states
+  const [newMatchingSkill, setNewMatchingSkill] = useState<string>("");
+  const [newAdditionalSkill, setNewAdditionalSkill] = useState<string>("");
+  const [newCert, setNewCert] = useState<string>("");
 
   // Detect fresher candidate profile for adaptive section ordering
   const isFresher = useMemo(() => {
@@ -101,16 +116,43 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(JSON.parse(JSON.stringify(resumeData)));
+    setUndoHistory([]);
     setIsScoreStale(false);
     setRecheckMessage(null);
   }, [resumeData]);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Compute modified status
   const isModified = useMemo(() => {
     return JSON.stringify(draft) !== JSON.stringify(resumeData);
   }, [draft, resumeData]);
 
+  // Push previous state into undo stack before mutating
+  const pushUndo = (prevDraft: TailoredResumeResponse) => {
+    setUndoHistory((history) => [...history.slice(-25), JSON.parse(JSON.stringify(prevDraft))]);
+  };
+
+  const handleUndo = () => {
+    if (undoHistory.length === 0) return;
+    const previous = undoHistory[undoHistory.length - 1];
+    setUndoHistory((h) => h.slice(0, h.length - 1));
+    setDraft(previous);
+    setIsScoreStale(true);
+  };
+
+  // --- Handlers for Document Fields ---
   const handleFieldChange = (field: string, value: unknown) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       [field]: value,
@@ -119,6 +161,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleContactChange = (field: string, value: string) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       contact_info: {
@@ -129,10 +172,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     setIsScoreStale(true);
   };
 
-  // --- Skills Handlers ---
-  const handleAddMatchingSkill = () => {
-    const trimmed = newMatchingSkill.trim();
+  const handleAddMatchingSkill = (explicitVal?: string) => {
+    const val = typeof explicitVal === "string" ? explicitVal : newMatchingSkill;
+    const trimmed = val.trim();
     if (!trimmed) return;
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       skills: {
@@ -145,6 +189,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveMatchingSkill = (index: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       skills: {
@@ -155,9 +200,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     setIsScoreStale(true);
   };
 
-  const handleAddAdditionalSkill = () => {
-    const trimmed = newAdditionalSkill.trim();
+  const handleAddAdditionalSkill = (explicitVal?: string) => {
+    const val = typeof explicitVal === "string" ? explicitVal : newAdditionalSkill;
+    const trimmed = val.trim();
     if (!trimmed) return;
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       skills: {
@@ -170,6 +217,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveAdditionalSkill = (index: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       skills: {
@@ -182,6 +230,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   // --- Experience Handlers ---
   const handleUpdateExperience = (expIndex: number, field: keyof ExperienceItem, val: string | string[]) => {
+    pushUndo(draft);
     setDraft((prev) => {
       const updated = [...prev.experience];
       updated[expIndex] = { ...updated[expIndex], [field]: val };
@@ -202,6 +251,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleAddBullet = (expIndex: number) => {
+    pushUndo(draft);
     setDraft((prev) => {
       const updated = [...prev.experience];
       updated[expIndex] = {
@@ -214,6 +264,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveBullet = (expIndex: number, bulletIndex: number) => {
+    pushUndo(draft);
     setDraft((prev) => {
       const updated = [...prev.experience];
       updated[expIndex] = {
@@ -226,6 +277,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleAddPosition = () => {
+    pushUndo(draft);
     const newPos: ExperienceItem = {
       role: "Software Engineer",
       company: "Company Name",
@@ -241,6 +293,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemovePosition = (expIndex: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       experience: prev.experience.filter((_, i) => i !== expIndex),
@@ -250,6 +303,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   // --- Education Handlers ---
   const handleUpdateEducation = (eduIndex: number, field: keyof EducationItem, val: string) => {
+    pushUndo(draft);
     setDraft((prev) => {
       const updated = [...prev.education];
       updated[eduIndex] = { ...updated[eduIndex], [field]: val };
@@ -259,6 +313,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleAddEducation = () => {
+    pushUndo(draft);
     const newEdu: EducationItem = {
       degree: "B.S. in Computer Science",
       institution: "University",
@@ -272,6 +327,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveEducation = (eduIndex: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       education: prev.education.filter((_, i) => i !== eduIndex),
@@ -281,6 +337,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   // --- Projects Handlers ---
   const handleUpdateProject = (projIndex: number, field: keyof ProjectItem, val: string | string[]) => {
+    pushUndo(draft);
     setDraft((prev) => {
       const updated = [...prev.projects];
       updated[projIndex] = { ...updated[projIndex], [field]: val };
@@ -289,7 +346,45 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     setIsScoreStale(true);
   };
 
+  const handleUpdateProjectBullet = (projIndex: number, bulletIndex: number, val: string) => {
+    setDraft((prev) => {
+      const updated = [...prev.projects];
+      const newBullets = [...(updated[projIndex].bullets || [])];
+      newBullets[bulletIndex] = val;
+      updated[projIndex] = { ...updated[projIndex], bullets: newBullets };
+      return { ...prev, projects: updated };
+    });
+    setIsScoreStale(true);
+  };
+
+  const handleAddProjectBullet = (projIndex: number) => {
+    pushUndo(draft);
+    setDraft((prev) => {
+      const updated = [...prev.projects];
+      updated[projIndex] = {
+        ...updated[projIndex],
+        bullets: [...(updated[projIndex].bullets || []), "Engineered core modules and optimized runtime efficiency."],
+      };
+      return { ...prev, projects: updated };
+    });
+    setIsScoreStale(true);
+  };
+
+  const handleRemoveProjectBullet = (projIndex: number, bulletIndex: number) => {
+    pushUndo(draft);
+    setDraft((prev) => {
+      const updated = [...prev.projects];
+      updated[projIndex] = {
+        ...updated[projIndex],
+        bullets: (updated[projIndex].bullets || []).filter((_, i) => i !== bulletIndex),
+      };
+      return { ...prev, projects: updated };
+    });
+    setIsScoreStale(true);
+  };
+
   const handleAddProject = () => {
+    pushUndo(draft);
     const newProj: ProjectItem = {
       name: "Cloud Service Platform",
       technologies: ["TypeScript", "Next.js", "Python"],
@@ -303,6 +398,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveProject = (projIndex: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       projects: prev.projects.filter((_, i) => i !== projIndex),
@@ -314,6 +410,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   const handleAddCert = () => {
     const trimmed = newCert.trim();
     if (!trimmed) return;
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       certifications: [...prev.certifications, trimmed],
@@ -323,11 +420,51 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   };
 
   const handleRemoveCert = (index: number) => {
+    pushUndo(draft);
     setDraft((prev) => ({
       ...prev,
       certifications: prev.certifications.filter((_, i) => i !== index),
     }));
     setIsScoreStale(true);
+  };
+
+  // --- AI Improve Trigger ---
+  const openAiImprove = (target: {
+    id: string;
+    text: string;
+    sectionType: "summary" | "experience" | "project";
+    context?: string;
+    onApply: (improved: string) => void;
+  }) => {
+    setActiveFocus(target);
+    setAiTarget({
+      text: target.text,
+      sectionType: target.sectionType,
+      context: target.context,
+      onApply: (improved) => {
+        pushUndo(draft);
+        target.onApply(improved);
+        // Refresh activeFocus so immediate repeated AI Improve operates on the latest accepted text!
+        setActiveFocus((prev) => (prev ? { ...prev, text: improved } : null));
+        setIsScoreStale(true);
+      },
+    });
+  };
+
+  // Persistent Toolbar AI Improve Handler
+  const handleToolbarAiImprove = () => {
+    if (activeFocus && activeFocus.text.trim()) {
+      openAiImprove(activeFocus);
+    } else {
+      // Default to improving the professional summary
+      openAiImprove({
+        id: "summary",
+        text: draft.tailored_summary,
+        sectionType: "summary",
+        context: `Target Role: ${draft.job_analysis?.target_role || "Software Engineer"}`,
+        onApply: (improved) => handleFieldChange("tailored_summary", improved),
+      });
+    }
   };
 
   // --- Re-check Score Workflow ---
@@ -391,157 +528,243 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   const handleResetToBaseline = () => {
     if (window.confirm("Discard all unsaved edits and restore initial tailored resume?")) {
+      pushUndo(draft);
       setDraft(JSON.parse(JSON.stringify(resumeData)));
       setIsScoreStale(false);
       setRecheckMessage(null);
     }
   };
 
+  const isEditing = viewMode === "editor";
+
   return (
     <div className="space-y-6">
-      {/* Studio Action Toolbar */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        {/* Left: Mode toggle & Status Indicators */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center p-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
-            <button
-              type="button"
-              onClick={() => setViewMode("editor")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === "editor"
-                  ? "bg-[#291B32] text-white shadow-sm"
-                  : "text-[#674E61] hover:text-[#291B32]"
-              }`}
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-              <span>Interactive Editor</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("preview")}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                viewMode === "preview"
-                  ? "bg-[#291B32] text-white shadow-sm"
-                  : "text-[#674E61] hover:text-[#291B32]"
-              }`}
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>Document Preview</span>
-            </button>
-          </div>
-
-          {/* Draft Modification Status */}
-          {isModified ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FDF6F3] border border-[#C45D39]/40 text-xs font-semibold text-[#C45D39]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C45D39] animate-pulse" />
-              Unsaved Draft Edits
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-semibold text-[#674E61]">
-              <Check className="w-3.5 h-3.5 text-[#C45D39]" />
-              Draft In Sync
-            </span>
-          )}
-
-          {/* Score Stale Alert */}
-          {isScoreStale && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-xs font-semibold text-amber-800">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-              Score Stale (Edits made)
-            </span>
-          )}
-        </div>
-
-        {/* Right: Actions (ATS Audit, Re-check, Discard, Save Version, Export) */}
-        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
-          {/* ATS Quality Audit Button */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleRunAudit}
-            isLoading={isAuditing}
-            icon={<ShieldCheck className="w-3.5 h-3.5 text-[#C45D39]" />}
-          >
-            <span>ATS Audit</span>
-            {draft.audit ? (
-              <span
-                className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                  draft.audit.errors.length > 0
-                    ? "bg-rose-100 text-rose-800"
-                    : "bg-[#E8D9E8] text-[#291B32]"
+      {/* 5. Responsive Professional Action Toolbar */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm flex flex-col gap-3.5">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          {/* Group 1: Editing Mode & Primary Actions */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* Mode Switcher: Edit Resume vs Done Editing */}
+            <div className="inline-flex items-center p-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] min-h-[44px]">
+              <button
+                type="button"
+                onClick={() => setViewMode("editor")}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
+                  isEditing
+                    ? "bg-[#291B32] text-white shadow-xs"
+                    : "text-[#674E61] hover:text-[#291B32]"
                 }`}
+                title="Switch to inline document editing mode"
               >
-                {draft.audit.overall_score}%
-              </span>
-            ) : null}
-          </Button>
-
-          {/* Re-check Score Button */}
-          <Button
-            variant="recheck"
-            size="sm"
-            onClick={handleRecheckScore}
-            isLoading={isRechecking}
-            icon={<RefreshCw className={`w-3.5 h-3.5 ${isRechecking ? "animate-spin" : ""}`} />}
-          >
-            Re-check Score
-          </Button>
-
-          {/* Discard Edits */}
-          {isModified && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetToBaseline}
-              icon={<RotateCcw className="w-3.5 h-3.5" />}
-            >
-              Discard Edits
-            </Button>
-          )}
-
-          {/* Save Version */}
-          <Button
-            variant="save"
-            size="sm"
-            onClick={() => onSaveVersion(draft)}
-            icon={<Save className="w-3.5 h-3.5 text-[#E8D9E8]" />}
-          >
-            Save as Version
-          </Button>
-
-          {/* Export Actions Dropdown */}
-          <div className="relative group">
-            <Button
-              variant="export"
-              size="sm"
-              icon={<FileDown className="w-3.5 h-3.5 text-[#C45D39]" />}
-            >
-              <span>Export</span>
-              <ChevronDown className="w-3 h-3 ml-0.5 opacity-60" />
-            </Button>
-            <div className="absolute right-0 mt-1 w-36 py-1 bg-white border border-[#DDD0D7] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-              <button
-                type="button"
-                onClick={() => onExport("pdf", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
-              >
-                <span>Download PDF</span>
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Interactive Editor</span>
               </button>
               <button
                 type="button"
-                onClick={() => onExport("docx", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
+                onClick={() => setViewMode("preview")}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
+                  !isEditing
+                    ? "bg-[#291B32] text-white shadow-xs"
+                    : "text-[#674E61] hover:text-[#291B32]"
+                }`}
+                title="Switch to clean recruiter document preview"
               >
-                <span>Word (DOCX)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onExport("txt", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
-              >
-                <span>Plain Text (TXT)</span>
+                <Eye className="w-3.5 h-3.5" />
+                <span>Document Preview</span>
               </button>
             </div>
+
+            {/* Persistent AI Improve Button */}
+            <button
+              type="button"
+              onClick={handleToolbarAiImprove}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#FBEFEA] hover:bg-[#F7E1D7] active:bg-[#F2D0C1] border border-[#C45D39]/30 text-[#C45D39] text-xs font-bold transition-all shadow-xs min-h-[44px]"
+              title={
+                activeFocus
+                  ? `AI Improve focused: ${activeFocus.sectionType}`
+                  : "AI Improve selected section or summary"
+              }
+            >
+              <Sparkles className="w-4 h-4 text-[#C45D39]" />
+              <span>AI Improve</span>
+              {activeFocus && (
+                <span className="text-[10px] font-mono uppercase bg-[#C45D39] text-white px-1.5 py-0.5 rounded">
+                  {activeFocus.sectionType}
+                </span>
+              )}
+            </button>
+
+            {/* Re-check Score Button */}
+            <Button
+              variant="recheck"
+              size="md"
+              onClick={handleRecheckScore}
+              isLoading={isRechecking}
+              icon={<RefreshCw className={`w-3.5 h-3.5 ${isRechecking ? "animate-spin" : ""}`} />}
+              className="min-h-[44px]"
+            >
+              Re-check Score
+            </Button>
+
+            {/* ATS Audit Button */}
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={handleRunAudit}
+              isLoading={isAuditing}
+              icon={<ShieldCheck className="w-3.5 h-3.5 text-[#C45D39]" />}
+              className="min-h-[44px]"
+            >
+              <span>ATS Audit</span>
+              {draft.audit ? (
+                <span
+                  className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    draft.audit.errors.length > 0
+                      ? "bg-rose-100 text-rose-800"
+                      : "bg-[#E8D9E8] text-[#291B32]"
+                  }`}
+                >
+                  {draft.audit.overall_score}%
+                </span>
+              ) : null}
+            </Button>
+          </div>
+
+          {/* Group 2: Secondary Document Controls */}
+          <div className="flex flex-wrap items-center gap-2 justify-end">
+            {/* Undo Button */}
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={undoHistory.length === 0}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all min-h-[44px] ${
+                undoHistory.length > 0
+                  ? "bg-white border-[#DDD0D7] text-[#291B32] hover:bg-[#F7F2EB]"
+                  : "bg-[#F7F2EB]/50 border-[#DDD0D7]/40 text-[#674E61]/40 cursor-not-allowed"
+              }`}
+              title="Undo last draft edit"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              <span>Undo</span>
+            </button>
+
+            {/* Discard Edits Button */}
+            {isModified && (
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={handleResetToBaseline}
+                icon={<RotateCcw className="w-3.5 h-3.5" />}
+                className="min-h-[44px]"
+              >
+                Discard Edits
+              </Button>
+            )}
+
+            {/* Save as Version Button */}
+            <Button
+              variant="save"
+              size="md"
+              onClick={() => onSaveVersion(draft)}
+              icon={<Save className="w-3.5 h-3.5 text-[#E8D9E8]" />}
+              className="min-h-[44px]"
+            >
+              Save as Version
+            </Button>
+
+            {/* Export Dropdown */}
+            <div className="relative" ref={exportMenuRef}>
+              <Button
+                variant="export"
+                size="md"
+                onClick={() => setShowExportMenu((prev) => !prev)}
+                icon={<FileDown className="w-3.5 h-3.5 text-[#C45D39]" />}
+                className="min-h-[44px]"
+              >
+                <span>Export</span>
+                <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-70" />
+              </Button>
+
+              {showExportMenu && (
+                <div className="absolute right-0 mt-1.5 w-48 py-1.5 bg-white border border-[#DDD0D7] rounded-xl shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowExportMenu(false);
+                      onExport("pdf", draft);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors min-h-[40px]"
+                  >
+                    <span>Download PDF</span>
+                    <span className="text-[10px] text-[#674E61] font-mono">ATS Standard</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowExportMenu(false);
+                      onExport("docx", draft);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors min-h-[40px]"
+                  >
+                    <span>Download DOCX</span>
+                    <span className="text-[10px] text-[#674E61] font-mono">MS Word</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowExportMenu(false);
+                      onExport("txt", draft);
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors min-h-[40px]"
+                  >
+                    <span>Download TXT</span>
+                    <span className="text-[10px] text-[#674E61] font-mono">Plain Text</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status Line */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#DDD0D7]/60 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Draft Sync Status */}
+            {isModified ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FDF6F3] border border-[#C45D39]/40 text-xs font-semibold text-[#C45D39]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C45D39] animate-pulse" />
+                Unsaved Draft Edits
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-semibold text-[#674E61]">
+                <Check className="w-3.5 h-3.5 text-[#C45D39]" />
+                Draft In Sync
+              </span>
+            )}
+
+            {/* Score Stale Alert */}
+            {isScoreStale && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-xs font-semibold text-amber-800">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                Score Stale (Edits made)
+              </span>
+            )}
+
+            {/* Fresher Adaptive Layout Badge */}
+            {isFresher && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-bold text-[#291B32]">
+                <GraduationCap className="w-3.5 h-3.5 text-[#C45D39]" />
+                Fresher Adaptive Layout
+              </span>
+            )}
+          </div>
+
+          <div className="text-[11px] text-[#674E61]">
+            {isEditing ? (
+              <span>Click any document text directly to edit. Hover bullets for AI Improve.</span>
+            ) : (
+              <span>Recruiter Preview Mode: Clean ATS document appearance.</span>
+            )}
           </div>
         </div>
       </div>
@@ -562,667 +785,507 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           <button
             type="button"
             onClick={() => setRecheckMessage(null)}
-            className="text-[#674E61] hover:text-[#291B32]"
+            className="text-[#674E61] hover:text-[#291B32] p-1"
           >
             ×
           </button>
         </div>
       )}
 
-      {/* VIEW MODE 1: INTERACTIVE EDITOR */}
-      {viewMode === "editor" ? (
-        <div className="space-y-6">
-          {/* Section 1: Candidate Contact Info */}
-          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-[#C45D39]" />
-                <h3 className="font-heading font-bold text-sm text-[#291B32]">
-                  {draft.candidate_name || "Candidate Information & Contact"}
-                </h3>
-              </div>
-              <span className="text-[11px] text-[#674E61]">Contact & Details</span>
+      {/* 3. Rebuilt WYSIWYG Document Canvas: A Single Continuous Professional ATS Resume */}
+      <div className="w-full max-w-[850px] mx-auto bg-white border border-[#DDD0D7] shadow-xl rounded-xl p-8 sm:p-14 text-[#291B32] font-sans transition-all relative select-text">
+        {/* Document Header: Candidate Name & Contact Details */}
+        <div className="text-center pb-5 border-b border-[#291B32] space-y-2">
+          {isEditing ? (
+            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight">
+              <span className="sr-only">{draft.candidate_name || "Candidate Name"}</span>
+              <input
+                type="text"
+                value={draft.candidate_name || ""}
+                onChange={(e) => handleFieldChange("candidate_name", e.target.value)}
+                placeholder="Candidate Full Name"
+                className="w-full text-center text-2xl sm:text-3xl font-black text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-1 outline-none bg-transparent transition-all placeholder-[#674E61]/40"
+              />
+            </h1>
+          ) : (
+            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight">
+              {draft.candidate_name || "Candidate Name"}
+            </h1>
+          )}
+
+          {/* Contact Line */}
+          {isEditing ? (
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[#674E61] pt-1">
+              <input
+                type="email"
+                value={draft.contact_info?.email || ""}
+                onChange={(e) => handleContactChange("email", e.target.value)}
+                placeholder="Email address"
+                className="text-center border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-0.5 outline-none bg-transparent w-44"
+              />
+              <span className="text-[#DDD0D7] select-none">•</span>
+              <input
+                type="text"
+                value={draft.contact_info?.phone || ""}
+                onChange={(e) => handleContactChange("phone", e.target.value)}
+                placeholder="Phone number"
+                className="text-center border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-0.5 outline-none bg-transparent w-32"
+              />
+              <span className="text-[#DDD0D7] select-none">•</span>
+              <input
+                type="text"
+                value={draft.contact_info?.location || ""}
+                onChange={(e) => handleContactChange("location", e.target.value)}
+                placeholder="Location"
+                className="text-center border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-0.5 outline-none bg-transparent w-32"
+              />
+              <span className="text-[#DDD0D7] select-none">•</span>
+              <input
+                type="text"
+                value={draft.contact_info?.linkedin || ""}
+                onChange={(e) => handleContactChange("linkedin", e.target.value)}
+                placeholder="LinkedIn URL"
+                className="text-center border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-0.5 outline-none bg-transparent w-44"
+              />
+              <span className="text-[#DDD0D7] select-none">•</span>
+              <input
+                type="text"
+                value={draft.contact_info?.github || draft.contact_info?.portfolio || ""}
+                onChange={(e) => handleContactChange("github", e.target.value)}
+                placeholder="GitHub / Portfolio"
+                className="text-center border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-0.5 outline-none bg-transparent w-44"
+              />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={draft.candidate_name}
-                  onChange={(e) => handleFieldChange("candidate_name", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={draft.contact_info?.email || ""}
-                  onChange={(e) => handleContactChange("email", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  value={draft.contact_info?.phone || ""}
-                  onChange={(e) => handleContactChange("phone", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={draft.contact_info?.location || ""}
-                  onChange={(e) => handleContactChange("location", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  LinkedIn URL
-                </label>
-                <input
-                  type="text"
-                  value={draft.contact_info?.linkedin || ""}
-                  onChange={(e) => handleContactChange("linkedin", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
-                  GitHub / Portfolio
-                </label>
-                <input
-                  type="text"
-                  value={draft.contact_info?.github || draft.contact_info?.portfolio || ""}
-                  onChange={(e) => handleContactChange("github", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
-                />
-              </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-center gap-x-2 text-xs text-[#291B32]">
+              {draft.contact_info?.email && <span>{draft.contact_info.email}</span>}
+              {draft.contact_info?.phone && (
+                <>
+                  <span className="text-[#DDD0D7] select-none">•</span>
+                  <span>{draft.contact_info.phone}</span>
+                </>
+              )}
+              {draft.contact_info?.location && (
+                <>
+                  <span className="text-[#DDD0D7] select-none">•</span>
+                  <span>{draft.contact_info.location}</span>
+                </>
+              )}
+              {draft.contact_info?.linkedin && (
+                <>
+                  <span className="text-[#DDD0D7] select-none">•</span>
+                  <span>{draft.contact_info.linkedin}</span>
+                </>
+              )}
+              {(draft.contact_info?.github || draft.contact_info?.portfolio) && (
+                <>
+                  <span className="text-[#DDD0D7] select-none">•</span>
+                  <span>{draft.contact_info.github || draft.contact_info.portfolio}</span>
+                </>
+              )}
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Section 2: Professional Summary */}
-          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#C45D39]" />
-                <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                  Professional Summary
-                </h4>
-              </div>
-
-              <Button
-                variant="ai"
-                size="sm"
+        {/* Section: Professional Summary */}
+        <div className="mt-5 space-y-1.5">
+          <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
+              Professional Summary
+            </h2>
+            {isEditing && (
+              <button
+                type="button"
                 onClick={() =>
-                  setAiTarget({
+                  openAiImprove({
+                    id: "summary",
                     text: draft.tailored_summary,
                     sectionType: "summary",
                     context: `Target Role: ${draft.job_analysis?.target_role || "Software Engineer"}`,
                     onApply: (improved) => handleFieldChange("tailored_summary", improved),
                   })
                 }
-                icon={<Sparkles className="w-3.5 h-3.5" />}
+                className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[11px] font-bold text-[#C45D39] transition-all"
+                title="AI Improve Summary wording and impact"
               >
-                AI Improve Summary
-              </Button>
-            </div>
-
-            <textarea
-              rows={4}
-              value={draft.tailored_summary}
-              onChange={(e) => handleFieldChange("tailored_summary", e.target.value)}
-              className="w-full p-3.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] leading-relaxed focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] resize-y placeholder-[#674E61]/60"
-              placeholder="Enter your tailored professional summary..."
-            />
-          </div>
-
-          {/* Section 3: Technical Skills */}
-          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#DDD0D7]">
-              <Wrench className="w-4 h-4 text-[#C45D39]" />
-              <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                Technical Skills & Competencies
-              </h4>
-            </div>
-
-            {/* Matching Skills */}
-            <div className="space-y-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C45D39]">
-                Role-Matching Skills
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {draft.skills.matching_skills.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-semibold text-[#291B32]"
-                  >
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMatchingSkill(idx)}
-                      className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
-                      aria-label={`Remove ${skill}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-
-                {/* Add matching skill inline */}
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={newMatchingSkill}
-                    onChange={(e) => setNewMatchingSkill(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddMatchingSkill()}
-                    placeholder="+ Add Skill"
-                    className="px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:border-[#C45D39] w-28"
-                  />
-                  {newMatchingSkill.trim() && (
-                    <Button variant="ai" size="sm" onClick={handleAddMatchingSkill}>
-                      Add
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Skills */}
-            <div className="space-y-2.5 pt-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61]">
-                Additional & Foundational Skills
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {draft.skills.additional_skills.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-medium text-[#674E61]"
-                  >
-                    <span>{skill}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAdditionalSkill(idx)}
-                      className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
-                      aria-label={`Remove ${skill}`}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-
-                {/* Add additional skill inline */}
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    value={newAdditionalSkill}
-                    onChange={(e) => setNewAdditionalSkill(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddAdditionalSkill()}
-                    placeholder="+ Add Additional"
-                    className="px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:border-[#C45D39] w-32"
-                  />
-                  {newAdditionalSkill.trim() && (
-                    <Button variant="secondary" size="sm" onClick={handleAddAdditionalSkill}>
-                      Add
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Work Experience */}
-          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#C45D39]" />
-                <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                  Professional Experience
-                </h4>
-              </div>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleAddPosition}
-                icon={<Plus className="w-3.5 h-3.5 text-[#C45D39]" />}
-              >
-                Add Position
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              {draft.experience.map((exp, expIdx) => (
-                <div
-                  key={expIdx}
-                  className="p-5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-4"
-                >
-                  {/* Position metadata row */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#DDD0D7]">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 w-full">
-                      <input
-                        type="text"
-                        value={exp.role}
-                        onChange={(e) => handleUpdateExperience(expIdx, "role", e.target.value)}
-                        placeholder="Job Title / Role"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <input
-                        type="text"
-                        value={exp.company}
-                        onChange={(e) => handleUpdateExperience(expIdx, "company", e.target.value)}
-                        placeholder="Company"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <input
-                        type="text"
-                        value={exp.duration || ""}
-                        onChange={(e) => handleUpdateExperience(expIdx, "duration", e.target.value)}
-                        placeholder="Dates / Duration"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <input
-                        type="text"
-                        value={exp.location || ""}
-                        onChange={(e) => handleUpdateExperience(expIdx, "location", e.target.value)}
-                        placeholder="Location"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePosition(expIdx)}
-                      className="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg hover:bg-rose-100 self-end sm:self-center transition-colors"
-                      title="Delete Position"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Bullet points */}
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61]">
-                      Key Accomplishments & Bullets
-                    </span>
-
-                    {exp.bullets.map((bullet, bulletIdx) => (
-                      <div key={bulletIdx} className="flex items-start gap-2">
-                        <textarea
-                          rows={2}
-                          value={bullet}
-                          onChange={(e) => handleUpdateBullet(expIdx, bulletIdx, e.target.value)}
-                          className="flex-1 p-2.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] leading-relaxed focus:outline-none focus:border-[#C45D39] resize-y"
-                        />
-                        <div className="flex flex-col gap-1">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setAiTarget({
-                                text: bullet,
-                                sectionType: "experience",
-                                context: `${exp.role} at ${exp.company}`,
-                                onApply: (improved) => handleUpdateBullet(expIdx, bulletIdx, improved),
-                              })
-                            }
-                            className="p-2 rounded-lg bg-[#E8D9E8] border border-[#DDD0D7] text-[#291B32] hover:bg-[#C45D39] hover:text-white transition-colors"
-                            title="AI Improve this bullet"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveBullet(expIdx, bulletIdx)}
-                            className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-[#674E61] hover:text-rose-600 hover:border-rose-300 transition-colors"
-                            title="Delete bullet"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleAddBullet(expIdx)}
-                      icon={<Plus className="w-3 h-3 text-[#C45D39]" />}
-                    >
-                      Add Bullet Point
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 5: Projects */}
-          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
-              <div className="flex items-center gap-2">
-                <FolderGit2 className="w-4 h-4 text-[#C45D39]" />
-                <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                  Projects & Technical Case Studies
-                </h4>
-              </div>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleAddProject}
-                icon={<Plus className="w-3.5 h-3.5 text-[#C45D39]" />}
-              >
-                Add Project
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {draft.projects.map((proj, projIdx) => (
-                <div
-                  key={projIdx}
-                  className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
-                      <input
-                        type="text"
-                        value={proj.name}
-                        onChange={(e) => handleUpdateProject(projIdx, "name", e.target.value)}
-                        placeholder="Project Name"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <input
-                        type="text"
-                        value={proj.technologies.join(", ")}
-                        onChange={(e) =>
-                          handleUpdateProject(
-                            projIdx,
-                            "technologies",
-                            e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
-                          )
-                        }
-                        placeholder="Technologies (comma-separated)"
-                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveProject(projIdx)}
-                      className="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg hover:bg-rose-100 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Project bullet */}
-                  {proj.bullets.map((b, bIdx) => (
-                    <div key={bIdx} className="flex items-center gap-2">
-                      <textarea
-                        rows={1}
-                        value={b}
-                        onChange={(e) => {
-                          const updated = [...proj.bullets];
-                          updated[bIdx] = e.target.value;
-                          handleUpdateProject(projIdx, "bullets", updated);
-                        }}
-                        className="flex-1 p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39] resize-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setAiTarget({
-                            text: b,
-                            sectionType: "project",
-                            context: `Project: ${proj.name}`,
-                            onApply: (improved) => {
-                              const updated = [...proj.bullets];
-                              updated[bIdx] = improved;
-                              handleUpdateProject(projIdx, "bullets", updated);
-                            },
-                          })
-                        }
-                        className="p-1.5 rounded-lg bg-[#E8D9E8] text-[#291B32] hover:bg-[#C45D39] hover:text-white transition-colors"
-                        title="AI Improve bullet"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 6: Education & Certifications */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Education */}
-            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-[#C45D39]" />
-                  <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                    Education & Credentials
-                  </h4>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleAddEducation}
-                  icon={<Plus className="w-3 h-3 text-[#C45D39]" />}
-                >
-                  Add
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {draft.education.map((edu, eduIdx) => (
-                  <div
-                    key={eduIdx}
-                    className="p-3.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <input
-                        type="text"
-                        value={edu.degree}
-                        onChange={(e) => handleUpdateEducation(eduIdx, "degree", e.target.value)}
-                        placeholder="Degree"
-                        className="flex-1 p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEducation(eduIdx)}
-                        className="text-rose-600 p-1 hover:bg-rose-100 rounded transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={edu.institution}
-                        onChange={(e) => handleUpdateEducation(eduIdx, "institution", e.target.value)}
-                        placeholder="Institution"
-                        className="p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
-                      />
-                      <input
-                        type="text"
-                        value={edu.year || ""}
-                        onChange={(e) => handleUpdateEducation(eduIdx, "year", e.target.value)}
-                        placeholder="Year"
-                        className="p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Certifications */}
-            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-[#DDD0D7]">
-                <Award className="w-4 h-4 text-[#C45D39]" />
-                <h4 className="font-heading font-bold text-sm text-[#291B32]">
-                  Certifications
-                </h4>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {draft.certifications.map((cert, certIdx) => (
-                    <span
-                      key={certIdx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs text-[#291B32] font-medium"
-                    >
-                      <span>{cert}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCert(certIdx)}
-                        className="text-[#674E61] hover:text-rose-600"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newCert}
-                    onChange={(e) => setNewCert(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddCert()}
-                    placeholder="+ Add Certification"
-                    className="flex-1 p-2 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
-                  />
-                  <Button variant="secondary" size="sm" onClick={handleAddCert}>
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* VIEW MODE 2: DOCUMENT PREVIEW CANVAS (CONSERVATIVE SINGLE COLUMN ATS FORMAT) */
-        <div className="p-8 sm:p-12 rounded-2xl bg-white text-[#291B32] border border-[#DDD0D7] shadow-sm max-w-4xl mx-auto space-y-6 font-sans">
-          {/* Document Header */}
-          <div className="text-center pb-4 border-b border-[#DDD0D7] space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#291B32]">
-              {draft.candidate_name}
-            </h1>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-[#674E61]">
-              {draft.contact_info?.email && <span>{draft.contact_info.email}</span>}
-              {draft.contact_info?.phone && <span>• {draft.contact_info.phone}</span>}
-              {draft.contact_info?.location && <span>• {draft.contact_info.location}</span>}
-              {draft.contact_info?.linkedin && <span>• {draft.contact_info.linkedin}</span>}
-              {draft.contact_info?.github && <span>• {draft.contact_info.github}</span>}
-              {draft.contact_info?.portfolio && <span>• {draft.contact_info.portfolio}</span>}
-            </div>
-            {isFresher && (
-              <div className="pt-1">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7]">
-                  Fresher Adaptive Layout
-                </span>
-              </div>
+                <Sparkles className="w-3 h-3 text-[#C45D39]" />
+                <span>AI Improve Summary</span>
+              </button>
             )}
           </div>
 
-          {/* Document Summary */}
-          {draft.tailored_summary && draft.tailored_summary.trim() && (
-            <div className="space-y-1.5">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
-                Professional Summary
-              </h2>
-              <p className="text-xs text-[#291B32] leading-relaxed">
-                {draft.tailored_summary}
-              </p>
+          {isEditing ? (
+            <textarea
+              rows={4}
+              value={draft.tailored_summary}
+              onFocus={() =>
+                setActiveFocus({
+                  id: "summary",
+                  text: draft.tailored_summary,
+                  sectionType: "summary",
+                  context: `Target Role: ${draft.job_analysis?.target_role || "Software Engineer"}`,
+                  onApply: (improved) => handleFieldChange("tailored_summary", improved),
+                })
+              }
+              onChange={(e) => handleFieldChange("tailored_summary", e.target.value)}
+              className="w-full p-2 text-xs sm:text-sm text-[#291B32] leading-relaxed border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded-lg outline-none bg-transparent resize-y transition-all"
+              placeholder="Enter tailored professional summary..."
+            />
+          ) : (
+            <p className="text-xs sm:text-sm text-[#291B32] leading-relaxed pt-1">
+              {draft.tailored_summary}
+            </p>
+          )}
+        </div>
+
+        {/* Section: Technical & Core Skills */}
+        <div className="mt-5 space-y-2">
+          <div className="border-b border-[#291B32] pb-1">
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
+              Technical Skills & Competencies
+            </h2>
+          </div>
+
+          {isEditing ? (
+            <div className="space-y-3 pt-1">
+              {/* Role-Matching Skills */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C45D39] block">
+                  Core Role Competencies
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {draft.skills.matching_skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-semibold text-[#291B32]"
+                    >
+                      <span>{skill}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMatchingSkill(idx)}
+                        className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
+                        aria-label={`Remove ${skill}`}
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={newMatchingSkill}
+                      onChange={(e) => setNewMatchingSkill(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddMatchingSkill(e.currentTarget.value);
+                        }
+                      }}
+                      placeholder="+ Add Skill"
+                      className="px-2.5 py-1 rounded bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39] w-28"
+                    />
+                    {newMatchingSkill.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => handleAddMatchingSkill()}
+                        className="px-2 py-1 rounded bg-[#C45D39] text-white text-xs font-bold"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Technologies */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61] block">
+                  Additional Technologies & Tools
+                </span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {draft.skills.additional_skills.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-medium text-[#291B32]"
+                    >
+                      <span>{skill}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAdditionalSkill(idx)}
+                        className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
+                        aria-label={`Remove ${skill}`}
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={newAdditionalSkill}
+                      onChange={(e) => setNewAdditionalSkill(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddAdditionalSkill(e.currentTarget.value);
+                        }
+                      }}
+                      placeholder="+ Add Tool"
+                      className="px-2.5 py-1 rounded bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39] w-28"
+                    />
+                    {newAdditionalSkill.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => handleAddAdditionalSkill()}
+                        className="px-2 py-1 rounded bg-[#291B32] text-white text-xs font-bold"
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-xs sm:text-sm text-[#291B32] leading-relaxed pt-1 space-y-1">
+              {draft.skills.matching_skills.length > 0 && (
+                <div>
+                  <strong className="text-[#291B32]">Core Competencies:</strong>{" "}
+                  {draft.skills.matching_skills.join(", ")}
+                </div>
+              )}
+              {draft.skills.additional_skills.length > 0 && (
+                <div>
+                  <strong className="text-[#291B32]">Additional Technologies:</strong>{" "}
+                  {draft.skills.additional_skills.join(", ")}
+                </div>
+              )}
             </div>
           )}
+        </div>
 
-          {/* Document Skills */}
-          {(draft.skills.matching_skills.length > 0 || draft.skills.additional_skills.length > 0) && (
-            <div className="space-y-1.5">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
-                Technical & Core Skills
-              </h2>
-              <p className="text-xs text-[#291B32] leading-relaxed">
-                {draft.skills.matching_skills.length > 0 && (
-                  <>
-                    <strong className="text-[#291B32]">Core Competencies:</strong>{" "}
-                    {draft.skills.matching_skills.join(", ")}
-                  </>
+        {/* Section Rendering with Adaptive Ordering (Fresher vs Experienced) */}
+        {(() => {
+          // 1. Professional Experience Section
+          const renderExperienceSection = () => (
+            <div key="sec-experience" className="mt-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
+                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
+                  Professional Experience
+                </h2>
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleAddPosition}
+                    className="flex items-center gap-1 text-xs text-[#C45D39] hover:underline font-bold"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Position</span>
+                  </button>
                 )}
-                {draft.skills.additional_skills.length > 0 && (
-                  <>
-                    {draft.skills.matching_skills.length > 0 && <br />}
-                    <strong className="text-[#291B32]">Additional Technologies:</strong>{" "}
-                    {draft.skills.additional_skills.join(", ")}
-                  </>
-                )}
-              </p>
-            </div>
-          )}
+              </div>
 
-          {/* Subrenders for adaptive layout */}
-          {(() => {
-            const renderExperience = () =>
-              draft.experience.length > 0 ? (
-                <div key="exp" className="space-y-3">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
-                    Professional Experience
-                  </h2>
-                  <div className="space-y-4">
-                    {draft.experience.map((exp, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
+              <div className="space-y-4 pt-1">
+                {draft.experience.map((exp, expIdx) => (
+                  <div key={expIdx} className="space-y-1.5 group/pos">
+                    {/* Header Row: Role & Duration */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm gap-1">
+                      {isEditing ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={exp.role}
+                            onChange={(e) => handleUpdateExperience(expIdx, "role", e.target.value)}
+                            placeholder="Role Title"
+                            className="font-bold text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent flex-1"
+                          />
+                          <input
+                            type="text"
+                            value={exp.duration || ""}
+                            onChange={(e) => handleUpdateExperience(expIdx, "duration", e.target.value)}
+                            placeholder="Dates (e.g. 2022 - Present)"
+                            className="text-right text-[#674E61] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent w-36"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between w-full">
                           <span className="font-bold text-[#291B32]">{exp.role}</span>
                           <span className="text-[#674E61]">{exp.duration}</span>
                         </div>
-                        <div className="flex items-center justify-between text-xs italic text-[#674E61]">
+                      )}
+                    </div>
+
+                    {/* Sub-Header Row: Company & Location */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs italic text-[#674E61] gap-1">
+                      {isEditing ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={exp.company}
+                            onChange={(e) => handleUpdateExperience(expIdx, "company", e.target.value)}
+                            placeholder="Company Name"
+                            className="border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent flex-1"
+                          />
+                          <input
+                            type="text"
+                            value={exp.location || ""}
+                            onChange={(e) => handleUpdateExperience(expIdx, "location", e.target.value)}
+                            placeholder="Location"
+                            className="text-right border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent w-36"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePosition(expIdx)}
+                            className="text-[#674E61] hover:text-rose-600 p-1 opacity-70 hover:opacity-100"
+                            title="Remove entire position"
+                            aria-label={`Remove position ${exp.role}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between w-full">
                           <span>{exp.company}</span>
                           {exp.location && <span>{exp.location}</span>}
                         </div>
-                        <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32] pt-1">
-                          {exp.bullets.map((b, bIdx) => (
-                            <li key={bIdx} className="leading-relaxed">
-                              {b}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
+                      )}
+                    </div>
 
-            const renderProjects = () =>
-              draft.projects.length > 0 ? (
-                <div key="proj" className="space-y-3">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
-                    Key Projects
-                  </h2>
-                  <div className="space-y-3">
-                    {draft.projects.map((proj, pIdx) => (
-                      <div key={pIdx} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
+                    {/* Bullets List */}
+                    <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs sm:text-sm text-[#291B32] pt-1">
+                      {exp.bullets.map((bullet, bIdx) => (
+                        <li key={bIdx} className="leading-relaxed group/bullet">
+                          {isEditing ? (
+                            <div className="flex items-start gap-1.5">
+                              <textarea
+                                rows={2}
+                                value={bullet}
+                                onFocus={() =>
+                                  setActiveFocus({
+                                    id: `exp-${expIdx}-${bIdx}`,
+                                    text: bullet,
+                                    sectionType: "experience",
+                                    context: `Role: ${exp.role} at ${exp.company}`,
+                                    onApply: (improved) => handleUpdateBullet(expIdx, bIdx, improved),
+                                  })
+                                }
+                                onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)}
+                                className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
+                              />
+
+                              <div className="flex items-center gap-1 shrink-0 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openAiImprove({
+                                      id: `exp-${expIdx}-${bIdx}`,
+                                      text: bullet,
+                                      sectionType: "experience",
+                                      context: `Role: ${exp.role} at ${exp.company}`,
+                                      onApply: (improved) => handleUpdateBullet(expIdx, bIdx, improved),
+                                    })
+                                  }
+                                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
+                                  title="AI Improve this bullet"
+                                >
+                                  <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
+                                  <span>AI Improve</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveBullet(expIdx, bIdx)}
+                                  className="text-[#674E61] hover:text-rose-600 p-1"
+                                  aria-label={`Remove bullet ${bIdx + 1}`}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <span>{bullet}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {isEditing && (
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleAddBullet(expIdx)}
+                          className="text-xs text-[#C45D39] hover:underline font-semibold flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Bullet</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+
+          // 2. Key Projects Section
+          const renderProjectsSection = () => (
+            <div key="sec-projects" className="mt-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
+                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
+                  Key Projects
+                </h2>
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleAddProject}
+                    className="flex items-center gap-1 text-xs text-[#C45D39] hover:underline font-bold"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Project</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4 pt-1">
+                {draft.projects.map((proj, pIdx) => (
+                  <div key={pIdx} className="space-y-1.5 group/proj">
+                    {/* Project Title and Technologies */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm gap-1">
+                      {isEditing ? (
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={proj.name}
+                            onChange={(e) => handleUpdateProject(pIdx, "name", e.target.value)}
+                            placeholder="Project Name"
+                            className="font-bold text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent flex-1"
+                          />
+                          <input
+                            type="text"
+                            value={(proj.technologies || []).join(", ")}
+                            onChange={(e) =>
+                              handleUpdateProject(
+                                pIdx,
+                                "technologies",
+                                e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                              )
+                            }
+                            placeholder="Tech (comma-separated)"
+                            className="text-right text-[#674E61] font-mono text-xs border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent w-44"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveProject(pIdx)}
+                            className="text-[#674E61] hover:text-rose-600 p-1 opacity-70 hover:opacity-100"
+                            title="Remove project"
+                            aria-label={`Remove project ${proj.name}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between w-full">
                           <span className="font-bold text-[#291B32]">{proj.name}</span>
                           {proj.technologies && proj.technologies.length > 0 && (
                             <span className="text-[11px] text-[#674E61] font-mono">
@@ -1230,83 +1293,260 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                             </span>
                           )}
                         </div>
-                        {proj.link && (
-                          <div className="text-[11px] text-[#291B32] underline">
-                            {proj.link}
-                          </div>
-                        )}
-                        {proj.bullets && proj.bullets.length > 0 && (
-                          <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32] pt-0.5">
-                            {proj.bullets.map((b, bIdx) => (
-                              <li key={bIdx} className="leading-relaxed">
-                               {b}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
+                      )}
+                    </div>
 
-            const renderEducation = () =>
-              draft.education.length > 0 ? (
-                <div key="edu" className="space-y-2">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
-                    Education
-                  </h2>
-                  <div className="space-y-1.5">
-                    {draft.education.map((edu, i) => (
-                      <div key={i} className="text-xs space-y-0.5">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <strong className="text-[#291B32]">{edu.degree}</strong> — {edu.institution}
-                          </div>
-                          <span className="text-[#674E61]">{edu.year}</span>
+                    {/* Project Link */}
+                    {isEditing ? (
+                      <div>
+                        <input
+                          type="text"
+                          value={proj.link || ""}
+                          onChange={(e) => handleUpdateProject(pIdx, "link", e.target.value)}
+                          placeholder="Project link / repo URL"
+                          className="text-xs text-[#674E61] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent w-full"
+                        />
+                      </div>
+                    ) : (
+                      proj.link && (
+                        <div className="text-[11px] text-[#291B32] underline">
+                          {proj.link}
                         </div>
-                        {edu.details && (
-                          <p className="text-[11px] text-[#674E61] italic">{edu.details}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
+                      )
+                    )}
 
-            const renderCertifications = () =>
-              draft.certifications.length > 0 ? (
-                <div key="cert" className="space-y-2">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
+                    {/* Project Bullets */}
+                    <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs sm:text-sm text-[#291B32] pt-0.5">
+                      {(proj.bullets || []).map((bullet, bIdx) => (
+                        <li key={bIdx} className="leading-relaxed group/bullet">
+                          {isEditing ? (
+                            <div className="flex items-start gap-1.5">
+                              <textarea
+                                rows={2}
+                                value={bullet}
+                                onFocus={() =>
+                                  setActiveFocus({
+                                    id: `proj-${pIdx}-${bIdx}`,
+                                    text: bullet,
+                                    sectionType: "project",
+                                    context: `Project: ${proj.name}`,
+                                    onApply: (improved) => handleUpdateProjectBullet(pIdx, bIdx, improved),
+                                  })
+                                }
+                                onChange={(e) => handleUpdateProjectBullet(pIdx, bIdx, e.target.value)}
+                                className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
+                              />
+
+                              <div className="flex items-center gap-1 shrink-0 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openAiImprove({
+                                      id: `proj-${pIdx}-${bIdx}`,
+                                      text: bullet,
+                                      sectionType: "project",
+                                      context: `Project: ${proj.name}`,
+                                      onApply: (improved) => handleUpdateProjectBullet(pIdx, bIdx, improved),
+                                    })
+                                  }
+                                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
+                                  title="AI Improve this project bullet"
+                                >
+                                  <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
+                                  <span>AI Improve</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveProjectBullet(pIdx, bIdx)}
+                                  className="text-[#674E61] hover:text-rose-600 p-1"
+                                  aria-label={`Remove bullet ${bIdx + 1}`}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <span>{bullet}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {isEditing && (
+                      <div className="pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleAddProjectBullet(pIdx)}
+                          className="text-xs text-[#C45D39] hover:underline font-semibold flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Bullet</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+
+          // 3. Education & Credentials Section
+          const renderEducationSection = () => (
+            <div key="sec-education" className="mt-5 space-y-2.5">
+              <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
+                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
+                  Education & Credentials
+                </h2>
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleAddEducation}
+                    className="flex items-center gap-1 text-xs text-[#C45D39] hover:underline font-bold"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Education</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-3 pt-1">
+                {draft.education.map((edu, eduIdx) => (
+                  <div key={eduIdx} className="text-xs sm:text-sm space-y-1">
+                    {isEditing ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            type="text"
+                            value={edu.degree}
+                            onChange={(e) => handleUpdateEducation(eduIdx, "degree", e.target.value)}
+                            placeholder="Degree"
+                            className="font-bold text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent flex-1"
+                          />
+                          <span className="text-[#674E61]">—</span>
+                          <input
+                            type="text"
+                            value={edu.institution}
+                            onChange={(e) => handleUpdateEducation(eduIdx, "institution", e.target.value)}
+                            placeholder="Institution"
+                            className="text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent flex-1"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={edu.year || ""}
+                            onChange={(e) => handleUpdateEducation(eduIdx, "year", e.target.value)}
+                            placeholder="Year"
+                            className="text-right text-[#674E61] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-0.5 outline-none bg-transparent w-24"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEducation(eduIdx)}
+                            className="text-[#674E61] hover:text-rose-600 p-1"
+                            title="Remove education"
+                            aria-label={`Remove education ${edu.degree}`}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <strong className="text-[#291B32]">{edu.degree}</strong> — {edu.institution}
+                        </div>
+                        <span className="text-[#674E61]">{edu.year}</span>
+                      </div>
+                    )}
+                    {edu.details && (
+                      <p className="text-[11px] text-[#674E61] italic">{edu.details}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+
+          // 4. Certifications Section
+          const renderCertificationsSection = () =>
+            draft.certifications.length > 0 || isEditing ? (
+              <div key="sec-certs" className="mt-5 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
+                  <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
                     Certifications & Credentials
                   </h2>
-                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32]">
+                </div>
+
+                {isEditing ? (
+                  <div className="space-y-2 pt-1">
+                    <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32]">
+                      {draft.certifications.map((cert, cIdx) => (
+                        <li key={cIdx} className="leading-relaxed">
+                          <div className="flex items-center justify-between gap-2">
+                            <span>{cert}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCert(cIdx)}
+                              className="text-[#674E61] hover:text-rose-600 p-0.5"
+                              aria-label={`Remove ${cert}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <input
+                        type="text"
+                        value={newCert}
+                        onChange={(e) => setNewCert(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddCert()}
+                        placeholder="+ Add Certification"
+                        className="px-2.5 py-1 rounded bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39] w-48"
+                      />
+                      {newCert.trim() && (
+                        <button
+                          type="button"
+                          onClick={handleAddCert}
+                          className="px-2.5 py-1 rounded bg-[#C45D39] text-white text-xs font-bold"
+                        >
+                          Add
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs sm:text-sm text-[#291B32] pt-1">
                     {draft.certifications.map((cert, cIdx) => (
-                      <li key={cIdx} className="leading-relaxed">{cert}</li>
+                      <li key={cIdx} className="leading-relaxed">
+                        {cert}
+                      </li>
                     ))}
                   </ul>
-                </div>
-              ) : null;
+                )}
+              </div>
+            ) : null;
 
-            // Adaptive section ordering: fresher puts projects & education first
-            if (isFresher) {
-              return [
-                renderProjects(),
-                renderEducation(),
-                renderExperience(),
-                renderCertifications(),
-              ];
-            } else {
-              return [
-                renderExperience(),
-                renderProjects(),
-                renderEducation(),
-                renderCertifications(),
-              ];
-            }
-          })()}
-        </div>
-      )}
+          // Adaptive layout ordering based on candidate experience level
+          if (isFresher) {
+            return [
+              renderProjectsSection(),
+              renderEducationSection(),
+              renderExperienceSection(),
+              renderCertificationsSection(),
+            ];
+          } else {
+            return [
+              renderExperienceSection(),
+              renderProjectsSection(),
+              renderEducationSection(),
+              renderCertificationsSection(),
+            ];
+          }
+        })()}
+      </div>
 
       {/* MODAL 1: RESUME QUALITY AUDIT MODAL */}
       {isAuditModalOpen && draft.audit && (

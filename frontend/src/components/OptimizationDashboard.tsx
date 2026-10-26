@@ -54,110 +54,142 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
   return (
     <div className="space-y-8">
-      {/* SECTION 1: HERO CIRCULAR SCORING OVERVIEW (Deep Aubergine Dark Surface with Burnished Copper Glow) */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#291B32] border border-[#3D294B] shadow-xl relative overflow-hidden text-white">
-        {/* Subtle Burnished Copper background glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C45D39]/15 rounded-full blur-3xl pointer-events-none" />
+      {/* SECTION 1: HERO DUAL-SCORE OVERVIEW (Deep Aubergine Dark Surfaces with High-Contrast Score Rings) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-white">
+        {/* SCORE A: Target Job Match Score */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#291B32] border border-[#3D294B] shadow-xl relative overflow-hidden flex flex-col justify-between space-y-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C45D39]/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-          {/* Main Hero Circular Score Ring */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+          <div className="flex items-center justify-between relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#3D294B] border border-[#C45D39]/40 text-xs font-semibold text-[#E8D9E8]">
+              <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
+              <span>Score A (JD Match): Target Job Match</span>
+            </div>
+            <span className="text-xs font-mono font-bold text-[#DDD0D7] bg-[#1F1426] px-2 py-0.5 rounded border border-[#3D294B]">
+              6-Factor Model
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
             <CircularScoreRing
               score={overallScore}
-              size={140}
-              strokeWidth={12}
+              size={130}
+              strokeWidth={11}
               color="#C45D39"
-              trackColor="#3D294B"
-              label=""
+              trackColor="#4A355A"
+              theme="dark"
+              textColor="text-white"
+              subtextColor="text-[#E8D9E8]"
+              sublabel="JD Match"
             />
-            <div className="space-y-1.5 max-w-sm">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3D294B] border border-[#C45D39]/40 text-xs font-semibold text-[#E8D9E8]">
-                <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
-                <span>Overall ATS Match Score</span>
-              </div>
-              <h3 className="font-heading font-extrabold text-2xl text-white">
+            <div className="space-y-1.5 text-center sm:text-left">
+              <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white">
                 {overallScore >= 85
-                  ? "Outstanding ATS Alignment"
+                  ? "Outstanding Match"
                   : overallScore >= 70
                   ? "Strong Role Alignment"
-                  : "Requires Targeted Optimization"}
+                  : "Targeted Optimization Needed"}
               </h3>
               <p className="text-xs text-[#DDD0D7] leading-relaxed">
-                Evaluated against explicit job requirements across 6 verified dimensions. Re-check score as you edit your draft.
+                Semantic alignment against target job requirements. Evaluates mandatory competencies, seniority, and domain terms.
               </p>
-              {atsAssessment && (
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#352340] border border-[#442D52] text-[#DDD0D7]">
-                    Score A (JD Match): <strong className="text-white font-mono">{overallScore}%</strong>
-                  </span>
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#3D294B] border border-[#C45D39]/40 text-[#E8D9E8]">
-                    Score B (ATS Quality): <strong className="text-white font-mono">{atsAssessment.overall_score}%</strong> ({audit?.grade || "Grade A"})
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Sub-Metrics Circular Rings */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full lg:w-auto">
-            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
-              <CircularScoreRing
-                score={matchBreakdown?.required_skill_score ?? 85}
-                size={76}
-                strokeWidth={7}
-                color="#C45D39"
-                trackColor="#291B32"
-                sublabel="/ 100"
-              />
-              <span className="text-[11px] font-bold text-white mt-2 text-center">
-                Required Skills
+          {/* Sub-Metrics for Score A */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#3D294B] relative z-10">
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {matchBreakdown?.required_skill_score ?? 85}%
               </span>
-              <span className="text-[10px] text-[#DDD0D7]">35% weight</span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Required (35%)</span>
             </div>
-
-            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
-              <CircularScoreRing
-                score={matchBreakdown?.experience_score ?? 80}
-                size={76}
-                strokeWidth={7}
-                color="#E8D9E8"
-                trackColor="#291B32"
-                sublabel="/ 100"
-              />
-              <span className="text-[11px] font-bold text-white mt-2 text-center">
-                Role Alignment
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {matchBreakdown?.experience_score ?? 80}%
               </span>
-              <span className="text-[10px] text-[#DDD0D7]">20% weight</span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Role Align (20%)</span>
             </div>
-
-            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
-              <CircularScoreRing
-                score={matchBreakdown?.keyword_score ?? 78}
-                size={76}
-                strokeWidth={7}
-                color="#C45D39"
-                trackColor="#291B32"
-                sublabel="/ 100"
-              />
-              <span className="text-[11px] font-bold text-white mt-2 text-center">
-                Keywords
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {matchBreakdown?.keyword_score ?? 78}%
               </span>
-              <span className="text-[10px] text-[#DDD0D7]">10% weight</span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Keywords (10%)</span>
             </div>
-
-            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
-              <CircularScoreRing
-                score={matchBreakdown?.structure_score ?? 95}
-                size={76}
-                strokeWidth={7}
-                color="#E8D9E8"
-                trackColor="#291B32"
-                sublabel="/ 100"
-              />
-              <span className="text-[11px] font-bold text-white mt-2 text-center">
-                Formatting
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {matchBreakdown?.structure_score ?? 95}%
               </span>
-              <span className="text-[10px] text-[#DDD0D7]">5% weight</span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Format (5%)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SCORE B: ATS & Resume Quality Score */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-[#291B32] border border-[#3D294B] shadow-xl relative overflow-hidden flex flex-col justify-between space-y-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8D9E8]/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="flex items-center justify-between relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#3D294B] border border-[#E8D9E8]/40 text-xs font-semibold text-[#E8D9E8]">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#E8D9E8]" />
+              <span>Score B (ATS Quality): Document Standards</span>
+            </div>
+            <span className="text-xs font-mono font-bold text-[#E8D9E8] bg-[#3D294B] px-2.5 py-0.5 rounded-full border border-[#4A355A]">
+              {audit?.grade || "Grade A"}
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10">
+            <CircularScoreRing
+              score={atsAssessment?.overall_score ?? audit?.overall_score ?? 90}
+              size={130}
+              strokeWidth={11}
+              color="#E8D9E8"
+              trackColor="#4A355A"
+              theme="dark"
+              textColor="text-white"
+              subtextColor="text-[#E8D9E8]"
+              sublabel="ATS Quality"
+            />
+            <div className="space-y-1.5 text-center sm:text-left">
+              <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-white">
+                {audit?.grade === "Grade A"
+                  ? "Enterprise ATS Ready"
+                  : audit?.grade === "Grade B"
+                  ? "Good Compatibility"
+                  : "Structure Needs Review"}
+              </h3>
+              <p className="text-xs text-[#DDD0D7] leading-relaxed">
+                Deterministic audit assessing parseability, section headers, bullet length, typography, and recruiter readability.
+              </p>
+            </div>
+          </div>
+
+          {/* Sub-Metrics for Score B */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#3D294B] relative z-10">
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {atsAssessment?.parseability_score ?? 95}%
+              </span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Parseability (25%)</span>
+            </div>
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {atsAssessment?.structure_score ?? 92}%
+              </span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Structure (20%)</span>
+            </div>
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {atsAssessment?.readability_score ?? 88}%
+              </span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Readability (15%)</span>
+            </div>
+            <div className="p-2 rounded-lg bg-[#1F1426]/60 border border-[#3D294B] text-center">
+              <span className="text-xs font-mono font-bold text-white block">
+                {atsAssessment?.formatting_consistency_score ?? 90}%
+              </span>
+              <span className="text-[10px] text-[#DDD0D7] block truncate">Format (15%)</span>
             </div>
           </div>
         </div>

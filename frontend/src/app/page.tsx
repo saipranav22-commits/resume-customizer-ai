@@ -99,7 +99,8 @@ export default function Home() {
     e.preventDefault();
     if (isDirty && tailoredResult) {
       if (
-        !confirm(
+        typeof window !== "undefined" &&
+        !window.confirm(
           "You have unsaved changes in your active tailored resume. Re-tailoring will overwrite your current workspace. Continue?"
         )
       ) {
@@ -169,7 +170,8 @@ export default function Home() {
   const handleReset = () => {
     if (isDirty && tailoredResult) {
       if (
-        !confirm(
+        typeof window !== "undefined" &&
+        !window.confirm(
           "You have unsaved changes in your active tailored resume. Resetting will discard these changes. Continue?"
         )
       ) {
@@ -185,8 +187,11 @@ export default function Home() {
     setIsSaved(false);
   };
 
-  const handleOpenSaveModal = () => {
-    if (!tailoredResult) return;
+  const handleOpenSaveModal = (currentDraft?: TailoredResumeResponse) => {
+    if (currentDraft) {
+      setTailoredResult(currentDraft);
+    }
+    if (!tailoredResult && !currentDraft) return;
     if (!user || !token) {
       setIsAuthModalOpen(true);
       return;
@@ -229,7 +234,8 @@ export default function Home() {
 
   const handleDetachActiveVersion = () => {
     if (
-      confirm(
+      typeof window !== "undefined" &&
+      window.confirm(
         "Detach from this revision family? Your current workspace content will remain, but subsequent saves will create a brand-new independent root (v1)."
       )
     ) {
@@ -244,7 +250,8 @@ export default function Home() {
   const handleLoadHistory = (detail: CustomizationHistoryDetail) => {
     if (isDirty && tailoredResult) {
       if (
-        !confirm(
+        typeof window !== "undefined" &&
+        !window.confirm(
           "You have unsaved changes in your active tailored resume. Loading another version will discard your current modifications. Continue?"
         )
       ) {
@@ -315,12 +322,19 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-[#F7F2EB] text-[#291B32] flex flex-col font-sans selection:bg-[#C45D39]/20 selection:text-[#291B32] studio-mesh-grid">
+    <div className="min-h-screen bg-[#F7F2EB] text-[#291B32] flex flex-col font-sans selection:bg-[#C45D39]/20 selection:text-[#291B32] studio-editorial-bg relative overflow-x-hidden">
+      {/* Editorial architectural line accents */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute left-[15%] top-0 bottom-0 w-[1px] bg-gradient-to-b from-[#C45D39]/12 via-[#291B32]/5 to-transparent" />
+        <div className="absolute right-[12%] top-32 w-64 h-88 border border-[#C45D39]/8 rounded-2xl bg-white/[0.04] transform rotate-[-2deg] hidden xl:block shadow-xs" />
+        <div className="absolute left-[8%] top-64 w-52 h-72 border border-[#291B32]/6 rounded-2xl bg-white/[0.03] transform rotate-[3deg] hidden xl:block shadow-xs" />
+      </div>
+
       {/* 1. Header and Account Controls */}
       <Header onOpenHistory={() => setIsHistoryDrawerOpen(true)} />
 
       {/* Primary Centered Vertical Workflow Container */}
-      <main className="flex-1 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12">
+      <main className="flex-1 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 relative z-10">
         {/* 2. Hero Section with Radial Glow and Visual Composition */}
         <section className="relative text-center max-w-3xl mx-auto pt-6 pb-2">
           {/* Subtle radial ambient glow */}
@@ -634,7 +648,7 @@ export default function Home() {
 
                 <button
                   type="button"
-                  onClick={handleOpenSaveModal}
+                  onClick={() => handleOpenSaveModal()}
                   disabled={isSaving}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#291B32] hover:bg-[#3B2848] active:bg-[#1F1426] text-[#FAF6F2] shadow-xs transition-all"
                 >

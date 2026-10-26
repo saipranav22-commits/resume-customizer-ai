@@ -10,6 +10,9 @@ export interface CircularScoreRingProps {
   sublabel?: string;
   color?: string;
   trackColor?: string;
+  textColor?: string;
+  subtextColor?: string;
+  theme?: "dark" | "light";
   delta?: number | null;
   className?: string;
 }
@@ -21,7 +24,10 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
   label,
   sublabel = "/ 100",
   color = "#C45D39",
-  trackColor = "#E8D9E8",
+  trackColor,
+  textColor,
+  subtextColor,
+  theme = "light",
   delta,
   className = "",
 }) => {
@@ -29,6 +35,20 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (clampedScore / 100) * circumference;
+
+  // Resolve high-contrast colors based on theme
+  const isDark = theme === "dark";
+  const resolvedTrack = trackColor || (isDark ? "#4A355A" : "#DDD0D7");
+  const resolvedTextColor = textColor || (isDark ? "text-white" : "text-[#291B32]");
+  const resolvedSubtextColor = subtextColor || (isDark ? "text-[#E8D9E8]" : "text-[#674E61]");
+
+  // Dynamic typography sizing based on ring diameter
+  const scoreTextSize =
+    size >= 130
+      ? "text-3xl font-black"
+      : size >= 95
+      ? "text-2xl font-extrabold"
+      : "text-lg font-bold";
 
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
@@ -42,12 +62,12 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          {/* Background track circle */}
+          {/* Background track circle - high contrast */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={trackColor}
+            stroke={resolvedTrack}
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -66,13 +86,17 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
           />
         </svg>
 
-        {/* Center content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className="font-heading font-extrabold text-[#291B32] tracking-tight leading-none text-2xl">
+        {/* Center content - Always visible with WCAG AA contrast */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+          <span
+            className={`font-heading ${scoreTextSize} ${resolvedTextColor} tracking-tight leading-none drop-shadow-xs`}
+          >
             {clampedScore}%
           </span>
           {sublabel && (
-            <span className="text-[10px] text-[#674E61] uppercase tracking-wider font-semibold mt-0.5">
+            <span
+              className={`text-[10px] ${resolvedSubtextColor} uppercase tracking-wider font-semibold mt-0.5 leading-tight`}
+            >
               {sublabel}
             </span>
           )}
@@ -83,7 +107,7 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
           <div
             className={`absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold shadow-xs flex items-center gap-0.5 ${
               delta > 0
-                ? "bg-[#C45D39]/15 text-[#C45D39] border border-[#C45D39]/30"
+                ? "bg-[#C45D39]/20 text-[#C45D39] border border-[#C45D39]/40"
                 : "bg-rose-50 text-rose-700 border border-rose-200"
             }`}
           >
@@ -93,7 +117,9 @@ export const CircularScoreRing: React.FC<CircularScoreRingProps> = ({
       </div>
 
       {label && (
-        <span className="text-xs font-medium text-[#674E61] mt-2.5 text-center line-clamp-1 max-w-[130px]">
+        <span
+          className={`text-xs font-semibold ${isDark ? "text-white" : "text-[#291B32]"} mt-2.5 text-center line-clamp-1 max-w-[140px]`}
+        >
           {label}
         </span>
       )}

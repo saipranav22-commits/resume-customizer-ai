@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, Check, X, Edit3, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
+import { Sparkles, Check, X, Edit3, ShieldCheck, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { improveResumeText, ApiError } from "@/lib/api";
 import Button from "@/components/ui/Button";
 
@@ -32,6 +32,29 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [userEditedText, setUserEditedText] = useState<string>("");
 
+  const runImprovement = async (textSource: string) => {
+    setIsLoading(true);
+    setError(null);
+    setIsEditing(false);
+    try {
+      const res = await improveResumeText({
+        text: textSource,
+        section_type: sectionType,
+        job_description: jobDescription,
+        context: contextInfo,
+      });
+      setImprovedText(res.improved_text);
+      setUserEditedText(res.improved_text);
+      setRationale(res.rationale);
+      setImpactKeywords(res.impact_keywords || []);
+    } catch (err: unknown) {
+      const msg = err instanceof ApiError ? err.message : "Failed to generate AI improvement.";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isOpen || !originalText.trim()) return;
 
@@ -41,7 +64,7 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
     setError(null);
     setIsEditing(false);
 
-    async function fetchImprovement() {
+    async function initialFetch() {
       try {
         const res = await improveResumeText({
           text: originalText,
@@ -66,7 +89,7 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
       }
     }
 
-    fetchImprovement();
+    initialFetch();
 
     return () => {
       isMounted = false;
@@ -74,6 +97,12 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
   }, [isOpen, originalText, sectionType, jobDescription, contextInfo]);
 
   if (!isOpen) return null;
+
+  const handleImproveAgain = () => {
+    // Operate on either the user's manual tweak or the current proposal
+    const textToIterate = isEditing ? userEditedText : improvedText || originalText;
+    runImprovement(textToIterate);
+  };
 
   const handleAccept = () => {
     const finalSelection = isEditing ? userEditedText : improvedText;
@@ -206,6 +235,16 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
             <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#DDD0D7]">
               <Button variant="ghost" size="md" onClick={onClose} className="w-full sm:w-auto">
                 Keep Original
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={handleImproveAgain}
+                isLoading={isLoading}
+                icon={<RefreshCw className={`w-3.5 h-3.5 text-[#C45D39] ${isLoading ? "animate-spin" : ""}`} />}
+                className="w-full sm:w-auto"
+              >
+                Improve Again
               </Button>
               <Button
                 variant="primary"
