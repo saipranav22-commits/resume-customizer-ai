@@ -19,7 +19,10 @@ import {
   Award,
   User,
   Wrench,
-  ChevronDown
+  ChevronDown,
+  ShieldCheck,
+  XCircle,
+  X,
 } from "lucide-react";
 import {
   TailoredResumeResponse,
@@ -27,9 +30,9 @@ import {
   EducationItem,
   ProjectItem,
   MatchScoreBreakdown,
-  OptimizationRecommendation
+  OptimizationRecommendation,
 } from "@/types/resume";
-import { recheckResumeScore, ApiError } from "@/lib/api";
+import { recheckResumeScore, auditResume, ApiError } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import AIImproveModal from "@/components/AIImproveModal";
 
@@ -53,11 +56,18 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   onScoreUpdated,
 }) => {
   // Deep clone initial resume to avoid mutating parent props
-  const [draft, setDraft] = useState<TailoredResumeResponse>(() => JSON.parse(JSON.stringify(resumeData)));
+  const [draft, setDraft] = useState<TailoredResumeResponse>(() =>
+    resumeData ? JSON.parse(JSON.stringify(resumeData)) : ({} as TailoredResumeResponse)
+  );
   const [viewMode, setViewMode] = useState<"editor" | "preview">("editor");
   const [isScoreStale, setIsScoreStale] = useState<boolean>(false);
   const [isRechecking, setIsRechecking] = useState<boolean>(false);
   const [recheckMessage, setRecheckMessage] = useState<string | null>(null);
+
+  // Phase 6.2: Audit and Dual-Score Modal States
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState<boolean>(false);
+  const [isAuditing, setIsAuditing] = useState<boolean>(false);
+  const [showDualScoreModal, setShowDualScoreModal] = useState<boolean>(false);
 
   // New skill input states
   const [newMatchingSkill, setNewMatchingSkill] = useState<string>("");
@@ -71,6 +81,21 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     context?: string;
     onApply: (improved: string) => void;
   } | null>(null);
+
+  // Detect fresher candidate profile for adaptive section ordering
+  const isFresher = useMemo(() => {
+    if (!draft.experience || draft.experience.length === 0) return true;
+    if (draft.experience.length === 1) {
+      const role = (draft.experience[0].role || "").toLowerCase();
+      if (["intern", "student", "trainee", "fellow", "apprentice"].some((w) => role.includes(w))) {
+        return true;
+      }
+      if (draft.projects && draft.projects.length >= 2) {
+        return true;
+      }
+    }
+    return false;
+  }, [draft.experience, draft.projects]);
 
   // Update draft whenever parent resumeData completely resets (e.g. from version restore)
   useEffect(() => {
@@ -319,7 +344,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         previous_breakdown: draft.match_breakdown,
       });
 
-      // Update draft with fresh score and breakdown
+      // Update draft with fresh score, breakdown, and audit
       setDraft((prev) => ({
         ...prev,
         match_score: res.match_score,
@@ -327,9 +352,12 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         match_breakdown: res.match_breakdown,
         recommendations: res.recommendations,
         missing_keywords: res.missing_keywords,
+        audit: res.audit ?? prev.audit,
+        ats_quality_assessment: res.ats_quality_assessment ?? prev.ats_quality_assessment,
       }));
 
       setIsScoreStale(false);
+      setShowDualScoreModal(true);
       const sign = res.score_delta > 0 ? `+${res.score_delta}` : `${res.score_delta}`;
       setRecheckMessage(
         res.score_delta !== 0
@@ -345,6 +373,21 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
       setRecheckMessage(`Error: ${msg}`);
     } finally {
       setIsRechecking(false);
+    }
+  };
+
+  // --- Run Resume Quality Audit Workflow ---
+  const handleRunAudit = async () => {
+    setIsAuditing(true);
+    try {
+      const auditRes = await auditResume(draft, jobDescription);
+      setDraft((prev) => ({ ...prev, audit: auditRes }));
+      setIsAuditModalOpen(true);
+    } catch (err: unknown) {
+      const msg = err instanceof ApiError ? err.message : "Failed to run resume audit.";
+      alert(msg);
+    } finally {
+      setIsAuditing(false);
     }
   };
 
@@ -411,8 +454,30 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           )}
         </div>
 
-        {/* Right: Actions (Re-check, Discard, Save Version, Export) */}
+        {/* Right: Actions (ATS Audit, Re-check, Discard, Save Version, Export) */}
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
+          {/* ATS Quality Audit Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRunAudit}
+            isLoading={isAuditing}
+            icon={<ShieldCheck className="w-3.5 h-3.5 text-[#7C4DFF]" />}
+          >
+            <span>ATS Audit</span>
+            {draft.audit ? (
+              <span
+                className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                  draft.audit.errors.length > 0
+                    ? "bg-rose-500/20 text-rose-300"
+                    : "bg-[#2C224B] text-[#B89AFF]"
+                }`}
+              >
+                {draft.audit.overall_score}%
+              </span>
+            ) : null}
+          </Button>
+
           {/* Re-check Score Button */}
           <Button
             variant="ai"
@@ -1058,7 +1123,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           </div>
         </div>
       ) : (
-        /* VIEW MODE 2: DOCUMENT PREVIEW CANVAS */
+        /* VIEW MODE 2: DOCUMENT PREVIEW CANVAS (ATS SINGLE COLUMN) */
         <div className="p-8 sm:p-12 rounded-2xl bg-[#FFFFFF] text-[#111827] shadow-2xl max-w-4xl mx-auto space-y-6 font-sans">
           {/* Document Header */}
           <div className="text-center pb-4 border-b border-slate-200 space-y-2">
@@ -1070,11 +1135,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {draft.contact_info?.phone && <span>• {draft.contact_info.phone}</span>}
               {draft.contact_info?.location && <span>• {draft.contact_info.location}</span>}
               {draft.contact_info?.linkedin && <span>• {draft.contact_info.linkedin}</span>}
+              {draft.contact_info?.github && <span>• {draft.contact_info.github}</span>}
+              {draft.contact_info?.portfolio && <span>• {draft.contact_info.portfolio}</span>}
             </div>
+            {isFresher && (
+              <div className="pt-1">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  Fresher Adaptive Layout
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Document Summary */}
-          {draft.tailored_summary && (
+          {draft.tailored_summary && draft.tailored_summary.trim() && (
             <div className="space-y-1.5">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
                 Professional Summary
@@ -1086,17 +1160,21 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           )}
 
           {/* Document Skills */}
-          {draft.skills.matching_skills.length > 0 && (
+          {(draft.skills.matching_skills.length > 0 || draft.skills.additional_skills.length > 0) && (
             <div className="space-y-1.5">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
-                Technical Skills
+                Technical & Core Skills
               </h2>
               <p className="text-xs text-slate-700 leading-relaxed">
-                <strong className="text-slate-900">Core Competencies:</strong>{" "}
-                {draft.skills.matching_skills.join(", ")}
+                {draft.skills.matching_skills.length > 0 && (
+                  <>
+                    <strong className="text-slate-900">Core Competencies:</strong>{" "}
+                    {draft.skills.matching_skills.join(", ")}
+                  </>
+                )}
                 {draft.skills.additional_skills.length > 0 && (
                   <>
-                    <br />
+                    {draft.skills.matching_skills.length > 0 && <br />}
                     <strong className="text-slate-900">Additional Technologies:</strong>{" "}
                     {draft.skills.additional_skills.join(", ")}
                   </>
@@ -1105,54 +1183,384 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             </div>
           )}
 
-          {/* Document Experience */}
-          {draft.experience.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
-                Professional Experience
-              </h2>
-              <div className="space-y-4">
-                {draft.experience.map((exp, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-900">{exp.role}</span>
-                      <span className="text-slate-500">{exp.duration}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs italic text-slate-600">
-                      <span>{exp.company}</span>
-                      <span>{exp.location}</span>
-                    </div>
-                    <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700 pt-1">
-                      {exp.bullets.map((b, bIdx) => (
-                        <li key={bIdx} className="leading-relaxed">
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
+          {/* Subrenders for adaptive layout */}
+          {(() => {
+            const renderExperience = () =>
+              draft.experience.length > 0 ? (
+                <div key="exp" className="space-y-3">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                    Professional Experience
+                  </h2>
+                  <div className="space-y-4">
+                    {draft.experience.map((exp, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-slate-900">{exp.role}</span>
+                          <span className="text-slate-500">{exp.duration}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs italic text-slate-600">
+                          <span>{exp.company}</span>
+                          {exp.location && <span>{exp.location}</span>}
+                        </div>
+                        <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700 pt-1">
+                          {exp.bullets.map((b, bIdx) => (
+                            <li key={bIdx} className="leading-relaxed">
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              ) : null;
 
-          {/* Document Education */}
-          {draft.education.length > 0 && (
-            <div className="space-y-2">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
-                Education
-              </h2>
-              <div className="space-y-1.5">
-                {draft.education.map((edu, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <div>
-                      <strong className="text-slate-900">{edu.degree}</strong> — {edu.institution}
-                    </div>
-                    <span className="text-slate-500">{edu.year}</span>
+            const renderProjects = () =>
+              draft.projects.length > 0 ? (
+                <div key="proj" className="space-y-3">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                    Key Projects
+                  </h2>
+                  <div className="space-y-3">
+                    {draft.projects.map((proj, pIdx) => (
+                      <div key={pIdx} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-slate-900">{proj.name}</span>
+                          {proj.technologies && proj.technologies.length > 0 && (
+                            <span className="text-[11px] text-slate-600 font-mono">
+                              [{proj.technologies.join(", ")}]
+                            </span>
+                          )}
+                        </div>
+                        {proj.link && (
+                          <div className="text-[11px] text-blue-700 underline">
+                            {proj.link}
+                          </div>
+                        )}
+                        {proj.bullets && proj.bullets.length > 0 && (
+                          <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700 pt-0.5">
+                            {proj.bullets.map((b, bIdx) => (
+                              <li key={bIdx} className="leading-relaxed">
+                                {b}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              ) : null;
+
+            const renderEducation = () =>
+              draft.education.length > 0 ? (
+                <div key="edu" className="space-y-2">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                    Education
+                  </h2>
+                  <div className="space-y-1.5">
+                    {draft.education.map((edu, i) => (
+                      <div key={i} className="text-xs space-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <strong className="text-slate-900">{edu.degree}</strong> — {edu.institution}
+                          </div>
+                          <span className="text-slate-500">{edu.year}</span>
+                        </div>
+                        {edu.details && (
+                          <p className="text-[11px] text-slate-600 italic">{edu.details}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+
+            const renderCertifications = () =>
+              draft.certifications.length > 0 ? (
+                <div key="cert" className="space-y-2">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                    Certifications & Credentials
+                  </h2>
+                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700">
+                    {draft.certifications.map((cert, cIdx) => (
+                      <li key={cIdx} className="leading-relaxed">{cert}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null;
+
+            // Adaptive section ordering: fresher puts projects & education first
+            if (isFresher) {
+              return [
+                renderProjects(),
+                renderEducation(),
+                renderExperience(),
+                renderCertifications(),
+              ];
+            } else {
+              return [
+                renderExperience(),
+                renderProjects(),
+                renderEducation(),
+                renderCertifications(),
+              ];
+            }
+          })()}
+        </div>
+      )}
+
+      {/* MODAL 1: RESUME QUALITY AUDIT MODAL */}
+      {isAuditModalOpen && draft.audit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111827] border border-[#30384B] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-[#7C4DFF]" />
+                <h3 className="font-heading font-bold text-lg text-[#F7F7FA]">
+                  ATS & Resume Quality Audit
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAuditModalOpen(false)}
+                className="p-1 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Overall Health Score Card */}
+            <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] flex items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold text-[#B8B9D0] uppercase">Overall Document Health</span>
+                <h4 className="text-xl font-extrabold text-[#F7F7FA]">Grade {draft.audit.grade}</h4>
+                <p className="text-xs text-[#B8B9D0] mt-1">{draft.audit.summary}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-3xl font-black text-[#7C4DFF] font-mono">{draft.audit.overall_score}%</span>
+                <span className="block text-[10px] text-[#B8B9D0]">Health Index</span>
               </div>
             </div>
-          )}
+
+            {/* Metrics Chips */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
+                <span className="text-[10px] text-[#B8B9D0] block">Word Count</span>
+                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.word_count ?? 0}</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
+                <span className="text-[10px] text-[#B8B9D0] block">Bullet Count</span>
+                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.bullet_count ?? 0}</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
+                <span className="text-[10px] text-[#B8B9D0] block">Avg Words/Bullet</span>
+                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.avg_bullet_words ?? 0}</span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
+                <span className="text-[10px] text-[#B8B9D0] block">Duplicate Skills</span>
+                <span className={`text-sm font-bold ${(draft.audit.metrics.duplicate_skills_count ?? 0) > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                  {draft.audit.metrics.duplicate_skills_count ?? 0}
+                </span>
+              </div>
+            </div>
+
+            {/* Issue Sections */}
+            <div className="space-y-4 text-xs">
+              {/* Errors */}
+              {draft.audit.errors.length > 0 && (
+                <div className="space-y-2">
+                  <h5 className="font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <XCircle className="w-4 h-4" />
+                    <span>Critical ATS Blockers ({draft.audit.errors.length})</span>
+                  </h5>
+                  <div className="space-y-2">
+                    {draft.audit.errors.map((err) => (
+                      <div key={err.id} className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-200 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <strong className="text-rose-100">{err.message}</strong>
+                          {err.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20">{err.location}</span>}
+                        </div>
+                        <p className="text-[11px] text-rose-300">{err.detail}</p>
+                        {err.recommendation && (
+                          <p className="text-[11px] text-rose-200 font-medium">💡 Fix: {err.recommendation}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Warnings */}
+              {draft.audit.warnings.length > 0 && (
+                <div className="space-y-2">
+                  <h5 className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span>Formatting & Consistency Warnings ({draft.audit.warnings.length})</span>
+                  </h5>
+                  <div className="space-y-2">
+                    {draft.audit.warnings.map((warn) => (
+                      <div key={warn.id} className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <strong className="text-amber-100">{warn.message}</strong>
+                          {warn.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20">{warn.location}</span>}
+                        </div>
+                        <p className="text-[11px] text-amber-300">{warn.detail}</p>
+                        {warn.recommendation && (
+                          <p className="text-[11px] text-amber-200 font-medium">💡 Fix: {warn.recommendation}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Suggestions */}
+              {draft.audit.suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <h5 className="font-bold text-[#B89AFF] uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4" />
+                    <span>High-Impact Polish Suggestions ({draft.audit.suggestions.length})</span>
+                  </h5>
+                  <div className="space-y-2">
+                    {draft.audit.suggestions.map((sug) => (
+                      <div key={sug.id} className="p-3 rounded-lg bg-[#2C224B]/40 border border-[#7C4DFF]/30 text-[#F7F7FA] space-y-1">
+                        <div className="flex items-center justify-between">
+                          <strong className="text-white">{sug.message}</strong>
+                          {sug.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2C224B]">{sug.location}</span>}
+                        </div>
+                        <p className="text-[11px] text-[#B8B9D0]">{sug.detail}</p>
+                        {sug.recommendation && (
+                          <p className="text-[11px] text-[#B89AFF] font-medium">💡 Suggestion: {sug.recommendation}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button variant="secondary" size="sm" onClick={() => setIsAuditModalOpen(false)}>
+                Close Audit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: DUAL SCORE RE-CHECK BREAKDOWN MODAL */}
+      {showDualScoreModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#111827] border border-[#30384B] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#7C4DFF]" />
+                <h3 className="font-heading font-bold text-lg text-[#F7F7FA]">
+                  Live Re-check Evaluation
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDualScoreModal(false)}
+                className="p-1 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Dual Score Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Score A: Job Description Match Score */}
+              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[11px] font-semibold text-[#B89AFF] uppercase block">Factor A</span>
+                    <h4 className="font-bold text-sm text-[#F7F7FA]">Job Description Match</h4>
+                  </div>
+                  <span className="text-2xl font-black text-[#7C4DFF] font-mono">
+                    {draft.match_score}%
+                  </span>
+                </div>
+                {draft.match_breakdown && (
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Required Skills (35%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.required_skill_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Preferred Skills (15%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.preferred_skill_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Experience Alignment (20%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.experience_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Responsibilities (15%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.responsibility_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Domain Keywords (10%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.keyword_score}%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Score B: ATS & Resume Quality Assessment */}
+              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[11px] font-semibold text-[#FDBB83] uppercase block">Factor B</span>
+                    <h4 className="font-bold text-sm text-[#F7F7FA]">ATS & Document Quality</h4>
+                  </div>
+                  <span className="text-2xl font-black text-[#FDBB83] font-mono">
+                    {draft.ats_quality_assessment?.overall_score ?? draft.ats_compatibility?.score ?? 90}%
+                  </span>
+                </div>
+                {draft.ats_quality_assessment && (
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Parseability (25%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.parseability_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Section Structure (20%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.structure_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Readability (15%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.readability_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Formatting Consistency (15%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.formatting_consistency_score}%</span>
+                    </div>
+                    <div className="flex justify-between text-[#B8B9D0]">
+                      <span>Content Coverage (15%):</span>
+                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.content_coverage_score}%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Non-proprietary Disclaimer */}
+            <div className="p-3.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-[11px] text-[#B8B9D0] leading-relaxed">
+              <span className="font-bold text-[#F7F7FA] block mb-0.5">Verification Disclaimer:</span>
+              Match and ATS quality scores indicate semantic and structural alignment with standard enterprise ATS parsers. They do not simulate or guarantee proprietary ATS vendor decisions or employer interview outcomes.
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Button variant="ghost" size="sm" onClick={() => { setShowDualScoreModal(false); setIsAuditModalOpen(true); }}>
+                Inspect Full Quality Audit
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setShowDualScoreModal(false)}>
+                Continue Editing
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 

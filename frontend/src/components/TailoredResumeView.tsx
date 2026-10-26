@@ -899,6 +899,198 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
               )}
             </div>
           </div>
+
+          {/* 4. ATS & Resume Quality Assessment (Track B) */}
+          {resume.ats_quality_assessment && (
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+                <div>
+                  <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#7C4DFF]" />
+                    ATS & Resume Quality Assessment (Track B)
+                  </h3>
+                  <p className="text-xs text-[#B8B9D0] mt-0.5">
+                    Deterministic document structure, single-column parseability, and readability health
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-[#7C4DFF] font-mono">
+                    {resume.ats_quality_assessment.overall_score}%
+                  </span>
+                  <span className="block text-[10px] text-[#B8B9D0]">
+                    {resume.audit?.grade ? `Grade ${resume.audit.grade}` : "ATS Quality"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Single-Column Parseability (25% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.parseability_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.parseability_score}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Section Structure (20% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.structure_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.structure_score}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Readability & Voice (15% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.readability_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.readability_score}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Formatting Consistency (15% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.formatting_consistency_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.formatting_consistency_score}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Content Coverage (15% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.content_coverage_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.content_coverage_score}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                    <span>Document Completeness (10% wt)</span>
+                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.completeness_score}%</span>
+                  </div>
+                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.completeness_score}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 p-4 rounded-xl bg-[#2C224B]/35 border border-[#30384B] text-xs text-[#F7F7FA] leading-relaxed">
+                <strong>Methodology & Non-Vendor Notice:</strong> {resume.ats_quality_assessment.explanation} {resume.ats_quality_assessment.disclaimer}
+              </div>
+            </div>
+          )}
+
+          {/* 5. Deterministic Resume Quality Audit Findings */}
+          {resume.audit && (
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+                <div>
+                  <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
+                    <FileCheck2 className="w-4 h-4 text-[#7C4DFF]" />
+                    Resume Quality Audit Findings
+                  </h3>
+                  <p className="text-xs text-[#B8B9D0] mt-0.5">
+                    Deterministic checks for contact details, bullet lengths, dates, and typography
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-black text-[#F7F7FA] font-mono">
+                    Grade {resume.audit.grade}
+                  </span>
+                  <span className="block text-[10px] text-[#B8B9D0]">
+                    {resume.audit.errors.length} errors, {resume.audit.warnings.length} warnings
+                  </span>
+                </div>
+              </div>
+
+              {/* Metrics Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Total Words</span>
+                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                    {resume.audit.metrics.word_count ?? "—"}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Bullet Points</span>
+                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                    {resume.audit.metrics.bullet_count ?? "—"}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Avg Bullet Length</span>
+                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                    {resume.audit.metrics.avg_bullet_words ? `${resume.audit.metrics.avg_bullet_words} words` : "—"}
+                  </span>
+                </div>
+                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Duplicate Skills</span>
+                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                    {resume.audit.metrics.duplicate_skills_count ?? 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Issues List */}
+              <div className="mt-5 space-y-2.5">
+                {[...resume.audit.errors, ...resume.audit.warnings, ...resume.audit.suggestions].map((issue, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                      issue.type === "error"
+                        ? "bg-rose-950/20 border-rose-500/40 text-rose-200"
+                        : issue.type === "warning"
+                        ? "bg-amber-950/20 border-amber-500/40 text-amber-200"
+                        : "bg-[#111827] border-[#30384B] text-[#F7F7FA]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                            issue.type === "error"
+                              ? "bg-rose-500/30 text-rose-300"
+                              : issue.type === "warning"
+                              ? "bg-amber-500/30 text-amber-300"
+                              : "bg-[#2C224B] text-[#B89AFF]"
+                          }`}
+                        >
+                          {issue.type}
+                        </span>
+                        <strong className="font-semibold text-[#F7F7FA]">{issue.message}</strong>
+                      </div>
+                      {issue.category && (
+                        <span className="text-[10px] font-mono text-[#B8B9D0] uppercase">
+                          {issue.category}
+                        </span>
+                      )}
+                    </div>
+                    {issue.location && (
+                      <p className="text-[11px] text-[#B8B9D0]">
+                        <span className="font-medium">Section:</span> {issue.location}
+                      </p>
+                    )}
+                    {issue.recommendation && (
+                      <p className="text-[11px] text-[#B89AFF] pt-0.5">
+                        <span className="font-medium text-[#F7F7FA]">Guidance:</span> {issue.recommendation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

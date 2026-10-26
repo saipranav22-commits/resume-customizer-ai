@@ -15,6 +15,7 @@ import {
   ImproveTextResponse,
   RecheckScoreRequest,
   RecheckScoreResponse,
+  ResumeQualityAudit,
 } from "@/types/resume";
 
 
@@ -569,6 +570,51 @@ export async function recheckResumeScore(
   } catch (err: unknown) {
     if (err instanceof ApiError) throw err;
     const msg = err instanceof Error ? err.message : "Failed to recheck resume score";
+    throw new ApiError(msg, 0);
+  }
+}
+
+export async function auditResume(
+  resumeData: TailoredResumeResponse,
+  jobDescription?: string,
+  token?: string | null
+): Promise<ResumeQualityAudit> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const queryParam = jobDescription ? `?job_description=${encodeURIComponent(jobDescription.slice(0, 500))}` : "";
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/audit${queryParam}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(resumeData),
+    });
+
+    if (!res.ok) {
+      let errorMsg = `Failed to audit resume (${res.status})`;
+      try {
+        const errJson = await res.json();
+        if (errJson.detail) {
+          errorMsg = Array.isArray(errJson.detail)
+            ? errJson.detail.map((d: { msg?: string }) => d.msg || JSON.stringify(d)).join(", ")
+            : errJson.detail;
+        }
+      } catch {
+        const rawText = await res.text();
+        if (rawText) errorMsg = rawText;
+      }
+      throw new ApiError(errorMsg, res.status);
+    }
+
+    return await res.json();
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Failed to audit resume";
     throw new ApiError(msg, 0);
   }
 }

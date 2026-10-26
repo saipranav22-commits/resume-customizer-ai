@@ -114,7 +114,61 @@ export const sampleTailoredResume: TailoredResumeResponse = {
       priority: "low",
       requires_user_confirmation: false
     }
-  ]
+  ],
+  ats_quality_assessment: {
+    overall_score: 93,
+    parseability_score: 98,
+    structure_score: 95,
+    readability_score: 90,
+    formatting_consistency_score: 92,
+    content_coverage_score: 92,
+    completeness_score: 95,
+    factor_weights: {
+      parseability: 0.25,
+      structure: 0.20,
+      readability: 0.15,
+      formatting_consistency: 0.15,
+      content_coverage: 0.15,
+      completeness: 0.10
+    },
+    explanation: "High document parseability and standard reverse-chronological structure.",
+    disclaimer: "ATS Quality Assessment is a heuristic structural evaluation and does not guarantee employer hiring decisions."
+  },
+  audit: {
+    overall_score: 93,
+    grade: "A",
+    errors: [],
+    warnings: [
+      {
+        id: "warn-bullet-length",
+        type: "warning",
+        category: "bullet_length",
+        message: "Bullet exceeds 35 words",
+        location: "TechCorp",
+        recommendation: "Shorten bullet to 15-25 words for optimal readability."
+      }
+    ],
+    suggestions: [
+      {
+        id: "sug-summary-punch",
+        type: "suggestion",
+        category: "summary_focus",
+        message: "Opening summary is concise and impact-focused",
+        location: "Professional Summary",
+        recommendation: "Consider leading with your most relevant domain achievement."
+      }
+    ],
+    summary: "Resume meets high professional ATS standards with 0 critical errors.",
+    metrics: {
+      word_count: 310,
+      bullet_count: 4,
+      avg_bullet_words: 18.5,
+      duplicate_skills_count: 0,
+      experience_entries_count: 2,
+      project_entries_count: 0,
+      education_entries_count: 1
+    }
+  }
 };
 
 export const sampleHistoryItems: CustomizationHistoryItem[] = [

@@ -50,6 +50,50 @@ class AtsCompatibility(BaseModel):
     strengths: List[str] = Field(default_factory=list)
     improvements: List[str] = Field(default_factory=list)
 
+# --- Phase 6.2: Professional ATS Quality Audit & Assessment Schemas ---
+
+class AuditIssue(BaseModel):
+    id: str
+    type: str = Field(description="'error' (critical ATS blocker), 'warning' (formatting/alignment concern), or 'suggestion' (polish)")
+    category: str = Field(description="e.g., 'contact_info', 'section_structure', 'bullet_quality', 'skills', 'dates', 'readability', 'length', 'ats_parseability'")
+    message: str = Field(description="Clear, user-friendly issue title")
+    detail: Optional[str] = Field(default=None, description="Explanation of why this affects ATS parsing or recruiter impression")
+    location: Optional[str] = Field(default=None, description="Section or bullet location in resume")
+    recommendation: Optional[str] = Field(default=None, description="Actionable correction guidance")
+
+class ResumeQualityAudit(BaseModel):
+    overall_score: int = Field(ge=0, le=100, description="Overall document health score (0-100)")
+    grade: str = Field(description="Letter grade, e.g. 'A (Recruiter Ready)', 'B', 'Needs Attention'")
+    errors: List[AuditIssue] = Field(default_factory=list, description="Critical errors that must be resolved for ATS compatibility")
+    warnings: List[AuditIssue] = Field(default_factory=list, description="Quality and formatting warnings")
+    suggestions: List[AuditIssue] = Field(default_factory=list, description="Optional high-impact polish suggestions")
+    summary: str = Field(description="Executive summary of the audit findings")
+    metrics: Dict[str, Any] = Field(default_factory=dict, description="Document stats: word count, bullet count, avg bullet length, duplicate skills")
+
+class AtsQualityAssessment(BaseModel):
+    overall_score: int = Field(ge=0, le=100, description="Heuristic ATS & Resume Quality Assessment score")
+    parseability_score: int = Field(ge=0, le=100, description="Text extractability and encoding cleanliness")
+    structure_score: int = Field(ge=0, le=100, description="Standard recognizable headings and reverse-chronological order")
+    readability_score: int = Field(ge=0, le=100, description="Pronoun absence, bullet brevity, active voice")
+    formatting_consistency_score: int = Field(ge=0, le=100, description="Date consistency, skill deduplication, no repeated text")
+    content_coverage_score: int = Field(ge=0, le=100, description="Demonstrated technical competencies and accomplishment depth")
+    completeness_score: int = Field(ge=0, le=100, description="Header, contact links, summary, education completeness")
+    factor_weights: Dict[str, float] = Field(
+        default_factory=lambda: {
+            "parseability": 0.25,
+            "structure": 0.20,
+            "readability": 0.15,
+            "formatting_consistency": 0.15,
+            "content_coverage": 0.15,
+            "completeness": 0.10,
+        },
+        description="Transparent weights used to derive the ATS quality score"
+    )
+    explanation: str = Field(description="Transparent factor-by-factor breakdown of the ATS score")
+    disclaimer: str = Field(
+        default="This heuristic ATS quality assessment evaluates technical parseability, standard formatting, and readability. It does not represent proprietary screening algorithms from specific employer ATS vendors."
+    )
+
 # --- Phase 5C: Advanced AI Resume Optimization Schemas ---
 
 class JobDescriptionAnalysis(BaseModel):
@@ -146,6 +190,15 @@ class TailoredResumeResponse(BaseModel):
     recommendations: List[OptimizationRecommendation] = Field(
         default_factory=list,
         description="Prioritized, evidence-grounded recommendations for resume optimization"
+    )
+    # Phase 6.2: Professional ATS Quality Audit & Assessment
+    audit: Optional[ResumeQualityAudit] = Field(
+        default=None,
+        description="Deterministic professional resume validation audit"
+    )
+    ats_quality_assessment: Optional[AtsQualityAssessment] = Field(
+        default=None,
+        description="Detailed 6-factor ATS and document quality assessment"
     )
 
 class HealthResponse(BaseModel):
@@ -324,3 +377,12 @@ class RecheckScoreResponse(BaseModel):
     score_delta: int = Field(default=0, description="Difference between new score and previous score")
     factor_deltas: Dict[str, int] = Field(default_factory=dict, description="Per-factor score deltas")
     is_stale: bool = False
+    # Phase 6.2: Professional ATS Quality Audit & Assessment
+    audit: Optional[ResumeQualityAudit] = Field(
+        default=None,
+        description="Deterministic professional resume validation audit"
+    )
+    ats_quality_assessment: Optional[AtsQualityAssessment] = Field(
+        default=None,
+        description="Detailed 6-factor ATS and document quality assessment"
+    )

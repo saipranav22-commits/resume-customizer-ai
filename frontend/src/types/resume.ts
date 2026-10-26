@@ -48,6 +48,50 @@ export interface AtsCompatibility {
   improvements: string[];
 }
 
+// --- Phase 6.2: Professional ATS Quality Audit & Assessment Types ---
+
+export interface AuditIssue {
+  id: string;
+  type: 'error' | 'warning' | 'suggestion';
+  category: string;
+  message: string;
+  detail?: string | null;
+  location?: string | null;
+  recommendation?: string | null;
+}
+
+export interface ResumeQualityAudit {
+  overall_score: number;
+  grade: string;
+  errors: AuditIssue[];
+  warnings: AuditIssue[];
+  suggestions: AuditIssue[];
+  summary: string;
+  metrics: {
+    word_count?: number;
+    bullet_count?: number;
+    avg_bullet_words?: number;
+    duplicate_skills_count?: number;
+    experience_entries_count?: number;
+    project_entries_count?: number;
+    education_entries_count?: number;
+    [key: string]: unknown;
+  };
+}
+
+export interface AtsQualityAssessment {
+  overall_score: number;
+  parseability_score: number;
+  structure_score: number;
+  readability_score: number;
+  formatting_consistency_score: number;
+  content_coverage_score: number;
+  completeness_score: number;
+  factor_weights: Record<string, number>;
+  explanation: string;
+  disclaimer: string;
+}
+
 // --- Phase 5C: Advanced AI Resume Optimization Types ---
 
 export interface JobDescriptionAnalysis {
@@ -113,6 +157,9 @@ export interface TailoredResumeResponse {
   job_analysis?: JobDescriptionAnalysis | null;
   match_breakdown?: MatchScoreBreakdown | null;
   recommendations?: OptimizationRecommendation[];
+  // Phase 6.2: Professional ATS Quality Audit & Assessment
+  audit?: ResumeQualityAudit | null;
+  ats_quality_assessment?: AtsQualityAssessment | null;
 }
 
 export interface HealthResponse {
@@ -281,4 +328,7 @@ export interface RecheckScoreResponse {
   score_delta: number;
   factor_deltas: Record<string, number>;
   is_stale: boolean;
+  // Phase 6.2: Professional ATS Quality Audit & Assessment
+  audit?: ResumeQualityAudit | null;
+  ats_quality_assessment?: AtsQualityAssessment | null;
 }

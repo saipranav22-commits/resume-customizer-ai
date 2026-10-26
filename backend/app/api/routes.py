@@ -18,6 +18,7 @@ from app.models.schemas import (
     ImproveTextResponse,
     RecheckScoreRequest,
     RecheckScoreResponse,
+    ResumeQualityAudit,
 )
 from app.services.auth import (
     AuthenticatedUser,
@@ -32,6 +33,7 @@ from app.services.customizer import (
     improve_text_snippet,
     recheck_draft_score,
 )
+from app.services.audit import audit_resume_quality
 from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
 
 router = APIRouter(prefix="/api", tags=["Resume Customization"])
@@ -107,6 +109,7 @@ async def customize_resume_endpoint(
     return tailored_result
 
 
+@router.post("/editor/improve", response_model=ImproveTextResponse)
 @router.post("/improve-text", response_model=ImproveTextResponse)
 async def improve_text_endpoint(
     req: ImproveTextRequest,
@@ -145,6 +148,7 @@ async def improve_text_endpoint(
         )
 
 
+@router.post("/editor/recheck-score", response_model=RecheckScoreResponse)
 @router.post("/recheck-score", response_model=RecheckScoreResponse)
 def recheck_score_endpoint(
     req: RecheckScoreRequest,
@@ -174,6 +178,27 @@ def recheck_score_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to recheck resume score: {str(e)}"
+        )
+
+
+@router.post("/audit", response_model=ResumeQualityAudit)
+def audit_resume_endpoint(
+    resume_data: TailoredResumeResponse,
+    job_description: Optional[str] = Query(None, description="Optional target job description"),
+    current_user: Optional[AuthenticatedUser] = Depends(get_current_user_optional)
+):
+    """
+    Phase 6.2: Deterministic professional resume validation audit:
+    - Evaluates contact info, section structure, bullet quality, duplicate skills, dates, and readability.
+    - Categorizes issues as errors, warnings, and suggestions.
+    - Returns document metrics and overall health score.
+    """
+    try:
+        return audit_resume_quality(resume_data, job_description)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to audit resume: {str(e)}"
         )
 
 
