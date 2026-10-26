@@ -940,7 +940,7 @@ export default function Home() {
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl text-left">
               <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
                 <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider font-mono">
-                  Phase 1
+                  Stage 1
                 </span>
                 <p className="text-xs font-bold text-[#291B32] mt-1 font-heading">
                   PDF & DOCX Extraction
@@ -951,7 +951,7 @@ export default function Home() {
               </div>
               <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
                 <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider font-mono">
-                  Phase 2
+                  Stage 2
                 </span>
                 <p className="text-xs font-bold text-[#291B32] mt-1 font-heading">
                   Explainable ATS Audit
@@ -962,7 +962,7 @@ export default function Home() {
               </div>
               <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
                 <span className="text-[10px] font-bold text-[#C45D39] uppercase tracking-wider font-mono">
-                  Phase 3
+                  Stage 3
                 </span>
                 <p className="text-xs font-bold text-[#291B32] mt-1 font-heading">
                   Live Studio & Multi-Export
@@ -982,7 +982,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#C45D39]" />
             <span className="font-semibold text-[#291B32]">Resume Customizer AI Studio</span>
-            <span className="text-[#8F7589]">· Phase 6.3</span>
+            <span className="text-[#8F7589]">· AI-Powered Resume Optimization</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-[#674E61]">
