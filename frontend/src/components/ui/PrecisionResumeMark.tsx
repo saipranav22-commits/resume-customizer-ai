@@ -6,6 +6,16 @@ interface PrecisionResumeMarkProps {
   showGlow?: boolean;
 }
 
+/**
+ * Option 1: Precision Resume Mark
+ * Canonical brand vector mark combining:
+ * - Aubergine rounded-square tile (#291B32)
+ * - Soft-white resume document silhouette (#FFFFFF)
+ * - Minimal folded corner in muted lavender (#E8D9E8)
+ * - Three structured resume-content strokes with generous negative space
+ * - A distinctive copper AI refinement sparkle (#C45D39)
+ * - One integrated copper precision/alignment element
+ */
 export default function PrecisionResumeMark({
   size = 36,
   className = "",
@@ -22,52 +32,49 @@ export default function PrecisionResumeMark({
       aria-label="Resume Customizer AI Precision Resume Mark"
       role="img"
     >
-      {/* 1. Rounded Square Container in Deep Aubergine */}
+      {/* 1. Aubergine rounded-square tile (#291B32) */}
       <rect
-        x="2"
-        y="2"
-        width="60"
-        height="60"
+        x="3"
+        y="3"
+        width="58"
+        height="58"
         rx="14"
         fill="#291B32"
         stroke="#4A355A"
-        strokeWidth="2"
+        strokeWidth="1.5"
       />
 
-      {/* 2. Optional ambient inner glow */}
+      {/* Subtle ambient glow */}
       {showGlow && (
-        <circle cx="48" cy="18" r="14" fill="#C45D39" fillOpacity="0.16" />
+        <circle cx="48" cy="14" r="14" fill="#C45D39" fillOpacity="0.16" />
       )}
 
-      {/* 3. Resume Document Silhouette (Soft White) */}
+      {/* 2. Soft-white resume document silhouette (#FFFFFF) */}
       <path
-        d="M15 14C15 12.8954 15.8954 12 17 12H35L45 22V50C45 51.1046 44.1046 52 43 52H17C15.8954 52 15 51.1046 15 50V14Z"
+        d="M16 15.5C16 14.1193 17.1193 13 18.5 13H36L46 23V48.5C46 49.8807 44.8807 51 43.5 51H18.5C17.1193 51 16 49.8807 16 48.5V15.5Z"
         fill="#FFFFFF"
       />
 
-      {/* 4. Folded Corner Flap (Muted Lavender) */}
+      {/* 3. Minimal folded corner in muted lavender (#E8D9E8) */}
       <path
-        d="M35 12V20C35 21.1046 35.8954 22 37 22H45L35 12Z"
+        d="M36 13V21C36 22.1046 36.8954 23 38 23H46L36 13Z"
         fill="#E8D9E8"
       />
 
-      {/* 5. Precision Alignment Bar (Burnished Copper) */}
-      <rect x="18" y="22" width="2.5" height="24" rx="1.25" fill="#C45D39" />
+      {/* 4. Integrated copper precision/alignment element (#C45D39) */}
+      <rect x="19" y="24" width="3" height="22" rx="1.5" fill="#C45D39" />
 
-      {/* 6. Content Strokes (Resume Text Structure) */}
-      <rect x="23" y="22.5" width="15" height="2.5" rx="1.25" fill="#291B32" />
-      <rect x="23" y="28.5" width="17" height="2" rx="1" fill="#674E61" />
-      <rect x="23" y="34" width="14" height="2" rx="1" fill="#674E61" />
-      <rect x="23" y="39.5" width="17" height="2" rx="1" fill="#DDD0D7" />
-      <rect x="23" y="45" width="11" height="2" rx="1" fill="#DDD0D7" />
+      {/* 5. Three structured resume-content strokes with generous negative space */}
+      <rect x="25" y="25" width="15" height="2.5" rx="1.25" fill="#291B32" />
+      <rect x="25" y="33" width="16" height="2.5" rx="1.25" fill="#674E61" />
+      <rect x="25" y="41" width="12" height="2.5" rx="1.25" fill="#8F7589" />
 
-      {/* 7. Intelligent Refinement Sparkle (Burnished Copper 4-Point Star) */}
+      {/* 6. Distinctive copper AI refinement sparkle (#C45D39) */}
       <path
-        d="M47 11C47 14.5 49 16.5 52.5 16.5C49 16.5 47 18.5 47 22C47 18.5 45 16.5 41.5 16.5C45 16.5 47 14.5 47 11Z"
+        d="M48 8C48 11.5 50.5 14 54 14C50.5 14 48 16.5 48 20C48 16.5 45.5 14 42 14C45.5 14 48 11.5 48 8Z"
         fill="#C45D39"
       />
-      {/* Secondary micro-sparkle */}
-      <circle cx="52.5" cy="24.5" r="1.2" fill="#E8D9E8" />
+      <circle cx="53.5" cy="21.5" r="1.25" fill="#E8D9E8" />
     </svg>
   );
 }
