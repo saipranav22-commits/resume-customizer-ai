@@ -20,7 +20,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Customizer AI — Premium AI Career Studio",
+  title: "Resume Customizer AI - Premium AI Career Studio",
   description: "Commercial-grade AI resume studio powered by FastAPI and Gemini AI. Real-time ATS compatibility scoring, interactive inline resume editing, explainable matching analysis, and multi-version management.",
   icons: {
     icon: [
