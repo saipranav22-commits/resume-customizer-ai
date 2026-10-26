@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import PrecisionResumeMark from "@/components/ui/PrecisionResumeMark";
 import {
-  Sparkles,
   Activity,
   ShieldCheck,
   AlertCircle,
@@ -55,9 +55,9 @@ export default function Header({ onOpenHistory }: HeaderProps) {
     <>
       <header className="border-b border-[#4A355A] bg-[#291B32] sticky top-0 z-40 shadow-sm">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="h-9 w-9 rounded-xl bg-[#352340] flex items-center justify-center text-[#FAF6F2] shadow-xs border border-[#4A355A]">
-              <Sparkles className="w-4 h-4 text-[#C45D39]" />
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="shrink-0 flex items-center justify-center shadow-xs">
+              <PrecisionResumeMark size={36} showGlow={true} />
             </div>
             <div>
               <div className="flex items-center gap-2">

@@ -10,16 +10,21 @@ import {
   Layers,
   Search,
   ShieldCheck,
-  FileCheck
+  FileCheck,
+  AlertTriangle
 } from "lucide-react";
 import { TailoredResumeResponse } from "@/types/resume";
 import CircularScoreRing from "@/components/ui/CircularScoreRing";
 
 export interface OptimizationDashboardProps {
   resumeData: TailoredResumeResponse;
+  isScoreStale?: boolean;
 }
 
-export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ resumeData }) => {
+export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({
+  resumeData,
+  isScoreStale = false,
+}) => {
   const [priorityFilter, setPriorityFilter] = useState<"all" | "high" | "medium" | "low">("all");
   const [expandedRecs, setExpandedRecs] = useState<Record<number, boolean>>({});
   const [auditFilter, setAuditFilter] = useState<"all" | "error" | "warning" | "suggestion">("all");
@@ -54,6 +59,35 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
   return (
     <div className="space-y-8">
+      {/* Stale Score Indicator Banner */}
+      {isScoreStale && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <div>
+              <p className="text-xs font-bold">Scoring Evaluation Stale</p>
+              <p className="text-[11px] text-amber-800">
+                Draft edits have occurred since this evaluation. Return to Interactive Studio and click &ldquo;Re-check Score&rdquo; to recalculate.
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/70 border border-amber-300 text-amber-900">
+            Edits Pending Recheck
+          </span>
+        </div>
+      )}
+
+      {/* Assurance Note */}
+      <div className="p-3.5 rounded-xl bg-[#FAF6F2] border border-[#DDD0D7] flex flex-wrap items-center justify-between gap-2 text-xs text-[#674E61]">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[#C45D39] shrink-0" />
+          <span className="font-medium text-[#291B32]">
+            Deterministic Calibrated Dual-Engine: Calculated directly from candidate evidence and target role requirements.
+          </span>
+        </div>
+        <span className="text-[10px] font-mono text-[#674E61]">Zero False ATS Guarantees</span>
+      </div>
+
       {/* SECTION 1: HERO DUAL-SCORE OVERVIEW (Deep Aubergine Dark Surfaces with High-Contrast Score Rings) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-white">
         {/* SCORE A: Target Job Match Score */}

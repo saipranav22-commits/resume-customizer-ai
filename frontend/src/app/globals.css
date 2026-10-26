@@ -139,6 +139,55 @@ body {
   background: #C45D39;
 }
 
+/* Phase 6.7 Premium Motion System */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes subtleShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-hero-reveal {
+  animation: heroReveal 480ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-section {
+  animation: fadeIn 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Tactile Micro-Interactions: 150ms-220ms */
+button, a {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 180ms;
+}
+
+button:active, a:active {
+  transform: scale(0.985);
+  transition-duration: 150ms;
+}
+
+/* Document Canvas Paper Elevation */
+.resume-paper-elevated {
+  background-color: #FFFFFF;
+  border: 1px solid #DDD0D7;
+  border-radius: 0.75rem;
+  box-shadow: 0 16px 40px -8px rgba(41, 27, 50, 0.12), 0 4px 12px rgba(41, 27, 50, 0.05);
+  transition: box-shadow 220ms ease, border-color 220ms ease;
+}
+
+.resume-paper-elevated:hover {
+  box-shadow: 0 20px 48px -10px rgba(41, 27, 50, 0.16), 0 6px 16px rgba(41, 27, 50, 0.06);
+}
+
 /* Accessibility: Respect user preference for reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

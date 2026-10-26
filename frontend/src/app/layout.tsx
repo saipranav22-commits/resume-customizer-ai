@@ -20,8 +20,18 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Customizer AI — Premium AI Resume Studio",
+  title: "Resume Customizer AI — Premium AI Career Studio",
   description: "Commercial-grade AI resume studio powered by FastAPI and Gemini AI. Real-time ATS compatibility scoring, interactive inline resume editing, explainable matching analysis, and multi-version management.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -941,7 +941,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
       )}
 
       {/* 3. Rebuilt WYSIWYG Document Canvas: A Single Continuous Professional ATS Resume */}
-      <div className="w-full max-w-[850px] mx-auto bg-white border border-[#DDD0D7] shadow-xl rounded-xl p-8 sm:p-14 text-[#291B32] font-sans transition-all relative select-text">
+      <div className="w-full max-w-[850px] mx-auto resume-paper-elevated p-8 sm:p-14 text-[#291B32] font-sans transition-all relative select-text">
         {/* Document Header: Candidate Name & Contact Details */}
         <div className="text-center pb-5 border-b border-[#291B32] space-y-2">
           {isEditing ? (

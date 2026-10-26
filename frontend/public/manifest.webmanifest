@@ -1,0 +1,26 @@
+{
+  "name": "Resume Customizer AI \u2014 Premium Career Studio",
+  "short_name": "ResumeAI",
+  "description": "Precision AI Resume Studio & ATS Optimization Engine powered by FastAPI and Gemini AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#291B32",
+  "theme_color": "#291B32",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Concept B: RC Editorial Monogram -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#291B32" stroke="#4A355A" stroke-width="2"/>
+  <text x="14" y="42" font-family="serif" font-size="30" font-weight="bold" fill="#FFFFFF">R</text>
+  <text x="32" y="42" font-family="serif" font-size="30" font-weight="bold" fill="#C45D39">C</text>
+  <path d="M48 12C48 15 49.5 16.5 52.5 16.5C49.5 16.5 48 18 48 21C48 18 46.5 16.5 43.5 16.5C46.5 16.5 48 15 48 12Z" fill="#C45D39"/>
+</svg>

@@ -17,7 +17,10 @@ import {
   Layers,
   FileText,
   Sliders,
+  FileSearch,
 } from "lucide-react";
+import PrecisionResumeMark from "@/components/ui/PrecisionResumeMark";
+import HeroStudioShowcase from "@/components/HeroStudioShowcase";
 import Header from "@/components/Header";
 import ResumeUpload from "@/components/ResumeUpload";
 import JobDescriptionInput from "@/components/JobDescriptionInput";
@@ -76,6 +79,24 @@ export default function Home() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false);
 
   const canSubmit = Boolean(file) && jobDescription.trim().length >= 50 && !isLoading;
+
+  // Phase 6.7: Synthetic Studio Demo loader for immediate visual verification and QA
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("demo") === "studio") {
+        import("@/__tests__/testFixtures").then(({ sampleTailoredResume }) => {
+          setTailoredResult(sampleTailoredResume);
+          setActiveDraft(sampleTailoredResume);
+          setJobDescription("Senior Backend Engineer looking for Python, FastAPI, Docker, and AWS experience.");
+          const tab = params.get("tab");
+          if (tab === "audit" || tab === "diff" || tab === "cover-letter" || tab === "editor") {
+            setActiveTab(tab);
+          }
+        });
+      }
+    }
+  }, []);
 
   // Warn before browser window unload when there are unsaved workspace modifications
   useEffect(() => {
@@ -353,124 +374,235 @@ export default function Home() {
 
       {/* Primary Centered Vertical Workflow Container */}
       <main className="flex-1 max-w-[1240px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 relative z-10">
-        {/* 2. Hero Section with Radial Glow and Visual Composition */}
-        <section className="relative text-center max-w-3xl mx-auto pt-6 pb-2">
+        {/* 2. Redesigned Editorial Two-Column Hero */}
+        <section className="relative pt-4 sm:pt-8 pb-4">
           {/* Subtle radial ambient glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#C45D39]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#C45D39]/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] mb-5 shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#C45D39] animate-pulse" />
-            <span>AI Resume Studio & Precision ATS Optimization</span>
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+            {/* Left Column: Editorial Product Narrative (58% / 7 cols) */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              {/* Eyebrow */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7] shadow-xs">
+                <PrecisionResumeMark size={16} />
+                <span className="tracking-wide">AI Career Studio & Precision ATS Optimization</span>
+              </div>
 
-          <h1 className="relative font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#291B32] tracking-tight leading-[1.15]">
-            Engineered for High-Impact Roles.{" "}
-            <span className="text-[#C45D39]">
-              Tailored by True AI.
-            </span>
-          </h1>
+              {/* Headline */}
+              <h1 className="font-heading text-3xl sm:text-4xl lg:text-[44px] xl:text-5xl font-extrabold text-[#291B32] tracking-tight leading-[1.12]">
+                Engineered for High-Impact Roles.{" "}
+                <span className="text-[#C45D39] block sm:inline">
+                  Tailored by True AI.
+                </span>
+              </h1>
 
-          <p className="relative mt-4 text-sm sm:text-base text-[#674E61] leading-relaxed max-w-2xl mx-auto">
-            Analyze job descriptions against authentic candidate evidence. Align hard skills,
-            enhance experience bullets inline with grounded AI suggestions, and re-check scores in real time.
-          </p>
+              {/* Supporting copy */}
+              <p className="text-sm sm:text-base text-[#674E61] leading-relaxed max-w-xl">
+                Analyze target job requirements against authentic candidate evidence. Align hard skills, enhance experience bullets inline with grounded AI suggestions, and re-check calibrated dual scores in real time.
+              </p>
 
-          {/* Quick Jump Action Bar */}
-          <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="#upload-resume-section"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#C45D39] hover:bg-[#B34E2C] active:bg-[#9E4324] text-white shadow-md shadow-[#C45D39]/25 transition-all"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <a
-              href="#capabilities-section"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-white hover:bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7] hover:border-[#291B32] shadow-xs transition-all"
-            >
-              <Layers className="w-4 h-4 text-[#C45D39]" />
-              <span>Studio Capabilities</span>
-            </a>
-          </div>
+              {/* Primary & Secondary Action CTAs */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <a
+                  href="#upload-resume-section"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-[#C45D39] hover:bg-[#B34E2C] active:bg-[#9E4324] text-white shadow-md shadow-[#C45D39]/25 hover:shadow-[#C45D39]/40 transition-all focus-visible:ring-2 focus-visible:ring-[#C45D39]"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <a
+                  href="#capabilities-section"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-white hover:bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7] hover:border-[#291B32] shadow-xs transition-all"
+                >
+                  <Layers className="w-4 h-4 text-[#C45D39]" />
+                  <span>Studio Capabilities</span>
+                </a>
+              </div>
 
-          {/* Workflow Sequence Indicator */}
-          <div className="relative mt-10 inline-flex flex-wrap items-center justify-center gap-2.5 text-xs font-semibold text-[#674E61] bg-white border border-[#DDD0D7] px-4 py-2.5 rounded-2xl shadow-xs">
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
-                01
-              </span>
-              <span>Upload Resume</span>
-            </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
-                02
-              </span>
-              <span>Target JD</span>
-            </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
-                03
-              </span>
-              <span>Preferences</span>
-            </span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60" />
-            <span className="text-[#291B32] flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
-                04
-              </span>
-              <span>Interactive Studio</span>
-            </span>
+              {/* 4-Step Progression Indicator */}
+              <div className="pt-2">
+                <div className="inline-flex flex-wrap items-center gap-2 text-xs font-semibold text-[#674E61] bg-white border border-[#DDD0D7] px-3.5 py-2 rounded-2xl shadow-xs">
+                  <span className="text-[#291B32] flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
+                      01
+                    </span>
+                    <span>Upload Resume</span>
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60 shrink-0" />
+                  <span className="text-[#291B32] flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
+                      02
+                    </span>
+                    <span>Target JD</span>
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60 shrink-0" />
+                  <span className="text-[#291B32] flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
+                      03
+                    </span>
+                    <span>Preferences</span>
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#C45D39]/60 shrink-0" />
+                  <span className="text-[#291B32] flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-[#E8D9E8] text-[#291B32] flex items-center justify-center font-bold text-[10px] font-mono border border-[#DDD0D7]">
+                      04
+                    </span>
+                    <span>Interactive Studio</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Restrained Confidence Indicators */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1 text-xs text-[#674E61]">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#C45D39] shrink-0" />
+                  <span>Zero Fabrication</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#C45D39] shrink-0" />
+                  <span>Grounded AI Improve</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <FileCheck2 className="w-3.5 h-3.5 text-[#C45D39] shrink-0" />
+                  <span>Calibrated ATS Audit</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Original Polished Miniature Studio Showcase (42% / 5 cols) */}
+            <div className="lg:col-span-5 w-full">
+              <HeroStudioShowcase />
+            </div>
           </div>
         </section>
 
-        {/* 3. Product Capability Overview (3 Professional Cards) */}
-        <section id="capabilities-section" className="space-y-4 pt-2">
-          <div className="text-center max-w-xl mx-auto">
-            <h2 className="text-xs uppercase font-mono font-bold tracking-widest text-[#C45D39]">
-              Commercial-Grade Platform
-            </h2>
-            <p className="font-heading text-xl sm:text-2xl font-bold text-[#291B32] mt-1">
+        {/* 3. Advanced Product Capabilities (6 Specialized Architecture Cards) */}
+        <section id="capabilities-section" className="space-y-6 pt-4 scroll-mt-20">
+          <div className="text-center max-w-2xl mx-auto space-y-1.5">
+            <span className="text-xs uppercase font-mono font-bold tracking-widest text-[#C45D39] bg-[#FBEFEA] px-2.5 py-1 rounded-md border border-[#C45D39]/20 inline-block">
+              Platform Architecture
+            </span>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#291B32] tracking-tight">
               End-to-End Optimization Architecture
+            </h2>
+            <p className="text-xs sm:text-sm text-[#674E61] max-w-xl mx-auto">
+              A comprehensive career engineering studio built for accuracy, candidate evidence integrity, and executive presentation.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md">
-              <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] mb-4 group-hover:scale-105 transition-transform">
-                <Target className="w-5 h-5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Card 1: Resume Parsing */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <FileSearch className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  Resume Parsing
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Extracts structured candidate data from PDF and Word DOCX files while preserving contact credentials, bullet hierarchy, and chronology.
+                </p>
               </div>
-              <h3 className="font-heading text-base font-bold text-[#291B32]">
-                ATS & Alignment Audit
-              </h3>
-              <p className="text-xs text-[#674E61] mt-2 leading-relaxed">
-                6-factor mathematical scoring with granular skill breakdowns, keyword density evaluation, and prioritized gap recommendations.
-              </p>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">PDF & DOCX Standard</span>
+                <span className="text-[#C45D39] font-semibold">&bull; Lossless</span>
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md">
-              <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] mb-4 group-hover:scale-105 transition-transform">
-                <Edit3 className="w-5 h-5" />
+            {/* Card 2: JD Alignment Analysis */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <Target className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  JD Alignment Analysis
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Six-factor calibrated evaluation modeling required technical proficiencies, bonus qualifications, demonstrated seniority, and domain terms.
+                </p>
               </div>
-              <h3 className="font-heading text-base font-bold text-[#291B32]">
-                Interactive Studio & AI Improve
-              </h3>
-              <p className="text-xs text-[#674E61] mt-2 leading-relaxed">
-                Inline resume editing with one-click AI bullet enhancement, side-by-side accept/reject suggestions, and live score recalculation.
-              </p>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">6-Factor Model</span>
+                <span className="text-[#C45D39] font-semibold">&bull; Documented Weights</span>
+              </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md">
-              <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] mb-4 group-hover:scale-105 transition-transform">
-                <FileText className="w-5 h-5" />
+            {/* Card 3: Grounded AI Optimization */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  Grounded AI Optimization
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Strict anti-hallucination guardrails ensure zero invented credentials. Suggestions enhance bullet impact based strictly on candidate facts.
+                </p>
               </div>
-              <h3 className="font-heading text-base font-bold text-[#291B32]">
-                Versioning Hub & Multi-Export
-              </h3>
-              <p className="text-xs text-[#674E61] mt-2 leading-relaxed">
-                Branching revision families backed by Supabase RLS. Generate executive ReportLab PDFs, Word DOCX, and plain text anytime.
-              </p>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">Anti-Hallucination</span>
+                <span className="text-emerald-700 font-semibold">&bull; Evidence Enforced</span>
+              </div>
+            </div>
+
+            {/* Card 4: Interactive Resume Editor */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  Interactive Resume Editor
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Continuous ATS document canvas with inline editing, contextual bullet improvement, batch section optimization, and instant recruiter preview.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">ATS Document Canvas</span>
+                <span className="text-[#C45D39] font-semibold">&bull; Live Recalculation</span>
+              </div>
+            </div>
+
+            {/* Card 5: ATS Document Audit */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  ATS Document Audit
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Deterministic quality analysis assessing parseability, section structure, word economy, bullet verb cadence, and recruiter readability.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">Deterministic Engine</span>
+                <span className="text-[#C45D39] font-semibold">&bull; Grade A &ndash; F</span>
+              </div>
+            </div>
+
+            {/* Card 6: Version History and Export */}
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] hover:border-[#C45D39]/50 transition-all group shadow-xs hover:shadow-md flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] border border-[#C45D39]/20 flex items-center justify-center text-[#C45D39] group-hover:scale-105 transition-transform">
+                  <GitBranch className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-[#291B32]">
+                  Version History & Export
+                </h3>
+                <p className="text-xs text-[#674E61] leading-relaxed">
+                  Branching revision trees secured by Supabase RLS. Immutable version snapshots, side-by-side diff comparison, and ReportLab PDF, DOCX, and TXT export.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-[#DDD0D7]/60 mt-4 flex items-center justify-between text-[11px] text-[#674E61]">
+                <span className="font-mono">Supabase RLS</span>
+                <span className="text-[#C45D39] font-semibold">&bull; Multi-Format</span>
+              </div>
             </div>
           </div>
         </section>
@@ -779,7 +911,7 @@ export default function Home() {
 
             {/* Tab 2: ATS & Alignment Audit Dashboard */}
             {activeTab === "audit" && (
-              <OptimizationDashboard resumeData={activeDraft || tailoredResult} />
+              <OptimizationDashboard resumeData={activeDraft || tailoredResult} isScoreStale={isDirty} />
             )}
 
             {/* Tab 3: Change Diff View */}
