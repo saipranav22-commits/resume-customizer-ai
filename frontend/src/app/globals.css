@@ -1,39 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0B101A;
-  --surface-main: #111827;
-  --surface-card: #1B2231;
-  --foreground: #F7F7FA;
-  --foreground-secondary: #B8B9D0;
-  --brand-accent: #7C4DFF;
-  --brand-accent-hover: #6940DE;
-  --brand-accent-soft: #2C224B;
-  --muted-violet: #B89AFF;
-  --copper-accent: #FDBB83;
-  --border-subtle: #30384B;
+  /* Phase 6.3: Aubergine & Copper Brand Tokens */
+  --color-primary-brand: #291B32;       /* Deep Aubergine */
+  --color-dark-surface: #291B32;        /* Deep Aubergine */
+  --color-dark-surface-card: #352340;   /* Elevated Aubergine */
+  --color-dark-surface-border: #4A355A; /* Aubergine Border */
+
+  --color-accent-copper: #C45D39;       /* Burnished Copper */
+  --color-copper-hover: #B34E2C;        /* Copper Hover */
+  --color-copper-active: #9E4324;       /* Copper Active */
+  --color-copper-tint: #FBEFEA;         /* Copper Subtle Light Tint */
+
+  --color-bg-porcelain: #F7F2EB;        /* Warm Porcelain */
+  --color-surface-lavender: #E8D9E8;    /* Muted Lavender */
+  --color-lavender-tint: #F4EDF4;       /* Lavender Light Tint */
+  --color-lavender-border: #D8C3D8;     /* Lavender Border */
+
+  --color-text-aubergine: #291B32;      /* Deep Aubergine Heading / Body */
+  --color-text-plum: #674E61;           /* Dusty Plum Supporting Text */
+  --color-text-muted: #8F7589;          /* Muted Plum */
+  --color-text-light: #FAF6F2;          /* Off-white Text for Dark Aubergine Containers */
+
+  --color-card-white: #FFFFFF;          /* Soft White Card */
+  --color-border-subtle: #DDD0D7;       /* Refined Plum Gray Border */
+
+  /* Aliases for Theme Integration */
+  --background: var(--color-bg-porcelain);
+  --foreground: var(--color-text-aubergine);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface-main);
-  --color-card: var(--surface-card);
-  --color-foreground: var(--foreground);
-  --color-secondary: var(--foreground-secondary);
-  --color-accent: var(--brand-accent);
-  --color-accent-hover: var(--brand-accent-hover);
-  --color-accent-soft: var(--brand-accent-soft);
-  --color-violet-muted: var(--muted-violet);
-  --color-copper: var(--copper-accent);
-  --color-border: var(--border-subtle);
+  --color-aubergine: #291B32;
+  --color-aubergine-dark: #1F1426;
+  --color-aubergine-surface: #352340;
+  --color-aubergine-border: #4A355A;
+
+  --color-copper: #C45D39;
+  --color-copper-hover: #B34E2C;
+  --color-copper-active: #9E4324;
+  --color-copper-tint: #FBEFEA;
+
+  --color-porcelain: #F7F2EB;
+  --color-lavender: #E8D9E8;
+  --color-lavender-tint: #F4EDF4;
+  --color-lavender-border: #D8C3D8;
+
+  --color-plum: #674E61;
+  --color-plum-muted: #8F7589;
+  --color-plum-border: #DDD0D7;
+
+  --color-card: #FFFFFF;
+  --color-border: #DDD0D7;
+
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-plus-jakarta), var(--font-geist-sans), sans-serif;
 }
 
 body {
-  background-color: #0B101A;
-  color: #F7F7FA;
+  background-color: #F7F2EB;
+  color: #291B32;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -41,52 +68,70 @@ body {
 
 /* Accessible focus styling */
 :focus-visible {
-  outline: 2px solid #7C4DFF;
+  outline: 2px solid #C45D39;
   outline-offset: 2px;
 }
 
-/* Studio Background Utilities */
+/* Luxury Aubergine & Copper Ambient Utilities */
 .studio-mesh-grid {
-  background-image: radial-gradient(rgba(124, 77, 255, 0.08) 1px, transparent 1px);
+  background-color: #F7F2EB;
+  background-image: radial-gradient(#DDD0D7 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.studio-dark-mesh-grid {
+  background-color: #291B32;
+  background-image: radial-gradient(rgba(196, 93, 57, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .studio-radial-glow {
-  background: radial-gradient(circle at 50% 20%, rgba(124, 77, 255, 0.15) 0%, rgba(44, 34, 75, 0.05) 50%, transparent 80%);
+  background: radial-gradient(circle at 50% 20%, rgba(196, 93, 57, 0.08) 0%, rgba(232, 217, 232, 0.25) 50%, transparent 80%);
 }
 
-/* Studio Card Utilities */
+.studio-aubergine-glow {
+  background: radial-gradient(circle at 50% 20%, rgba(196, 93, 57, 0.18) 0%, rgba(41, 27, 50, 0.8) 60%, #291B32 100%);
+}
+
+/* Luxury Editorial Cards */
 .studio-card {
-  background-color: #111827;
-  border: 1px solid #30384B;
+  background-color: #FFFFFF;
+  border: 1px solid #DDD0D7;
   border-radius: 1rem;
-  box-shadow: 0 4px 20px -2px rgba(11, 16, 26, 0.7), 0 2px 6px -1px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px -2px rgba(41, 27, 50, 0.05), 0 2px 6px -1px rgba(41, 27, 50, 0.03);
 }
 
 .studio-card-elevated {
-  background-color: #1B2231;
-  border: 1px solid #30384B;
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 4px 10px -2px rgba(124, 77, 255, 0.05);
+  background-color: #FFFFFF;
+  border: 1px solid #DDD0D7;
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px -4px rgba(41, 27, 50, 0.08), 0 4px 12px -2px rgba(41, 27, 50, 0.04);
 }
 
-/* Custom dark scrollbars */
+.studio-dark-card {
+  background-color: #291B32;
+  border: 1px solid #4A355A;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px -2px rgba(31, 20, 38, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Custom refined scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B101A;
+  background: #F7F2EB;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30384B;
+  background: #DDD0D7;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7C4DFF;
+  background: #C45D39;
 }
 
 /* Accessibility: Respect user preference for reduced motion */

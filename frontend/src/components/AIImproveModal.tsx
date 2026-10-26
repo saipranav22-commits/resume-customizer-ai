@@ -82,19 +82,19 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0B101A]/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl bg-[#111827] border border-[#30384B] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#291B32]/60 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="relative w-full max-w-2xl bg-white border border-[#DDD0D7] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 text-[#291B32]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/30 text-[#B89AFF]">
-              <Sparkles className="w-5 h-5 text-[#7C4DFF]" />
+            <div className="p-2.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-[#291B32]">
+              <Sparkles className="w-5 h-5 text-[#C45D39]" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-lg text-[#F7F7FA]">
+              <h3 className="font-heading font-bold text-lg text-[#291B32]">
                 AI Text Improvement
               </h3>
-              <p className="text-xs text-[#B8B9D0]">
+              <p className="text-xs text-[#674E61]">
                 Optimizing for {sectionType === "summary" ? "Professional Summary" : `${sectionType} bullet alignment`}
               </p>
             </div>
@@ -102,7 +102,7 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231] transition-colors"
+            className="p-1.5 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-[#F7F2EB] transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -110,28 +110,28 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
         </div>
 
         {/* Anti-Fabrication Guarantee Chip */}
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1B2231] border border-[#30384B] text-xs text-[#B8B9D0]">
-          <ShieldCheck className="w-4 h-4 text-[#FDBB83] flex-shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61]">
+          <ShieldCheck className="w-4 h-4 text-[#C45D39] flex-shrink-0" />
           <span>
-            <strong className="text-[#F7F7FA]">Strict Truthfulness:</strong> Preserves verified facts while elevating action verbs, conciseness, and ATS alignment.
+            <strong className="text-[#291B32]">Strict Truthfulness:</strong> Preserves verified facts while elevating action verbs, conciseness, and ATS alignment.
           </span>
         </div>
 
         {/* Content Body */}
         {isLoading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-8 h-8 animate-spin text-[#7C4DFF]" />
-            <p className="text-sm font-medium text-[#B8B9D0]">
+            <Loader2 className="w-8 h-8 animate-spin text-[#C45D39]" />
+            <p className="text-sm font-medium text-[#674E61]">
               Analyzing phrasing and aligning with target role competencies...
             </p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-3 text-sm">
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-3 text-sm">
             <div className="flex items-center gap-2 font-semibold">
-              <AlertCircle className="w-5 h-5 text-rose-400" />
+              <AlertCircle className="w-5 h-5 text-rose-600" />
               <span>Could not generate improvement</span>
             </div>
-            <p className="text-xs text-rose-200/80">{error}</p>
+            <p className="text-xs text-rose-800">{error}</p>
             <Button variant="secondary" size="sm" onClick={onClose}>
               Close
             </Button>
@@ -139,27 +139,27 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
         ) : (
           <div className="space-y-4 text-xs sm:text-sm">
             {/* Original Wording Card */}
-            <div className="p-4 rounded-xl bg-[#0B101A] border border-[#30384B] space-y-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0]">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61]">
                 Original Text
               </span>
-              <p className="text-[#B8B9D0] leading-relaxed line-through opacity-70">
+              <p className="text-[#674E61] leading-relaxed line-through opacity-75">
                 {originalText}
               </p>
             </div>
 
             {/* Proposed Wording Card */}
-            <div className="p-4 rounded-xl bg-[#1B2231] border border-[#7C4DFF]/40 space-y-2 shadow-inner">
+            <div className="p-4 rounded-xl bg-[#FDF6F3] border border-[#C45D39]/40 space-y-2 shadow-inner">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#B89AFF] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#7C4DFF]" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C45D39] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
                   Proposed Improvement
                 </span>
                 {!isEditing && (
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="inline-flex items-center gap-1 text-xs text-[#FDBB83] hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-[#C45D39] hover:underline font-semibold"
                   >
                     <Edit3 className="w-3 h-3" />
                     <span>Edit before accepting</span>
@@ -172,10 +172,10 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
                   rows={3}
                   value={userEditedText}
                   onChange={(e) => setUserEditedText(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#0B101A] border border-[#7C4DFF] text-[#F7F7FA] focus:outline-none focus:ring-2 focus:ring-[#7C4DFF]/30 resize-none text-xs sm:text-sm"
+                  className="w-full p-3 rounded-lg bg-white border border-[#C45D39] text-[#291B32] focus:outline-none focus:ring-2 focus:ring-[#C45D39]/20 resize-none text-xs sm:text-sm"
                 />
               ) : (
-                <p className="text-[#F7F7FA] font-medium leading-relaxed">
+                <p className="text-[#291B32] font-medium leading-relaxed">
                   {improvedText}
                 </p>
               )}
@@ -183,16 +183,16 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
 
             {/* Rationale & Keywords */}
             {rationale && (
-              <div className="p-3 rounded-xl bg-[#2C224B]/40 border border-[#7C4DFF]/20 space-y-1.5 text-xs">
-                <span className="font-semibold text-[#B89AFF]">Why this wording is more effective:</span>
-                <p className="text-[#B8B9D0] leading-relaxed">{rationale}</p>
+              <div className="p-3.5 rounded-xl bg-[#E8D9E8]/40 border border-[#DDD0D7] space-y-1.5 text-xs">
+                <span className="font-semibold text-[#291B32]">Why this wording is more effective:</span>
+                <p className="text-[#674E61] leading-relaxed">{rationale}</p>
                 {impactKeywords.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="text-[#B8B9D0] font-medium mr-1">Target Keywords:</span>
+                    <span className="text-[#674E61] font-medium mr-1">Target Keywords:</span>
                     {impactKeywords.map((kw, i) => (
                       <span
                         key={i}
-                        className="px-2 py-0.5 rounded-md bg-[#2C224B] border border-[#7C4DFF]/40 text-[#B89AFF] font-medium text-[11px]"
+                        className="px-2 py-0.5 rounded-md bg-[#E8D9E8] border border-[#DDD0D7] text-[#291B32] font-semibold text-[11px]"
                       >
                         {kw}
                       </span>
@@ -203,12 +203,12 @@ export const AIImproveModal: React.FC<AIImproveModalProps> = ({
             )}
 
             {/* Actions */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#30384B]">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#DDD0D7]">
               <Button variant="ghost" size="md" onClick={onClose} className="w-full sm:w-auto">
                 Keep Original
               </Button>
               <Button
-                variant="ai"
+                variant="primary"
                 size="md"
                 onClick={handleAccept}
                 icon={<Check className="w-4 h-4" />}

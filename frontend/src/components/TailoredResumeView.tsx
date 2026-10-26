@@ -127,18 +127,18 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-6 w-full text-[#291B32]">
       {/* Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#7C4DFF]" />
+            <h2 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#C45D39]" />
               Tailored Resume Workspace
             </h2>
             {resume.is_llm_generated !== false ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#2C224B] text-[#F7F7FA] border border-[#30384B]">
-                <Sparkles className="w-3 h-3 text-[#7C4DFF]" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]">
+                <Sparkles className="w-3 h-3 text-[#C45D39]" />
                 Gemini AI Tailored
               </span>
             ) : (
@@ -148,7 +148,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
               </span>
             )}
           </div>
-          <p className="text-xs text-[#B8B9D0] mt-0.5">
+          <p className="text-xs text-[#674E61] mt-0.5">
             Full-width executive preview, explainable scoring, before/after diff, and recruiter downloads
           </p>
         </div>
@@ -159,7 +159,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             type="button"
             disabled={Boolean(downloadingFormat)}
             onClick={() => handleDownload("pdf")}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#7C4DFF] hover:bg-[#6940DE] active:bg-[#5933C4] disabled:opacity-50 transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#C45D39] hover:bg-[#b35230] active:bg-[#a04626] disabled:opacity-50 transition-all shadow-md shadow-[#C45D39]/20"
           >
             <Download className="w-3.5 h-3.5" />
             {downloadingFormat === "pdf" ? "Exporting PDF..." : "Download PDF"}
@@ -170,9 +170,9 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             type="button"
             disabled={Boolean(downloadingFormat)}
             onClick={() => handleDownload("docx")}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#F7F7FA] bg-[#111827] hover:bg-[#111827] border border-[#30384B] disabled:opacity-50 transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-[#291B32] bg-[#F7F2EB] hover:bg-[#FAF6F2] border border-[#DDD0D7] disabled:opacity-50 transition-all shadow-xs"
           >
-            <FileText className="w-3.5 h-3.5 text-[#7C4DFF]" />
+            <FileText className="w-3.5 h-3.5 text-[#C45D39]" />
             {downloadingFormat === "docx" ? "Exporting Word..." : "Word (DOCX)"}
           </button>
 
@@ -181,9 +181,9 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             type="button"
             disabled={Boolean(downloadingFormat)}
             onClick={() => handleDownload("txt")}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#F7F7FA] bg-[#111827] hover:bg-[#111827] transition-all border border-[#30384B] shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#291B32] bg-[#F7F2EB] hover:bg-[#FAF6F2] transition-all border border-[#DDD0D7] shadow-xs"
           >
-            <FileCheck2 className="w-3.5 h-3.5 text-[#B8B9D0]" />
+            <FileCheck2 className="w-3.5 h-3.5 text-[#674E61]" />
             Plain Text
           </button>
 
@@ -191,16 +191,16 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             id="copy-resume-btn"
             type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#F7F7FA] hover:bg-[#111827] transition-all border border-[#30384B] shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#291B32] bg-[#F7F2EB] hover:bg-[#FAF6F2] transition-all border border-[#DDD0D7] shadow-xs"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-[#7C4DFF]" />
-                <span className="text-[#7C4DFF] font-medium">Copied!</span>
+                <Check className="w-3.5 h-3.5 text-[#C45D39]" />
+                <span className="text-[#C45D39] font-medium">Copied!</span>
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 text-[#B8B9D0]" />
+                <Copy className="w-3.5 h-3.5 text-[#674E61]" />
                 <span>Copy</span>
               </>
             )}
@@ -211,85 +211,85 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
       {/* Metrics & Match Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Match Score Card */}
-        <div className="p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+        <div className="p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#F7F7FA] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#291B32] uppercase tracking-wider">
               JD Match Score
             </span>
-            <Target className="w-4 h-4 text-[#7C4DFF]" />
+            <Target className="w-4 h-4 text-[#C45D39]" />
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#7C4DFF] font-mono">
+            <span className="text-3xl font-extrabold text-[#C45D39] font-mono">
               {resume.match_score}%
             </span>
-            <span className="text-xs text-[#F7F7FA] font-medium">
+            <span className="text-xs text-[#291B32] font-medium">
               {resume.match_score >= 80 ? "High Compatibility" : "Moderate Alignment"}
             </span>
           </div>
-          <div className="mt-3 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+          <div className="mt-3 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
             <div
-              className="bg-[#7C4DFF] h-2 rounded-full transition-all duration-1000"
+              className="bg-[#C45D39] h-2 rounded-full transition-all duration-1000"
               style={{ width: `${resume.match_score}%` }}
             />
           </div>
         </div>
 
         {/* ATS Score Card */}
-        <div className="p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+        <div className="p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#F7F7FA] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#291B32] uppercase tracking-wider">
               ATS Friendliness
             </span>
-            <Award className="w-4 h-4 text-[#7C4DFF]" />
+            <Award className="w-4 h-4 text-[#C45D39]" />
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#F7F7FA] font-mono">
+            <span className="text-3xl font-extrabold text-[#291B32] font-mono">
               {resume.ats_compatibility.score}%
             </span>
-            <span className="text-xs text-[#B8B9D0] font-medium">
+            <span className="text-xs text-[#674E61] font-medium">
               Scannable Format
             </span>
           </div>
-          <div className="mt-3 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
+          <div className="mt-3 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
             <div
-              className="bg-[#7C4DFF] h-2 rounded-full transition-all duration-1000"
+              className="bg-[#291B32] h-2 rounded-full transition-all duration-1000"
               style={{ width: `${resume.ats_compatibility.score}%` }}
             />
           </div>
         </div>
 
         {/* Missing Keywords Notice Card */}
-        <div className="p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
+        <div className="p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#F7F7FA] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#291B32] uppercase tracking-wider">
               Missing JD Keywords
             </span>
-            <ShieldCheck className="w-4 h-4 text-[#7C4DFF]" />
+            <ShieldCheck className="w-4 h-4 text-[#C45D39]" />
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#F7F7FA] font-mono">
+            <span className="text-3xl font-extrabold text-[#291B32] font-mono">
               {resume.missing_keywords.length}
             </span>
-            <span className="text-xs text-[#B8B9D0] font-medium">
+            <span className="text-xs text-[#674E61] font-medium">
               Identified & Isolated
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-[#B8B9D0] leading-relaxed">
+          <p className="mt-1.5 text-[11px] text-[#674E61] leading-relaxed">
             Strictly segregated to avoid credential fabrication
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#30384B] pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-[#DDD0D7] pb-3">
         <button
           id="tab-resume-btn"
           type="button"
           onClick={() => setActiveTab("resume")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "resume"
-              ? "bg-[#7C4DFF] text-white shadow-sm"
-              : "text-[#F7F7FA] hover:bg-[#111827] bg-[#111827]/60 border border-[#30384B]"
+              ? "bg-[#C45D39] text-white shadow-sm"
+              : "text-[#291B32] hover:bg-white bg-[#F7F2EB] border border-[#DDD0D7]"
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -302,8 +302,8 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           onClick={() => setActiveTab("diff")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "diff"
-              ? "bg-[#7C4DFF] text-white shadow-sm"
-              : "text-[#F7F7FA] hover:bg-[#111827] bg-[#111827]/60 border border-[#30384B]"
+              ? "bg-[#C45D39] text-white shadow-sm"
+              : "text-[#291B32] hover:bg-white bg-[#F7F2EB] border border-[#DDD0D7]"
           }`}
         >
           <GitCompare className="w-3.5 h-3.5" />
@@ -316,8 +316,8 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           onClick={() => setActiveTab("cover_letter")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "cover_letter"
-              ? "bg-[#7C4DFF] text-white shadow-sm"
-              : "text-[#F7F7FA] hover:bg-[#111827] bg-[#111827]/60 border border-[#30384B]"
+              ? "bg-[#C45D39] text-white shadow-sm"
+              : "text-[#291B32] hover:bg-white bg-[#F7F2EB] border border-[#DDD0D7]"
           }`}
         >
           <Mail className="w-3.5 h-3.5" />
@@ -330,8 +330,8 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           onClick={() => setActiveTab("gaps")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "gaps"
-              ? "bg-[#7C4DFF] text-white shadow-sm"
-              : "text-[#F7F7FA] hover:bg-[#111827] bg-[#111827]/60 border border-[#30384B]"
+              ? "bg-[#C45D39] text-white shadow-sm"
+              : "text-[#291B32] hover:bg-white bg-[#F7F2EB] border border-[#DDD0D7]"
           }`}
         >
           <AlertCircle className="w-3.5 h-3.5" />
@@ -344,32 +344,32 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           onClick={() => setActiveTab("optimization")}
           className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "optimization"
-              ? "bg-[#7C4DFF] text-white shadow-sm"
-              : "text-[#F7F7FA] hover:bg-[#111827] bg-[#111827]/60 border border-[#30384B]"
+              ? "bg-[#C45D39] text-white shadow-sm"
+              : "text-[#291B32] hover:bg-white bg-[#F7F2EB] border border-[#DDD0D7]"
           }`}
         >
           <Target className="w-3.5 h-3.5" />
           AI Optimization & Breakdown
           {resume.recommendations && resume.recommendations.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-[#2C224B] text-[#F7F7FA] font-bold">
+            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-[#E8D9E8] text-[#291B32] font-bold">
               {resume.recommendations.length}
             </span>
           )}
         </button>
       </div>
 
-      {/* TAB 1: FULL RESUME PREVIEW */}
+      {/* TAB 1: FULL RESUME PREVIEW (Conservative ATS Single Column) */}
       {activeTab === "resume" && (
         <div
           id="resume-preview-document"
-          className="p-8 sm:p-12 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm text-[#F7F7FA]"
+          className="p-8 sm:p-12 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm text-[#291B32] font-sans"
         >
           {/* Header */}
-          <div className="text-center pb-6 border-b border-[#30384B]">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#F7F7FA]">
+          <div className="text-center pb-6 border-b border-[#DDD0D7]">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-[#291B32]">
               {resume.candidate_name}
             </h1>
-            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs text-[#B8B9D0]">
+            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs text-[#674E61]">
               {resume.contact_info.email && <span>{resume.contact_info.email}</span>}
               {resume.contact_info.phone && <span>• {resume.contact_info.phone}</span>}
               {resume.contact_info.location && <span>• {resume.contact_info.location}</span>}
@@ -380,7 +380,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                     href={resume.contact_info.linkedin}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#7C4DFF] hover:underline font-medium"
+                    className="text-[#C45D39] hover:underline font-medium"
                   >
                     LinkedIn
                   </a>
@@ -393,7 +393,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                     href={resume.contact_info.github}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#7C4DFF] hover:underline font-medium"
+                    className="text-[#C45D39] hover:underline font-medium"
                   >
                     GitHub
                   </a>
@@ -404,31 +404,31 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
           {/* Professional Summary */}
           <div className="mt-6">
-            <h3 className="font-display text-xs font-bold text-[#7C4DFF] uppercase tracking-widest flex items-center gap-1.5 mb-2">
-              <Briefcase className="w-3.5 h-3.5" />
+            <h3 className="text-xs font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5 mb-2 border-b border-[#DDD0D7] pb-1">
+              <Briefcase className="w-3.5 h-3.5 text-[#C45D39]" />
               Professional Summary
             </h3>
-            <p className="text-sm leading-relaxed text-[#F7F7FA]">
+            <p className="text-xs leading-relaxed text-[#291B32]">
               {resume.tailored_summary}
             </p>
           </div>
 
           {/* Core Skills */}
           <div className="mt-6">
-            <h3 className="font-display text-xs font-bold text-[#7C4DFF] uppercase tracking-widest flex items-center gap-1.5 mb-2">
-              <Layers className="w-3.5 h-3.5" />
+            <h3 className="text-xs font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5 mb-2 border-b border-[#DDD0D7] pb-1">
+              <Layers className="w-3.5 h-3.5 text-[#C45D39]" />
               Core Qualifications & Skills
             </h3>
             {resume.skills.matching_skills.length > 0 && (
               <div className="mb-2.5">
-                <span className="text-xs font-semibold text-[#F7F7FA]">
+                <span className="text-xs font-semibold text-[#291B32]">
                   Target JD Alignment:
                 </span>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {resume.skills.matching_skills.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#2C224B] text-[#F7F7FA] border border-[#30384B]"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]"
                     >
                       {skill}
                     </span>
@@ -438,14 +438,14 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
             )}
             {resume.skills.additional_skills.length > 0 && (
               <div className="mt-2.5">
-                <span className="text-xs font-semibold text-[#F7F7FA]">
+                <span className="text-xs font-semibold text-[#674E61]">
                   Additional Capabilities:
                 </span>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {resume.skills.additional_skills.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#111827] text-[#F7F7FA] border border-[#30384B]"
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#F7F2EB] text-[#674E61] border border-[#DDD0D7]"
                     >
                       {skill}
                     </span>
@@ -457,28 +457,27 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
           {/* Experience */}
           <div className="mt-6">
-            <h3 className="font-display text-xs font-bold text-[#7C4DFF] uppercase tracking-widest flex items-center gap-1.5 mb-3">
-              <Briefcase className="w-3.5 h-3.5" />
+            <h3 className="text-xs font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5 mb-3 border-b border-[#DDD0D7] pb-1">
+              <Briefcase className="w-3.5 h-3.5 text-[#C45D39]" />
               Professional Experience
             </h3>
             <div className="space-y-5">
               {resume.experience.map((exp, idx) => (
-                <div key={idx} className="border-l-2 border-[#7C4DFF]/40 pl-4 py-0.5">
-                  <div className="flex flex-wrap items-baseline justify-between gap-1">
-                    <span className="text-sm font-bold text-[#F7F7FA]">
-                      {exp.role} <span className="text-[#B8B9D0] font-normal">at</span> {exp.company}
+                <div key={idx} className="space-y-1">
+                  <div className="flex flex-wrap items-baseline justify-between text-xs">
+                    <span className="font-bold text-[#291B32]">
+                      {exp.role} <span className="text-[#674E61] font-normal">at</span> {exp.company}
                     </span>
                     {exp.duration && (
-                      <span className="text-xs text-[#B8B9D0] font-mono">
+                      <span className="text-[#674E61]">
                         {exp.duration}
                       </span>
                     )}
                   </div>
-                  <ul className="mt-2 space-y-1.5 text-xs sm:text-sm text-[#F7F7FA]/90">
+                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32] pt-1">
                     {exp.bullets.map((bullet, bIdx) => (
-                      <li key={bIdx} className="flex items-start gap-2">
-                        <span className="text-[#7C4DFF] mt-1.5 h-1.5 w-1.5 rounded-full bg-[#7C4DFF] shrink-0" />
-                        <span>{bullet}</span>
+                      <li key={bIdx} className="leading-relaxed">
+                        {bullet}
                       </li>
                     ))}
                   </ul>
@@ -490,19 +489,19 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           {/* Education */}
           {resume.education && resume.education.length > 0 && (
             <div className="mt-6">
-              <h3 className="font-display text-xs font-bold text-[#7C4DFF] uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <GraduationCap className="w-3.5 h-3.5" />
+              <h3 className="text-xs font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5 mb-2 border-b border-[#DDD0D7] pb-1">
+                <GraduationCap className="w-3.5 h-3.5 text-[#C45D39]" />
                 Education
               </h3>
               <div className="space-y-2">
                 {resume.education.map((edu, idx) => (
-                  <div key={idx} className="flex items-baseline justify-between text-xs sm:text-sm">
+                  <div key={idx} className="flex items-baseline justify-between text-xs">
                     <div>
-                      <span className="font-semibold text-[#F7F7FA]">{edu.degree}</span>
-                      <span className="text-[#B8B9D0]"> — {edu.institution}</span>
-                      {edu.details && <p className="text-xs text-[#B8B9D0] mt-0.5">{edu.details}</p>}
+                      <strong className="text-[#291B32]">{edu.degree}</strong>
+                      <span className="text-[#674E61]"> — {edu.institution}</span>
+                      {edu.details && <p className="text-[11px] text-[#674E61] mt-0.5">{edu.details}</p>}
                     </div>
-                    {edu.year && <span className="text-xs text-[#B8B9D0] font-mono">{edu.year}</span>}
+                    {edu.year && <span className="text-[#674E61]">{edu.year}</span>}
                   </div>
                 ))}
               </div>
@@ -512,21 +511,21 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           {/* Projects */}
           {resume.projects && resume.projects.length > 0 && (
             <div className="mt-6">
-              <h3 className="font-display text-xs font-bold text-[#7C4DFF] uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <Award className="w-3.5 h-3.5" />
+              <h3 className="text-xs font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5 mb-2 border-b border-[#DDD0D7] pb-1">
+                <Award className="w-3.5 h-3.5 text-[#C45D39]" />
                 Featured Projects
               </h3>
               <div className="space-y-3">
                 {resume.projects.map((proj, idx) => (
-                  <div key={idx} className="text-xs sm:text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-[#F7F7FA]">{proj.name}</span>
+                  <div key={idx} className="text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <strong className="text-[#291B32]">{proj.name}</strong>
                       {proj.technologies && proj.technologies.length > 0 && (
-                        <span className="text-xs text-[#B8B9D0]">[{proj.technologies.join(", ")}]</span>
+                        <span className="text-[11px] text-[#674E61] font-mono">[{proj.technologies.join(", ")}]</span>
                       )}
                     </div>
                     {proj.bullets.map((b, bIdx) => (
-                      <p key={bIdx} className="text-[#F7F7FA]/80 mt-1 pl-3 border-l border-[#30384B]">
+                      <p key={bIdx} className="text-[#291B32] pl-3 border-l border-[#DDD0D7]">
                         {b}
                       </p>
                     ))}
@@ -546,12 +545,12 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
       {/* TAB 4: MISSING KEYWORDS GAP ANALYSIS */}
       {activeTab === "gaps" && (
-        <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm space-y-6">
-          <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-900 leading-relaxed">
+        <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+          <div className="p-4 rounded-xl bg-[#FDF6F3] border border-[#C45D39]/30 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-[#C45D39] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#291B32] leading-relaxed">
               <p className="font-bold mb-1">Ethical Guardrail in Effect: Credential Fabrication Prevented</p>
-              <p>
+              <p className="text-[#674E61]">
                 The job description mentioned the keywords below, but our parser verified they do not exist
                 in your uploaded resume. To maintain strict honesty, these skills were <strong>not</strong> inserted into your tailored resume bullets or skills list.
               </p>
@@ -559,7 +558,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-bold text-sm text-[#F7F7FA]">
+            <h3 className="font-bold text-sm text-[#291B32]">
               Isolated Keywords & Transparent Action Plans ({resume.missing_keywords.length})
             </h3>
             {resume.missing_keywords.length > 0 ? (
@@ -567,16 +566,16 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                 {resume.missing_keywords.map((item, idx) => (
                   <div
                     key={idx}
-                    className="p-3.5 rounded-xl border border-[#30384B] bg-[#111827] space-y-1"
+                    className="p-3.5 rounded-xl border border-[#DDD0D7] bg-[#F7F2EB] space-y-1"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-[#F7F7FA]">{item.keyword}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-stone-200 text-stone-700 font-medium">
+                      <span className="font-bold text-xs text-[#291B32]">{item.keyword}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-white text-[#674E61] border border-[#DDD0D7] font-medium">
                         {item.category}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#B8B9D0]">{item.context}</p>
-                    <p className="text-[11px] text-[#7C4DFF] font-medium pt-1 flex items-center gap-1">
+                    <p className="text-[11px] text-[#674E61]">{item.context}</p>
+                    <p className="text-[11px] text-[#C45D39] font-medium pt-1 flex items-center gap-1">
                       <span>→</span>
                       <span>{item.recommendation}</span>
                     </p>
@@ -584,9 +583,9 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                 ))}
               </div>
             ) : (
-              <div className="p-6 text-center text-xs text-[#B8B9D0] bg-[#111827] rounded-xl border border-[#30384B]">
-                <Check className="w-6 h-6 text-[#7C4DFF] mx-auto mb-1.5" />
-                <p className="font-semibold text-[#F7F7FA]">No Critical Gaps Found</p>
+              <div className="p-6 text-center text-xs text-[#674E61] bg-[#F7F2EB] rounded-xl border border-[#DDD0D7]">
+                <Check className="w-6 h-6 text-[#C45D39] mx-auto mb-1.5" />
+                <p className="font-semibold text-[#291B32]">No Critical Gaps Found</p>
                 <p>Your resume satisfies all primary keywords identified in this job description.</p>
               </div>
             )}
@@ -594,16 +593,16 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
         </div>
       )}
 
-      {/* TAB 5: AI OPTIMIZATION & MATCH ANALYSIS (Phase 5C & 6) */}
+      {/* TAB 5: AI OPTIMIZATION & MATCH ANALYSIS */}
       {activeTab === "optimization" && (
         <div id="optimization-analysis-panel" className="flex flex-col gap-6">
           {!resume.match_breakdown && (
-            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm text-center">
-              <Info className="w-8 h-8 text-[#7C4DFF] mx-auto mb-2" />
-              <h3 className="font-bold text-sm text-[#F7F7FA]">
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm text-center">
+              <Info className="w-8 h-8 text-[#C45D39] mx-auto mb-2" />
+              <h3 className="font-bold text-sm text-[#291B32]">
                 Historical Snapshot (Match Score: {resume.match_score}%)
               </h3>
-              <p className="text-xs text-[#B8B9D0] mt-1 max-w-md mx-auto">
+              <p className="text-xs text-[#674E61] mt-1 max-w-md mx-auto">
                 This resume version was created prior to Phase 5C explainable scoring. Re-tailor against your target job description to generate a multi-factor score breakdown and structured JD requirements.
               </p>
             </div>
@@ -611,129 +610,129 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
           {/* 1. Explainable Match Score Breakdown */}
           {resume.match_breakdown && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
-              <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
                 <div>
-                  <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-                    <Target className="w-4 h-4 text-[#7C4DFF]" />
+                  <h3 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+                    <Target className="w-4 h-4 text-[#C45D39]" />
                     Explainable Match Breakdown
                   </h3>
-                  <p className="text-xs text-[#B8B9D0] mt-0.5">
+                  <p className="text-xs text-[#674E61] mt-0.5">
                     Multi-factor evaluation mathematically weighted across 6 criteria
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-black text-[#7C4DFF] font-mono">
+                  <span className="text-2xl font-black text-[#C45D39] font-mono">
                     {resume.match_breakdown.overall_score}%
                   </span>
-                  <span className="block text-[10px] text-[#B8B9D0]">Weighted Overall</span>
+                  <span className="block text-[10px] text-[#674E61]">Weighted Overall</span>
                 </div>
               </div>
 
               {/* Factors Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Required Skill Coverage ({Math.round(resume.match_breakdown.factor_weights["required_skills"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.required_skill_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.match_breakdown.required_skill_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.required_skill_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.match_breakdown.required_skill_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Preferred Skill Coverage ({Math.round(resume.match_breakdown.factor_weights["preferred_skills"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.preferred_skill_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.match_breakdown.preferred_skill_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.preferred_skill_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.match_breakdown.preferred_skill_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Role & Experience Alignment ({Math.round(resume.match_breakdown.factor_weights["experience"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.experience_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.match_breakdown.experience_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.experience_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.match_breakdown.experience_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Responsibility Alignment ({Math.round(resume.match_breakdown.factor_weights["responsibilities"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.responsibility_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.match_breakdown.responsibility_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.responsibility_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.match_breakdown.responsibility_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Domain Keyword Coverage ({Math.round(resume.match_breakdown.factor_weights["keyword_coverage"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.keyword_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.match_breakdown.keyword_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.keyword_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.match_breakdown.keyword_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Resume Structure & Readability ({Math.round(resume.match_breakdown.factor_weights["structure"] * 100)}% weight)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.match_breakdown.structure_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.match_breakdown.structure_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.match_breakdown.structure_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.match_breakdown.structure_score}%` }} />
                   </div>
                 </div>
               </div>
 
-              <div className="mt-5 p-4 rounded-xl bg-[#2C224B]/35 border border-[#30384B] text-xs text-[#F7F7FA] leading-relaxed">
-                <strong>Methodology & Evidence:</strong> {resume.match_breakdown.explanation}
+              <div className="mt-5 p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61] leading-relaxed">
+                <strong className="text-[#291B32]">Methodology & Evidence:</strong> {resume.match_breakdown.explanation}
               </div>
 
-              <div className="mt-2.5 p-3 rounded-xl bg-[#111827] border border-[#30384B] text-[11px] text-[#B8B9D0] leading-relaxed">
-                <strong>Transparency Note:</strong> {resume.match_breakdown.disclaimer}
+              <div className="mt-2.5 p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[11px] text-[#674E61] leading-relaxed">
+                <strong className="text-[#291B32]">Transparency Note:</strong> {resume.match_breakdown.disclaimer}
               </div>
             </div>
           )}
 
-          {/* 2. Structured Job Description Requirements with UX Fix */}
+          {/* 2. Structured Job Description Requirements */}
           {resume.job_analysis && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
-              <div className="pb-4 border-b border-[#30384B]">
-                <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-[#7C4DFF]" />
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
+              <div className="pb-4 border-b border-[#DDD0D7]">
+                <h3 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-[#C45D39]" />
                   Structured Job Requirements
                 </h3>
-                <p className="text-xs text-[#B8B9D0] mt-0.5">
+                <p className="text-xs text-[#674E61] mt-0.5">
                   Verifiable breakdown of technical requirements extracted from target job posting
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 text-xs">
                 <div>
-                  <span className="font-semibold text-[#B8B9D0]">Target Role:</span>
-                  <p className="text-[#F7F7FA] font-bold text-sm mt-0.5">{resume.job_analysis.target_role}</p>
+                  <span className="font-semibold text-[#674E61]">Target Role:</span>
+                  <p className="text-[#291B32] font-bold text-sm mt-0.5">{resume.job_analysis.target_role}</p>
                 </div>
                 <div>
-                  <span className="font-semibold text-[#B8B9D0]">Experience & Seniority:</span>
-                  <p className="text-[#F7F7FA] font-medium mt-0.5">{resume.job_analysis.experience_level || "Not specified"}</p>
+                  <span className="font-semibold text-[#674E61]">Experience & Seniority:</span>
+                  <p className="text-[#291B32] font-medium mt-0.5">{resume.job_analysis.experience_level || "Not specified"}</p>
                 </div>
                 <div className="md:col-span-2">
-                  <span className="font-semibold text-[#B8B9D0]">Education Requirement:</span>
-                  <p className="text-[#F7F7FA] font-medium mt-0.5">{resume.job_analysis.education_requirement || "Not specified"}</p>
+                  <span className="font-semibold text-[#674E61]">Education Requirement:</span>
+                  <p className="text-[#291B32] font-medium mt-0.5">{resume.job_analysis.education_requirement || "Not specified"}</p>
                 </div>
 
                 <div className="md:col-span-2 mt-2">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-semibold text-[#F7F7FA]">Mandatory Required Skills:</span>
-                    <span className="text-[11px] text-[#B8B9D0]">
+                    <span className="font-semibold text-[#291B32]">Mandatory Required Skills:</span>
+                    <span className="text-[11px] text-[#674E61]">
                       Distinguishes Highlighted vs Evidenced in Experience vs Absent
                     </span>
                   </div>
@@ -746,18 +745,18 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                           key={i}
                           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
                             matched
-                              ? "bg-[#2C224B] text-[#F7F7FA] border-[#30384B]"
+                              ? "bg-[#E8D9E8] text-[#291B32] border-[#DDD0D7]"
                               : evidenced
-                              ? "bg-[#111827] text-[#B8B9D0] border-[#30384B]"
-                              : "bg-[#2C224B] text-[#9A3412] border-[#7C4DFF]/40"
+                              ? "bg-[#F7F2EB] text-[#674E61] border-[#DDD0D7]"
+                              : "bg-[#FDF6F3] text-[#C45D39] border-[#C45D39]/30"
                           }`}
                         >
                           {matched ? (
-                            <Check className="w-3.5 h-3.5 text-[#7C4DFF]" />
+                            <Check className="w-3.5 h-3.5 text-[#C45D39]" />
                           ) : evidenced ? (
-                            <Info className="w-3.5 h-3.5 text-[#B8B9D0]" />
+                            <Info className="w-3.5 h-3.5 text-[#674E61]" />
                           ) : (
-                            <AlertCircle className="w-3.5 h-3.5 text-[#7C4DFF]" />
+                            <AlertCircle className="w-3.5 h-3.5 text-[#C45D39]" />
                           )}
                           <span>{skill}</span>
                           <span className="text-[10px] font-normal opacity-90">
@@ -775,7 +774,7 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
                 {resume.job_analysis.preferred_skills && resume.job_analysis.preferred_skills.length > 0 && (
                   <div className="md:col-span-2 mt-3">
-                    <span className="font-semibold text-[#F7F7FA]">Preferred / Bonus Qualifications:</span>
+                    <span className="font-semibold text-[#291B32]">Preferred / Bonus Qualifications:</span>
                     <div className="flex flex-wrap gap-2 mt-1.5">
                       {resume.job_analysis.preferred_skills.map((skill, i) => {
                         const matched = isSkillHighlighted(skill);
@@ -785,18 +784,18 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                             key={i}
                             className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
                               matched
-                                ? "bg-[#2C224B] text-[#F7F7FA] border-[#30384B]"
+                                ? "bg-[#E8D9E8] text-[#291B32] border-[#DDD0D7]"
                                 : evidenced
-                                ? "bg-[#111827] text-[#B8B9D0] border-[#30384B]"
-                                : "bg-[#111827] text-[#B8B9D0] border-[#30384B]"
+                                ? "bg-[#F7F2EB] text-[#674E61] border-[#DDD0D7]"
+                                : "bg-[#F7F2EB] text-[#674E61] border-[#DDD0D7]"
                             }`}
                           >
                             {matched ? (
-                              <Check className="w-3.5 h-3.5 text-[#7C4DFF]" />
+                              <Check className="w-3.5 h-3.5 text-[#C45D39]" />
                             ) : evidenced ? (
-                              <Info className="w-3.5 h-3.5 text-[#B8B9D0]" />
+                              <Info className="w-3.5 h-3.5 text-[#674E61]" />
                             ) : (
-                              <AlertCircle className="w-3.5 h-3.5 text-stone-400" />
+                              <AlertCircle className="w-3.5 h-3.5 text-[#674E61]" />
                             )}
                             <span>{skill}</span>
                             <span className="text-[10px] font-normal opacity-90">
@@ -817,18 +816,18 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
           )}
 
           {/* 3. Prioritized AI Optimization Recommendations */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
               <div>
-                <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#7C4DFF]" />
+                <h3 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#C45D39]" />
                   Prioritized AI Optimization Recommendations
                 </h3>
-                <p className="text-xs text-[#B8B9D0] mt-0.5">
+                <p className="text-xs text-[#674E61] mt-0.5">
                   Actionable suggestions grounded in factual resume evidence
                 </p>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#2C224B] text-[#F7F7FA]">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]">
                 {resume.recommendations?.length || 0} Actions
               </span>
             </div>
@@ -838,17 +837,17 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                 resume.recommendations.map((rec, idx) => (
                   <div
                     key={idx}
-                    className="p-5 rounded-xl border border-[#30384B] bg-[#111827] hover:border-[#7C4DFF]/40 transition-colors"
+                    className="p-5 rounded-xl border border-[#DDD0D7] bg-[#F7F2EB] hover:border-[#C45D39]/40 transition-colors"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                             rec.priority === "high"
-                              ? "bg-[#2C224B] text-[#9A3412] border border-[#7C4DFF]/40"
+                              ? "bg-rose-100 text-rose-800 border border-rose-200"
                               : rec.priority === "medium"
-                              ? "bg-amber-100 text-amber-900 border border-amber-200"
-                              : "bg-[#2C224B] text-[#F7F7FA] border border-[#30384B]"
+                              ? "bg-amber-100 text-amber-800 border border-amber-200"
+                              : "bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]"
                           }`}
                         >
                           {rec.priority} Priority
@@ -859,40 +858,40 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                             Requires Candidate Confirmation
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-[#2C224B] text-[#F7F7FA] border border-[#30384B]">
-                            <Check className="w-3 h-3 text-[#7C4DFF]" />
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]">
+                            <Check className="w-3 h-3 text-[#C45D39]" />
                             Evidence Grounded
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <h4 className="font-bold text-sm text-[#F7F7FA] mt-2.5">
+                    <h4 className="font-bold text-sm text-[#291B32] mt-2.5">
                       {rec.issue}
                     </h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2.5 text-xs text-[#B8B9D0]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2.5 text-xs text-[#674E61]">
                       <p>
-                        <strong className="text-[#F7F7FA]">JD Requirement:</strong> {rec.requirement}
+                        <strong className="text-[#291B32]">JD Requirement:</strong> {rec.requirement}
                       </p>
                       <p>
-                        <strong className="text-[#F7F7FA]">Resume Evidence:</strong> {rec.evidence}
+                        <strong className="text-[#291B32]">Resume Evidence:</strong> {rec.evidence}
                       </p>
                     </div>
 
-                    <div className="mt-3.5 p-3.5 rounded-lg bg-[#111827] border border-[#30384B] text-xs text-[#F7F7FA] leading-relaxed">
-                      <strong className="text-[#7C4DFF]">Proposed Improvement:</strong>{" "}
+                    <div className="mt-3.5 p-3.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] leading-relaxed">
+                      <strong className="text-[#C45D39]">Proposed Improvement:</strong>{" "}
                       {rec.proposed_improvement}
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-[#B8B9D0]">
-                  <Check className="w-8 h-8 text-[#7C4DFF] mx-auto mb-2" />
-                  <p className="font-semibold text-[#F7F7FA]">
+                <div className="p-8 text-center text-[#674E61]">
+                  <Check className="w-8 h-8 text-[#C45D39] mx-auto mb-2" />
+                  <p className="font-semibold text-[#291B32]">
                     No Critical Optimization Issues Identified
                   </p>
-                  <p className="text-xs text-[#B8B9D0] mt-1">
+                  <p className="text-xs text-[#674E61] mt-1">
                     Your tailored resume directly aligns with the primary requirements of the job description.
                   </p>
                 </div>
@@ -902,113 +901,113 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
           {/* 4. ATS & Resume Quality Assessment (Track B) */}
           {resume.ats_quality_assessment && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
-              <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
                 <div>
-                  <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-[#7C4DFF]" />
+                  <h3 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#C45D39]" />
                     ATS & Resume Quality Assessment (Track B)
                   </h3>
-                  <p className="text-xs text-[#B8B9D0] mt-0.5">
+                  <p className="text-xs text-[#674E61] mt-0.5">
                     Deterministic document structure, single-column parseability, and readability health
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-black text-[#7C4DFF] font-mono">
+                  <span className="text-2xl font-black text-[#C45D39] font-mono">
                     {resume.ats_quality_assessment.overall_score}%
                   </span>
-                  <span className="block text-[10px] text-[#B8B9D0]">
+                  <span className="block text-[10px] text-[#674E61]">
                     {resume.audit?.grade ? `Grade ${resume.audit.grade}` : "ATS Quality"}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Single-Column Parseability (25% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.parseability_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.ats_quality_assessment.parseability_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.parseability_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.parseability_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Section Structure (20% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.structure_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.ats_quality_assessment.structure_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.structure_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.structure_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Readability & Voice (15% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.readability_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.ats_quality_assessment.readability_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.readability_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.readability_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Formatting Consistency (15% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.formatting_consistency_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.ats_quality_assessment.formatting_consistency_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.formatting_consistency_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.formatting_consistency_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Content Coverage (15% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.content_coverage_score}%</span>
+                    <span className="font-mono text-[#C45D39] font-bold">{resume.ats_quality_assessment.content_coverage_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.content_coverage_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#C45D39] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.content_coverage_score}%` }} />
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-[#111827] border border-[#30384B]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-[#F7F7FA]">
+                <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#291B32]">
                     <span>Document Completeness (10% wt)</span>
-                    <span className="font-mono text-[#7C4DFF] font-bold">{resume.ats_quality_assessment.completeness_score}%</span>
+                    <span className="font-mono text-[#291B32] font-bold">{resume.ats_quality_assessment.completeness_score}%</span>
                   </div>
-                  <div className="mt-2.5 w-full bg-[#30384B] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#7C4DFF] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.completeness_score}%` }} />
+                  <div className="mt-2.5 w-full bg-[#DDD0D7] rounded-full h-2 overflow-hidden">
+                    <div className="bg-[#291B32] h-2 rounded-full" style={{ width: `${resume.ats_quality_assessment.completeness_score}%` }} />
                   </div>
                 </div>
               </div>
 
-              <div className="mt-5 p-4 rounded-xl bg-[#2C224B]/35 border border-[#30384B] text-xs text-[#F7F7FA] leading-relaxed">
-                <strong>Methodology & Non-Vendor Notice:</strong> {resume.ats_quality_assessment.explanation} {resume.ats_quality_assessment.disclaimer}
+              <div className="mt-5 p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61] leading-relaxed">
+                <strong className="text-[#291B32]">Methodology & Non-Vendor Notice:</strong> {resume.ats_quality_assessment.explanation} {resume.ats_quality_assessment.disclaimer}
               </div>
             </div>
           )}
 
           {/* 5. Deterministic Resume Quality Audit Findings */}
           {resume.audit && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-sm">
-              <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm">
+              <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
                 <div>
-                  <h3 className="text-base font-bold text-[#F7F7FA] flex items-center gap-2">
-                    <FileCheck2 className="w-4 h-4 text-[#7C4DFF]" />
+                  <h3 className="text-base font-bold text-[#291B32] flex items-center gap-2">
+                    <FileCheck2 className="w-4 h-4 text-[#C45D39]" />
                     Resume Quality Audit Findings
                   </h3>
-                  <p className="text-xs text-[#B8B9D0] mt-0.5">
+                  <p className="text-xs text-[#674E61] mt-0.5">
                     Deterministic checks for contact details, bullet lengths, dates, and typography
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xl font-black text-[#F7F7FA] font-mono">
+                  <span className="text-xl font-black text-[#291B32] font-mono">
                     Grade {resume.audit.grade}
                   </span>
-                  <span className="block text-[10px] text-[#B8B9D0]">
+                  <span className="block text-[10px] text-[#674E61]">
                     {resume.audit.errors.length} errors, {resume.audit.warnings.length} warnings
                   </span>
                 </div>
@@ -1016,27 +1015,27 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
 
               {/* Metrics Strip */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
-                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Total Words</span>
-                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#674E61] block">Total Words</span>
+                  <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                     {resume.audit.metrics.word_count ?? "—"}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Bullet Points</span>
-                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#674E61] block">Bullet Points</span>
+                  <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                     {resume.audit.metrics.bullet_count ?? "—"}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Avg Bullet Length</span>
-                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#674E61] block">Avg Bullet Length</span>
+                  <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                     {resume.audit.metrics.avg_bullet_words ? `${resume.audit.metrics.avg_bullet_words} words` : "—"}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-[#111827] border border-[#30384B] text-center">
-                  <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Duplicate Skills</span>
-                  <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+                <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                  <span className="text-[10px] uppercase font-bold text-[#674E61] block">Duplicate Skills</span>
+                  <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                     {resume.audit.metrics.duplicate_skills_count ?? 0}
                   </span>
                 </div>
@@ -1049,10 +1048,10 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                     key={idx}
                     className={`p-3.5 rounded-xl border text-xs space-y-1 ${
                       issue.type === "error"
-                        ? "bg-rose-950/20 border-rose-500/40 text-rose-200"
+                        ? "bg-rose-50 border-rose-200 text-rose-900"
                         : issue.type === "warning"
-                        ? "bg-amber-950/20 border-amber-500/40 text-amber-200"
-                        : "bg-[#111827] border-[#30384B] text-[#F7F7FA]"
+                        ? "bg-amber-50 border-amber-200 text-amber-900"
+                        : "bg-[#F7F2EB] border-[#DDD0D7] text-[#291B32]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -1060,30 +1059,30 @@ export default function TailoredResumeView({ resume }: TailoredResumeViewProps) 
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                             issue.type === "error"
-                              ? "bg-rose-500/30 text-rose-300"
+                              ? "bg-rose-100 text-rose-800"
                               : issue.type === "warning"
-                              ? "bg-amber-500/30 text-amber-300"
-                              : "bg-[#2C224B] text-[#B89AFF]"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-[#E8D9E8] text-[#291B32]"
                           }`}
                         >
                           {issue.type}
                         </span>
-                        <strong className="font-semibold text-[#F7F7FA]">{issue.message}</strong>
+                        <strong className="font-semibold text-[#291B32]">{issue.message}</strong>
                       </div>
                       {issue.category && (
-                        <span className="text-[10px] font-mono text-[#B8B9D0] uppercase">
+                        <span className="text-[10px] font-mono text-[#674E61] uppercase">
                           {issue.category}
                         </span>
                       )}
                     </div>
                     {issue.location && (
-                      <p className="text-[11px] text-[#B8B9D0]">
-                        <span className="font-medium">Section:</span> {issue.location}
+                      <p className="text-[11px] text-[#674E61]">
+                        <span className="font-medium text-[#291B32]">Section:</span> {issue.location}
                       </p>
                     )}
                     {issue.recommendation && (
-                      <p className="text-[11px] text-[#B89AFF] pt-0.5">
-                        <span className="font-medium text-[#F7F7FA]">Guidance:</span> {issue.recommendation}
+                      <p className="text-[11px] text-[#C45D39] pt-0.5">
+                        <span className="font-medium text-[#291B32]">Guidance:</span> {issue.recommendation}
                       </p>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
@@ -69,9 +69,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         if (mounted) {
-          setSession(initialSession);
-          setUser(mapUser(initialSession?.user ?? null));
-          setToken(initialSession?.access_token ?? null);
+          if (initialSession) {
+            setSession(initialSession);
+            setUser(mapUser(initialSession.user));
+            setToken(initialSession.access_token);
+          } else if (typeof window !== "undefined") {
+            const stored = localStorage.getItem("rc_demo_user");
+            if (stored) {
+              try {
+                const parsed = JSON.parse(stored);
+                setUser(parsed.user);
+                setToken(parsed.token);
+              } catch {
+                // ignore
+              }
+            }
+          }
           setIsLoading(false);
         }
       } catch (err) {
@@ -83,8 +96,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         (_event, newSession) => {
           if (mounted) {
             setSession(newSession);
-            setUser(mapUser(newSession?.user ?? null));
-            setToken(newSession?.access_token ?? null);
+            if (newSession) {
+              setUser(mapUser(newSession.user));
+              setToken(newSession.access_token);
+            } else if (typeof window !== "undefined") {
+              const stored = localStorage.getItem("rc_demo_user");
+              if (stored) {
+                try {
+                  const parsed = JSON.parse(stored);
+                  setUser(parsed.user);
+                  setToken(parsed.token);
+                } catch {
+                  setUser(null);
+                  setToken(null);
+                }
+              } else {
+                setUser(null);
+                setToken(null);
+              }
+            } else {
+              setUser(null);
+              setToken(null);
+            }
             setIsLoading(false);
           }
         }

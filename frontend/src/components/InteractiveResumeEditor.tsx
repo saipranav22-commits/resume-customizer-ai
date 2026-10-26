@@ -262,8 +262,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     const newEdu: EducationItem = {
       degree: "B.S. in Computer Science",
       institution: "University",
-      year: "Graduated",
-      details: "Relevant Coursework in Distributed Systems",
+      year: "2022",
     };
     setDraft((prev) => ({
       ...prev,
@@ -292,10 +291,9 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   const handleAddProject = () => {
     const newProj: ProjectItem = {
-      name: "New Software Project",
-      technologies: ["React", "FastAPI"],
-      bullets: ["Designed and implemented full-stack production application."],
-      link: "https://github.com/project",
+      name: "Cloud Service Platform",
+      technologies: ["TypeScript", "Next.js", "Python"],
+      bullets: ["Engineered responsive client architecture and integrated low-latency endpoints."],
     };
     setDraft((prev) => ({
       ...prev,
@@ -402,17 +400,17 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   return (
     <div className="space-y-6">
       {/* Studio Action Toolbar */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Left: Mode toggle & Status Indicators */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center p-1 rounded-xl bg-[#0B101A] border border-[#30384B]">
+          <div className="flex items-center p-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7]">
             <button
               type="button"
               onClick={() => setViewMode("editor")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === "editor"
-                  ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/30"
-                  : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  ? "bg-[#291B32] text-white shadow-sm"
+                  : "text-[#674E61] hover:text-[#291B32]"
               }`}
             >
               <Edit2 className="w-3.5 h-3.5" />
@@ -423,8 +421,8 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               onClick={() => setViewMode("preview")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 viewMode === "preview"
-                  ? "bg-[#7C4DFF] text-white shadow-md shadow-[#7C4DFF]/30"
-                  : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  ? "bg-[#291B32] text-white shadow-sm"
+                  : "text-[#674E61] hover:text-[#291B32]"
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -434,21 +432,21 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
           {/* Draft Modification Status */}
           {isModified ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#2C224B] border border-[#7C4DFF]/40 text-xs font-semibold text-[#B89AFF]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#7C4DFF] animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FDF6F3] border border-[#C45D39]/40 text-xs font-semibold text-[#C45D39]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C45D39] animate-pulse" />
               Unsaved Draft Edits
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#1B2231] border border-[#30384B] text-xs font-semibold text-[#B8B9D0]">
-              <Check className="w-3.5 h-3.5 text-[#B89AFF]" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-semibold text-[#674E61]">
+              <Check className="w-3.5 h-3.5 text-[#C45D39]" />
               Draft In Sync
             </span>
           )}
 
           {/* Score Stale Alert */}
           {isScoreStale && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs font-semibold text-amber-300">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-xs font-semibold text-amber-800">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               Score Stale (Edits made)
             </span>
           )}
@@ -458,19 +456,19 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end">
           {/* ATS Quality Audit Button */}
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={handleRunAudit}
             isLoading={isAuditing}
-            icon={<ShieldCheck className="w-3.5 h-3.5 text-[#7C4DFF]" />}
+            icon={<ShieldCheck className="w-3.5 h-3.5 text-[#C45D39]" />}
           >
             <span>ATS Audit</span>
             {draft.audit ? (
               <span
                 className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
                   draft.audit.errors.length > 0
-                    ? "bg-rose-500/20 text-rose-300"
-                    : "bg-[#2C224B] text-[#B89AFF]"
+                    ? "bg-rose-100 text-rose-800"
+                    : "bg-[#E8D9E8] text-[#291B32]"
                 }`}
               >
                 {draft.audit.overall_score}%
@@ -480,7 +478,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
           {/* Re-check Score Button */}
           <Button
-            variant="ai"
+            variant="recheck"
             size="sm"
             onClick={handleRecheckScore}
             isLoading={isRechecking}
@@ -503,10 +501,10 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
           {/* Save Version */}
           <Button
-            variant="secondary"
+            variant="save"
             size="sm"
             onClick={() => onSaveVersion(draft)}
-            icon={<Save className="w-3.5 h-3.5 text-[#FDBB83]" />}
+            icon={<Save className="w-3.5 h-3.5 text-[#E8D9E8]" />}
           >
             Save as Version
           </Button>
@@ -514,32 +512,32 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           {/* Export Actions Dropdown */}
           <div className="relative group">
             <Button
-              variant="editing"
+              variant="export"
               size="sm"
-              icon={<FileDown className="w-3.5 h-3.5 text-[#B89AFF]" />}
+              icon={<FileDown className="w-3.5 h-3.5 text-[#C45D39]" />}
             >
               <span>Export</span>
               <ChevronDown className="w-3 h-3 ml-0.5 opacity-60" />
             </Button>
-            <div className="absolute right-0 mt-1 w-36 py-1 bg-[#1B2231] border border-[#30384B] rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+            <div className="absolute right-0 mt-1 w-36 py-1 bg-white border border-[#DDD0D7] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
               <button
                 type="button"
                 onClick={() => onExport("pdf", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#F7F7FA] hover:bg-[#2C224B] hover:text-[#B89AFF] flex items-center justify-between"
+                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
               >
                 <span>Download PDF</span>
               </button>
               <button
                 type="button"
                 onClick={() => onExport("docx", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#F7F7FA] hover:bg-[#2C224B] hover:text-[#B89AFF] flex items-center justify-between"
+                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
               >
                 <span>Word (DOCX)</span>
               </button>
               <button
                 type="button"
                 onClick={() => onExport("txt", draft)}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#F7F7FA] hover:bg-[#2C224B] hover:text-[#B89AFF] flex items-center justify-between"
+                className="w-full text-left px-3.5 py-2 text-xs font-medium text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between"
               >
                 <span>Plain Text (TXT)</span>
               </button>
@@ -553,18 +551,18 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         <div
           className={`p-3 rounded-xl border text-xs font-medium flex items-center justify-between transition-all ${
             recheckMessage.startsWith("Error")
-              ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
-              : "bg-[#2C224B]/60 border-[#7C4DFF]/40 text-[#B89AFF]"
+              ? "bg-rose-50 border-rose-300 text-rose-800"
+              : "bg-[#FDF6F3] border-[#C45D39]/40 text-[#291B32]"
           }`}
         >
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#7C4DFF]" />
+            <Sparkles className="w-4 h-4 text-[#C45D39]" />
             <span>{recheckMessage}</span>
           </div>
           <button
             type="button"
             onClick={() => setRecheckMessage(null)}
-            className="text-[#B8B9D0] hover:text-[#F7F7FA]"
+            className="text-[#674E61] hover:text-[#291B32]"
           >
             ×
           </button>
@@ -575,98 +573,98 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
       {viewMode === "editor" ? (
         <div className="space-y-6">
           {/* Section 1: Candidate Contact Info */}
-          <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-[#7C4DFF]" />
-                <h3 className="font-heading font-bold text-sm text-[#F7F7FA]">
+                <User className="w-4 h-4 text-[#C45D39]" />
+                <h3 className="font-heading font-bold text-sm text-[#291B32]">
                   {draft.candidate_name || "Candidate Information & Contact"}
                 </h3>
               </div>
-              <span className="text-[11px] text-[#B8B9D0]">Contact & Details</span>
+              <span className="text-[11px] text-[#674E61]">Contact & Details</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   Full Name
                 </label>
                 <input
                   type="text"
                   value={draft.candidate_name}
                   onChange={(e) => handleFieldChange("candidate_name", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   Email
                 </label>
                 <input
                   type="email"
                   value={draft.contact_info?.email || ""}
                   onChange={(e) => handleContactChange("email", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   Phone
                 </label>
                 <input
                   type="text"
                   value={draft.contact_info?.phone || ""}
                   onChange={(e) => handleContactChange("phone", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   Location
                 </label>
                 <input
                   type="text"
                   value={draft.contact_info?.location || ""}
                   onChange={(e) => handleContactChange("location", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   LinkedIn URL
                 </label>
                 <input
                   type="text"
                   value={draft.contact_info?.linkedin || ""}
                   onChange={(e) => handleContactChange("linkedin", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0] mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#674E61] mb-1">
                   GitHub / Portfolio
                 </label>
                 <input
                   type="text"
                   value={draft.contact_info?.github || draft.contact_info?.portfolio || ""}
                   onChange={(e) => handleContactChange("github", e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF]"
+                  className="w-full p-2.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39]"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 2: Professional Summary */}
-          <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#7C4DFF]" />
-                <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+                <Sparkles className="w-4 h-4 text-[#C45D39]" />
+                <h4 className="font-heading font-bold text-sm text-[#291B32]">
                   Professional Summary
                 </h4>
               </div>
@@ -692,36 +690,36 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               rows={4}
               value={draft.tailored_summary}
               onChange={(e) => handleFieldChange("tailored_summary", e.target.value)}
-              className="w-full p-3.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-sm text-[#F7F7FA] leading-relaxed focus:outline-none focus:border-[#7C4DFF] focus:ring-1 focus:ring-[#7C4DFF] resize-y"
+              className="w-full p-3.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-sm text-[#291B32] leading-relaxed focus:outline-none focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] resize-y placeholder-[#674E61]/60"
               placeholder="Enter your tailored professional summary..."
             />
           </div>
 
           {/* Section 3: Technical Skills */}
-          <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#30384B]">
-              <Wrench className="w-4 h-4 text-[#7C4DFF]" />
-              <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#DDD0D7]">
+              <Wrench className="w-4 h-4 text-[#C45D39]" />
+              <h4 className="font-heading font-bold text-sm text-[#291B32]">
                 Technical Skills & Competencies
               </h4>
             </div>
 
             {/* Matching Skills */}
             <div className="space-y-2.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#B89AFF]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C45D39]">
                 Role-Matching Skills
               </span>
               <div className="flex flex-wrap gap-2">
                 {draft.skills.matching_skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/40 text-xs font-medium text-[#F7F7FA]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-semibold text-[#291B32]"
                   >
                     <span>{skill}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveMatchingSkill(idx)}
-                      className="text-[#B8B9D0] hover:text-rose-400 p-0.5 rounded"
+                      className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
                       aria-label={`Remove ${skill}`}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -737,7 +735,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                     onChange={(e) => setNewMatchingSkill(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddMatchingSkill()}
                     placeholder="+ Add Skill"
-                    className="px-3 py-1.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] placeholder:text-[#B8B9D0]/60 focus:outline-none focus:border-[#7C4DFF] w-28"
+                    className="px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:border-[#C45D39] w-28"
                   />
                   {newMatchingSkill.trim() && (
                     <Button variant="ai" size="sm" onClick={handleAddMatchingSkill}>
@@ -750,20 +748,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
             {/* Additional Skills */}
             <div className="space-y-2.5 pt-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61]">
                 Additional & Foundational Skills
               </span>
               <div className="flex flex-wrap gap-2">
                 {draft.skills.additional_skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1B2231] border border-[#30384B] text-xs font-medium text-[#B8B9D0]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-medium text-[#674E61]"
                   >
                     <span>{skill}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveAdditionalSkill(idx)}
-                      className="text-[#B8B9D0] hover:text-rose-400 p-0.5 rounded"
+                      className="text-[#674E61] hover:text-rose-600 p-0.5 rounded"
                       aria-label={`Remove ${skill}`}
                     >
                       <Trash2 className="w-3 h-3" />
@@ -779,7 +777,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                     onChange={(e) => setNewAdditionalSkill(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddAdditionalSkill()}
                     placeholder="+ Add Additional"
-                    className="px-3 py-1.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] placeholder:text-[#B8B9D0]/60 focus:outline-none focus:border-[#7C4DFF] w-32"
+                    className="px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] placeholder-[#674E61]/60 focus:outline-none focus:border-[#C45D39] w-32"
                   />
                   {newAdditionalSkill.trim() && (
                     <Button variant="secondary" size="sm" onClick={handleAddAdditionalSkill}>
@@ -792,11 +790,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           </div>
 
           {/* Section 4: Work Experience */}
-          <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-            <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#7C4DFF]" />
-                <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+                <Briefcase className="w-4 h-4 text-[#C45D39]" />
+                <h4 className="font-heading font-bold text-sm text-[#291B32]">
                   Professional Experience
                 </h4>
               </div>
@@ -805,7 +803,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                 variant="secondary"
                 size="sm"
                 onClick={handleAddPosition}
-                icon={<Plus className="w-3.5 h-3.5 text-[#7C4DFF]" />}
+                icon={<Plus className="w-3.5 h-3.5 text-[#C45D39]" />}
               >
                 Add Position
               </Button>
@@ -815,45 +813,45 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {draft.experience.map((exp, expIdx) => (
                 <div
                   key={expIdx}
-                  className="p-5 rounded-xl bg-[#1B2231]/70 border border-[#30384B] space-y-4"
+                  className="p-5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-4"
                 >
                   {/* Position metadata row */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#30384B]">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#DDD0D7]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 w-full">
                       <input
                         type="text"
                         value={exp.role}
                         onChange={(e) => handleUpdateExperience(expIdx, "role", e.target.value)}
                         placeholder="Job Title / Role"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs font-bold text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                       />
                       <input
                         type="text"
                         value={exp.company}
                         onChange={(e) => handleUpdateExperience(expIdx, "company", e.target.value)}
                         placeholder="Company"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                       />
                       <input
                         type="text"
                         value={exp.duration || ""}
                         onChange={(e) => handleUpdateExperience(expIdx, "duration", e.target.value)}
                         placeholder="Dates / Duration"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
                       />
                       <input
                         type="text"
                         value={exp.location || ""}
                         onChange={(e) => handleUpdateExperience(expIdx, "location", e.target.value)}
                         placeholder="Location"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
                       />
                     </div>
 
                     <button
                       type="button"
                       onClick={() => handleRemovePosition(expIdx)}
-                      className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 self-end sm:self-center"
+                      className="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg hover:bg-rose-100 self-end sm:self-center transition-colors"
                       title="Delete Position"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -862,7 +860,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
                   {/* Bullet points */}
                   <div className="space-y-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#B8B9D0]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#674E61]">
                       Key Accomplishments & Bullets
                     </span>
 
@@ -872,7 +870,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                           rows={2}
                           value={bullet}
                           onChange={(e) => handleUpdateBullet(expIdx, bulletIdx, e.target.value)}
-                          className="flex-1 p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] leading-relaxed focus:outline-none focus:border-[#7C4DFF] resize-y"
+                          className="flex-1 p-2.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] leading-relaxed focus:outline-none focus:border-[#C45D39] resize-y"
                         />
                         <div className="flex flex-col gap-1">
                           <button
@@ -885,7 +883,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                                 onApply: (improved) => handleUpdateBullet(expIdx, bulletIdx, improved),
                               })
                             }
-                            className="p-2 rounded-lg bg-[#2C224B] border border-[#7C4DFF]/30 text-[#B89AFF] hover:bg-[#7C4DFF] hover:text-white transition-colors"
+                            className="p-2 rounded-lg bg-[#E8D9E8] border border-[#DDD0D7] text-[#291B32] hover:bg-[#C45D39] hover:text-white transition-colors"
                             title="AI Improve this bullet"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
@@ -893,7 +891,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                           <button
                             type="button"
                             onClick={() => handleRemoveBullet(expIdx, bulletIdx)}
-                            className="p-2 rounded-lg bg-[#1B2231] border border-[#30384B] text-[#B8B9D0] hover:text-rose-400 hover:border-rose-500/30 transition-colors"
+                            className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-[#674E61] hover:text-rose-600 hover:border-rose-300 transition-colors"
                             title="Delete bullet"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -906,7 +904,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                       variant="ghost"
                       size="sm"
                       onClick={() => handleAddBullet(expIdx)}
-                      icon={<Plus className="w-3 h-3 text-[#7C4DFF]" />}
+                      icon={<Plus className="w-3 h-3 text-[#C45D39]" />}
                     >
                       Add Bullet Point
                     </Button>
@@ -917,11 +915,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           </div>
 
           {/* Section 5: Projects */}
-          <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+          <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <FolderGit2 className="w-4 h-4 text-[#7C4DFF]" />
-                <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+                <FolderGit2 className="w-4 h-4 text-[#C45D39]" />
+                <h4 className="font-heading font-bold text-sm text-[#291B32]">
                   Projects & Technical Case Studies
                 </h4>
               </div>
@@ -930,7 +928,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                 variant="secondary"
                 size="sm"
                 onClick={handleAddProject}
-                icon={<Plus className="w-3.5 h-3.5 text-[#7C4DFF]" />}
+                icon={<Plus className="w-3.5 h-3.5 text-[#C45D39]" />}
               >
                 Add Project
               </Button>
@@ -940,7 +938,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {draft.projects.map((proj, projIdx) => (
                 <div
                   key={projIdx}
-                  className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-3"
+                  className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 flex-1">
@@ -949,7 +947,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                         value={proj.name}
                         onChange={(e) => handleUpdateProject(projIdx, "name", e.target.value)}
                         placeholder="Project Name"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs font-bold text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                       />
                       <input
                         type="text"
@@ -962,13 +960,13 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                           )
                         }
                         placeholder="Technologies (comma-separated)"
-                        className="p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#B89AFF] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveProject(projIdx)}
-                      className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10"
+                      className="text-rose-600 hover:text-rose-800 p-1.5 rounded-lg hover:bg-rose-100 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -985,7 +983,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                           updated[bIdx] = e.target.value;
                           handleUpdateProject(projIdx, "bullets", updated);
                         }}
-                        className="flex-1 p-2 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF] resize-none"
+                        className="flex-1 p-2 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39] resize-none"
                       />
                       <button
                         type="button"
@@ -1001,7 +999,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                             },
                           })
                         }
-                        className="p-1.5 rounded-lg bg-[#2C224B] text-[#B89AFF] hover:bg-[#7C4DFF] hover:text-white"
+                        className="p-1.5 rounded-lg bg-[#E8D9E8] text-[#291B32] hover:bg-[#C45D39] hover:text-white transition-colors"
                         title="AI Improve bullet"
                       >
                         <Sparkles className="w-3.5 h-3.5" />
@@ -1016,11 +1014,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           {/* Section 6: Education & Certifications */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Education */}
-            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-[#7C4DFF]" />
-                  <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+                  <GraduationCap className="w-4 h-4 text-[#C45D39]" />
+                  <h4 className="font-heading font-bold text-sm text-[#291B32]">
                     Education & Credentials
                   </h4>
                 </div>
@@ -1028,7 +1026,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                   variant="ghost"
                   size="sm"
                   onClick={handleAddEducation}
-                  icon={<Plus className="w-3 h-3 text-[#7C4DFF]" />}
+                  icon={<Plus className="w-3 h-3 text-[#C45D39]" />}
                 >
                   Add
                 </Button>
@@ -1038,7 +1036,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                 {draft.education.map((edu, eduIdx) => (
                   <div
                     key={eduIdx}
-                    className="p-3.5 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2"
+                    className="p-3.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <input
@@ -1046,12 +1044,12 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                         value={edu.degree}
                         onChange={(e) => handleUpdateEducation(eduIdx, "degree", e.target.value)}
                         placeholder="Degree"
-                        className="flex-1 p-1.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs font-bold text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF]"
+                        className="flex-1 p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs font-bold text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveEducation(eduIdx)}
-                        className="text-rose-400 p-1 hover:bg-rose-500/10 rounded"
+                        className="text-rose-600 p-1 hover:bg-rose-100 rounded transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1062,14 +1060,14 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                         value={edu.institution}
                         onChange={(e) => handleUpdateEducation(eduIdx, "institution", e.target.value)}
                         placeholder="Institution"
-                        className="p-1.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
                       />
                       <input
                         type="text"
                         value={edu.year || ""}
                         onChange={(e) => handleUpdateEducation(eduIdx, "year", e.target.value)}
                         placeholder="Year"
-                        className="p-1.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] focus:outline-none focus:border-[#7C4DFF]"
+                        className="p-1.5 rounded-lg bg-white border border-[#DDD0D7] text-xs text-[#674E61] focus:outline-none focus:border-[#C45D39]"
                       />
                     </div>
                   </div>
@@ -1078,10 +1076,10 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             </div>
 
             {/* Certifications */}
-            <div className="p-6 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-4">
-              <div className="flex items-center gap-2 pb-3 border-b border-[#30384B]">
-                <Award className="w-4 h-4 text-[#FDBB83]" />
-                <h4 className="font-heading font-bold text-sm text-[#F7F7FA]">
+            <div className="p-6 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-4">
+              <div className="flex items-center gap-2 pb-3 border-b border-[#DDD0D7]">
+                <Award className="w-4 h-4 text-[#C45D39]" />
+                <h4 className="font-heading font-bold text-sm text-[#291B32]">
                   Certifications
                 </h4>
               </div>
@@ -1091,13 +1089,13 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                   {draft.certifications.map((cert, certIdx) => (
                     <span
                       key={certIdx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/30 text-xs text-[#B89AFF]"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs text-[#291B32] font-medium"
                     >
                       <span>{cert}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveCert(certIdx)}
-                        className="text-[#B8B9D0] hover:text-rose-400"
+                        className="text-[#674E61] hover:text-rose-600"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -1112,7 +1110,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                     onChange={(e) => setNewCert(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddCert()}
                     placeholder="+ Add Certification"
-                    className="flex-1 p-2 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#F7F7FA] focus:outline-none focus:border-[#7C4DFF]"
+                    className="flex-1 p-2 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#291B32] focus:outline-none focus:border-[#C45D39]"
                   />
                   <Button variant="secondary" size="sm" onClick={handleAddCert}>
                     Add
@@ -1123,14 +1121,14 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           </div>
         </div>
       ) : (
-        /* VIEW MODE 2: DOCUMENT PREVIEW CANVAS (ATS SINGLE COLUMN) */
-        <div className="p-8 sm:p-12 rounded-2xl bg-[#FFFFFF] text-[#111827] shadow-2xl max-w-4xl mx-auto space-y-6 font-sans">
+        /* VIEW MODE 2: DOCUMENT PREVIEW CANVAS (CONSERVATIVE SINGLE COLUMN ATS FORMAT) */
+        <div className="p-8 sm:p-12 rounded-2xl bg-white text-[#291B32] border border-[#DDD0D7] shadow-sm max-w-4xl mx-auto space-y-6 font-sans">
           {/* Document Header */}
-          <div className="text-center pb-4 border-b border-slate-200 space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          <div className="text-center pb-4 border-b border-[#DDD0D7] space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#291B32]">
               {draft.candidate_name}
             </h1>
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-600">
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-[#674E61]">
               {draft.contact_info?.email && <span>{draft.contact_info.email}</span>}
               {draft.contact_info?.phone && <span>• {draft.contact_info.phone}</span>}
               {draft.contact_info?.location && <span>• {draft.contact_info.location}</span>}
@@ -1140,7 +1138,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             </div>
             {isFresher && (
               <div className="pt-1">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#F7F2EB] text-[#291B32] border border-[#DDD0D7]">
                   Fresher Adaptive Layout
                 </span>
               </div>
@@ -1150,10 +1148,10 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           {/* Document Summary */}
           {draft.tailored_summary && draft.tailored_summary.trim() && (
             <div className="space-y-1.5">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                 Professional Summary
               </h2>
-              <p className="text-xs text-slate-700 leading-relaxed">
+              <p className="text-xs text-[#291B32] leading-relaxed">
                 {draft.tailored_summary}
               </p>
             </div>
@@ -1162,20 +1160,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           {/* Document Skills */}
           {(draft.skills.matching_skills.length > 0 || draft.skills.additional_skills.length > 0) && (
             <div className="space-y-1.5">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                 Technical & Core Skills
               </h2>
-              <p className="text-xs text-slate-700 leading-relaxed">
+              <p className="text-xs text-[#291B32] leading-relaxed">
                 {draft.skills.matching_skills.length > 0 && (
                   <>
-                    <strong className="text-slate-900">Core Competencies:</strong>{" "}
+                    <strong className="text-[#291B32]">Core Competencies:</strong>{" "}
                     {draft.skills.matching_skills.join(", ")}
                   </>
                 )}
                 {draft.skills.additional_skills.length > 0 && (
                   <>
                     {draft.skills.matching_skills.length > 0 && <br />}
-                    <strong className="text-slate-900">Additional Technologies:</strong>{" "}
+                    <strong className="text-[#291B32]">Additional Technologies:</strong>{" "}
                     {draft.skills.additional_skills.join(", ")}
                   </>
                 )}
@@ -1188,21 +1186,21 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             const renderExperience = () =>
               draft.experience.length > 0 ? (
                 <div key="exp" className="space-y-3">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                     Professional Experience
                   </h2>
                   <div className="space-y-4">
                     {draft.experience.map((exp, i) => (
                       <div key={i} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-slate-900">{exp.role}</span>
-                          <span className="text-slate-500">{exp.duration}</span>
+                          <span className="font-bold text-[#291B32]">{exp.role}</span>
+                          <span className="text-[#674E61]">{exp.duration}</span>
                         </div>
-                        <div className="flex items-center justify-between text-xs italic text-slate-600">
+                        <div className="flex items-center justify-between text-xs italic text-[#674E61]">
                           <span>{exp.company}</span>
                           {exp.location && <span>{exp.location}</span>}
                         </div>
-                        <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700 pt-1">
+                        <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32] pt-1">
                           {exp.bullets.map((b, bIdx) => (
                             <li key={bIdx} className="leading-relaxed">
                               {b}
@@ -1218,30 +1216,30 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             const renderProjects = () =>
               draft.projects.length > 0 ? (
                 <div key="proj" className="space-y-3">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                     Key Projects
                   </h2>
                   <div className="space-y-3">
                     {draft.projects.map((proj, pIdx) => (
                       <div key={pIdx} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-slate-900">{proj.name}</span>
+                          <span className="font-bold text-[#291B32]">{proj.name}</span>
                           {proj.technologies && proj.technologies.length > 0 && (
-                            <span className="text-[11px] text-slate-600 font-mono">
+                            <span className="text-[11px] text-[#674E61] font-mono">
                               [{proj.technologies.join(", ")}]
                             </span>
                           )}
                         </div>
                         {proj.link && (
-                          <div className="text-[11px] text-blue-700 underline">
+                          <div className="text-[11px] text-[#291B32] underline">
                             {proj.link}
                           </div>
                         )}
                         {proj.bullets && proj.bullets.length > 0 && (
-                          <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700 pt-0.5">
+                          <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32] pt-0.5">
                             {proj.bullets.map((b, bIdx) => (
                               <li key={bIdx} className="leading-relaxed">
-                                {b}
+                               {b}
                               </li>
                             ))}
                           </ul>
@@ -1255,7 +1253,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             const renderEducation = () =>
               draft.education.length > 0 ? (
                 <div key="edu" className="space-y-2">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                     Education
                   </h2>
                   <div className="space-y-1.5">
@@ -1263,12 +1261,12 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                       <div key={i} className="text-xs space-y-0.5">
                         <div className="flex items-center justify-between">
                           <div>
-                            <strong className="text-slate-900">{edu.degree}</strong> — {edu.institution}
+                            <strong className="text-[#291B32]">{edu.degree}</strong> — {edu.institution}
                           </div>
-                          <span className="text-slate-500">{edu.year}</span>
+                          <span className="text-[#674E61]">{edu.year}</span>
                         </div>
                         {edu.details && (
-                          <p className="text-[11px] text-slate-600 italic">{edu.details}</p>
+                          <p className="text-[11px] text-[#674E61] italic">{edu.details}</p>
                         )}
                       </div>
                     ))}
@@ -1279,10 +1277,10 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             const renderCertifications = () =>
               draft.certifications.length > 0 ? (
                 <div key="cert" className="space-y-2">
-                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[#291B32] border-b border-[#DDD0D7] pb-1">
                     Certifications & Credentials
                   </h2>
-                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-slate-700">
+                  <ul className="list-disc list-outside pl-4 space-y-1 text-xs text-[#291B32]">
                     {draft.certifications.map((cert, cIdx) => (
                       <li key={cIdx} className="leading-relaxed">{cert}</li>
                     ))}
@@ -1312,54 +1310,54 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
       {/* MODAL 1: RESUME QUALITY AUDIT MODAL */}
       {isAuditModalOpen && draft.audit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111827] border border-[#30384B] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#291B32]/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-[#DDD0D7] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6 text-[#291B32]">
+            <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#7C4DFF]" />
-                <h3 className="font-heading font-bold text-lg text-[#F7F7FA]">
+                <ShieldCheck className="w-5 h-5 text-[#C45D39]" />
+                <h3 className="font-heading font-bold text-lg text-[#291B32]">
                   ATS & Resume Quality Audit
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAuditModalOpen(false)}
-                className="p-1 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231]"
+                className="p-1 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-[#F7F2EB]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Overall Health Score Card */}
-            <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-[#B8B9D0] uppercase">Overall Document Health</span>
-                <h4 className="text-xl font-extrabold text-[#F7F7FA]">Grade {draft.audit.grade}</h4>
-                <p className="text-xs text-[#B8B9D0] mt-1">{draft.audit.summary}</p>
+                <span className="text-xs font-semibold text-[#674E61] uppercase">Overall Document Health</span>
+                <h4 className="text-xl font-extrabold text-[#291B32]">Grade {draft.audit.grade}</h4>
+                <p className="text-xs text-[#674E61] mt-1">{draft.audit.summary}</p>
               </div>
               <div className="text-right">
-                <span className="text-3xl font-black text-[#7C4DFF] font-mono">{draft.audit.overall_score}%</span>
-                <span className="block text-[10px] text-[#B8B9D0]">Health Index</span>
+                <span className="text-3xl font-black text-[#C45D39] font-mono">{draft.audit.overall_score}%</span>
+                <span className="block text-[10px] text-[#674E61]">Health Index</span>
               </div>
             </div>
 
             {/* Metrics Chips */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
-                <span className="text-[10px] text-[#B8B9D0] block">Word Count</span>
-                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.word_count ?? 0}</span>
+              <div className="p-2.5 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                <span className="text-[10px] text-[#674E61] block">Word Count</span>
+                <span className="text-sm font-bold text-[#291B32]">{draft.audit.metrics.word_count ?? 0}</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
-                <span className="text-[10px] text-[#B8B9D0] block">Bullet Count</span>
-                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.bullet_count ?? 0}</span>
+              <div className="p-2.5 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                <span className="text-[10px] text-[#674E61] block">Bullet Count</span>
+                <span className="text-sm font-bold text-[#291B32]">{draft.audit.metrics.bullet_count ?? 0}</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
-                <span className="text-[10px] text-[#B8B9D0] block">Avg Words/Bullet</span>
-                <span className="text-sm font-bold text-[#F7F7FA]">{draft.audit.metrics.avg_bullet_words ?? 0}</span>
+              <div className="p-2.5 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                <span className="text-[10px] text-[#674E61] block">Avg Words/Bullet</span>
+                <span className="text-sm font-bold text-[#291B32]">{draft.audit.metrics.avg_bullet_words ?? 0}</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-[#0B101A] border border-[#30384B] text-center">
-                <span className="text-[10px] text-[#B8B9D0] block">Duplicate Skills</span>
-                <span className={`text-sm font-bold ${(draft.audit.metrics.duplicate_skills_count ?? 0) > 0 ? "text-amber-400" : "text-emerald-400"}`}>
+              <div className="p-2.5 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+                <span className="text-[10px] text-[#674E61] block">Duplicate Skills</span>
+                <span className={`text-sm font-bold ${(draft.audit.metrics.duplicate_skills_count ?? 0) > 0 ? "text-amber-700" : "text-[#291B32]"}`}>
                   {draft.audit.metrics.duplicate_skills_count ?? 0}
                 </span>
               </div>
@@ -1370,20 +1368,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {/* Errors */}
               {draft.audit.errors.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <h5 className="font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
                     <XCircle className="w-4 h-4" />
                     <span>Critical ATS Blockers ({draft.audit.errors.length})</span>
                   </h5>
                   <div className="space-y-2">
                     {draft.audit.errors.map((err) => (
-                      <div key={err.id} className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-200 space-y-1">
+                      <div key={err.id} className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 space-y-1">
                         <div className="flex items-center justify-between">
-                          <strong className="text-rose-100">{err.message}</strong>
-                          {err.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20">{err.location}</span>}
+                          <strong className="text-rose-950">{err.message}</strong>
+                          {err.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100">{err.location}</span>}
                         </div>
-                        <p className="text-[11px] text-rose-300">{err.detail}</p>
+                        <p className="text-[11px] text-rose-800">{err.detail}</p>
                         {err.recommendation && (
-                          <p className="text-[11px] text-rose-200 font-medium">💡 Fix: {err.recommendation}</p>
+                          <p className="text-[11px] text-rose-900 font-medium">💡 Fix: {err.recommendation}</p>
                         )}
                       </div>
                     ))}
@@ -1394,20 +1392,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {/* Warnings */}
               {draft.audit.warnings.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <h5 className="font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4" />
                     <span>Formatting & Consistency Warnings ({draft.audit.warnings.length})</span>
                   </h5>
                   <div className="space-y-2">
                     {draft.audit.warnings.map((warn) => (
-                      <div key={warn.id} className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-1">
+                      <div key={warn.id} className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
                         <div className="flex items-center justify-between">
-                          <strong className="text-amber-100">{warn.message}</strong>
-                          {warn.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20">{warn.location}</span>}
+                          <strong className="text-amber-950">{warn.message}</strong>
+                          {warn.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100">{warn.location}</span>}
                         </div>
-                        <p className="text-[11px] text-amber-300">{warn.detail}</p>
+                        <p className="text-[11px] text-amber-800">{warn.detail}</p>
                         {warn.recommendation && (
-                          <p className="text-[11px] text-amber-200 font-medium">💡 Fix: {warn.recommendation}</p>
+                          <p className="text-[11px] text-amber-900 font-medium">💡 Fix: {warn.recommendation}</p>
                         )}
                       </div>
                     ))}
@@ -1418,20 +1416,20 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               {/* Suggestions */}
               {draft.audit.suggestions.length > 0 && (
                 <div className="space-y-2">
-                  <h5 className="font-bold text-[#B89AFF] uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
+                  <h5 className="font-bold text-[#291B32] uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#C45D39]" />
                     <span>High-Impact Polish Suggestions ({draft.audit.suggestions.length})</span>
                   </h5>
                   <div className="space-y-2">
                     {draft.audit.suggestions.map((sug) => (
-                      <div key={sug.id} className="p-3 rounded-lg bg-[#2C224B]/40 border border-[#7C4DFF]/30 text-[#F7F7FA] space-y-1">
+                      <div key={sug.id} className="p-3 rounded-lg bg-[#F7F2EB] border border-[#DDD0D7] text-[#291B32] space-y-1">
                         <div className="flex items-center justify-between">
-                          <strong className="text-white">{sug.message}</strong>
-                          {sug.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2C224B]">{sug.location}</span>}
+                          <strong className="text-[#291B32]">{sug.message}</strong>
+                          {sug.location && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#E8D9E8]">{sug.location}</span>}
                         </div>
-                        <p className="text-[11px] text-[#B8B9D0]">{sug.detail}</p>
+                        <p className="text-[11px] text-[#674E61]">{sug.detail}</p>
                         {sug.recommendation && (
-                          <p className="text-[11px] text-[#B89AFF] font-medium">💡 Suggestion: {sug.recommendation}</p>
+                          <p className="text-[11px] text-[#C45D39] font-medium">💡 Suggestion: {sug.recommendation}</p>
                         )}
                       </div>
                     ))}
@@ -1451,19 +1449,19 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
       {/* MODAL 2: DUAL SCORE RE-CHECK BREAKDOWN MODAL */}
       {showDualScoreModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111827] border border-[#30384B] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[#30384B]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#291B32]/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-[#DDD0D7] rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl p-6 space-y-6 text-[#291B32]">
+            <div className="flex items-center justify-between pb-4 border-b border-[#DDD0D7]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#7C4DFF]" />
-                <h3 className="font-heading font-bold text-lg text-[#F7F7FA]">
+                <Sparkles className="w-5 h-5 text-[#C45D39]" />
+                <h3 className="font-heading font-bold text-lg text-[#291B32]">
                   Live Re-check Evaluation
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowDualScoreModal(false)}
-                className="p-1 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#1B2231]"
+                className="p-1 rounded-lg text-[#674E61] hover:text-[#291B32] hover:bg-[#F7F2EB]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1472,74 +1470,74 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             {/* Dual Score Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Score A: Job Description Match Score */}
-              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] space-y-3">
+              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[11px] font-semibold text-[#B89AFF] uppercase block">Factor A</span>
-                    <h4 className="font-bold text-sm text-[#F7F7FA]">Job Description Match</h4>
+                    <span className="text-[11px] font-semibold text-[#C45D39] uppercase block">Factor A</span>
+                    <h4 className="font-bold text-sm text-[#291B32]">Job Description Match</h4>
                   </div>
-                  <span className="text-2xl font-black text-[#7C4DFF] font-mono">
+                  <span className="text-2xl font-black text-[#C45D39] font-mono">
                     {draft.match_score}%
                   </span>
                 </div>
                 {draft.match_breakdown && (
                   <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Required Skills (35%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.required_skill_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.match_breakdown.required_skill_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Preferred Skills (15%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.preferred_skill_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.match_breakdown.preferred_skill_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Experience Alignment (20%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.experience_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.match_breakdown.experience_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Responsibilities (15%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.responsibility_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.match_breakdown.responsibility_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Domain Keywords (10%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.match_breakdown.keyword_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.match_breakdown.keyword_score}%</span>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Score B: ATS & Resume Quality Assessment */}
-              <div className="p-4 rounded-xl bg-[#1B2231] border border-[#30384B] space-y-3">
+              <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[11px] font-semibold text-[#FDBB83] uppercase block">Factor B</span>
-                    <h4 className="font-bold text-sm text-[#F7F7FA]">ATS & Document Quality</h4>
+                    <span className="text-[11px] font-semibold text-[#291B32] uppercase block">Factor B</span>
+                    <h4 className="font-bold text-sm text-[#291B32]">ATS & Document Quality</h4>
                   </div>
-                  <span className="text-2xl font-black text-[#FDBB83] font-mono">
+                  <span className="text-2xl font-black text-[#291B32] font-mono">
                     {draft.ats_quality_assessment?.overall_score ?? draft.ats_compatibility?.score ?? 90}%
                   </span>
                 </div>
                 {draft.ats_quality_assessment && (
                   <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Parseability (25%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.parseability_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.ats_quality_assessment.parseability_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Section Structure (20%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.structure_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.ats_quality_assessment.structure_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Readability (15%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.readability_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.ats_quality_assessment.readability_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Formatting Consistency (15%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.formatting_consistency_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.ats_quality_assessment.formatting_consistency_score}%</span>
                     </div>
-                    <div className="flex justify-between text-[#B8B9D0]">
+                    <div className="flex justify-between text-[#674E61]">
                       <span>Content Coverage (15%):</span>
-                      <span className="font-bold text-[#F7F7FA]">{draft.ats_quality_assessment.content_coverage_score}%</span>
+                      <span className="font-bold text-[#291B32]">{draft.ats_quality_assessment.content_coverage_score}%</span>
                     </div>
                   </div>
                 )}
@@ -1547,8 +1545,8 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
             </div>
 
             {/* Non-proprietary Disclaimer */}
-            <div className="p-3.5 rounded-xl bg-[#0B101A] border border-[#30384B] text-[11px] text-[#B8B9D0] leading-relaxed">
-              <span className="font-bold text-[#F7F7FA] block mb-0.5">Verification Disclaimer:</span>
+            <div className="p-3.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-[11px] text-[#674E61] leading-relaxed">
+              <span className="font-bold text-[#291B32] block mb-0.5">Verification Disclaimer:</span>
               Match and ATS quality scores indicate semantic and structural alignment with standard enterprise ATS parsers. They do not simulate or guarantee proprietary ATS vendor decisions or employer interview outcomes.
             </div>
 

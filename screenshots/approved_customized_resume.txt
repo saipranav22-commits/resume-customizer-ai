@@ -1,0 +1,46 @@
+ALEX MORGAN
+alex.morgan@example.com | (555) 019-2834 | San Francisco, CA 94105 | linkedin.com/in/alexmorgan-dev
+============================================================
+
+PROFESSIONAL SUMMARY
+------------------------------
+Staff Full Stack & Cloud Systems Engineer with 8+ years architecting event-driven microservices, high-throughput APIs, and Kubernetes cloud infrastructure.
+
+TECHNICAL & PROFESSIONAL SKILLS
+------------------------------
+Target Role Match: Python, FastAPI, PostgreSQL, Docker, Kubernetes, AWS, Microservices, RESTful API Design, GraphQL, Kubernetes
+Additional Technologies: TypeScript, React, Next.js, Node.js, Redis, CI/CD, Agile/Scrum
+
+PROFESSIONAL EXPERIENCE
+------------------------------
+Senior Software Engineer - CloudScale Technologies (10/2021 – Present) | San Francisco, CA
+  * Engineered distributed event streaming pipelines handling 50k events/sec using FastAPI, Kafka, and PostgreSQL with zero data loss.
+  * Optimized backend systems and resolved critical bugs while collaborating with database teams to enhance SQL query performance and data retrieval efficiency.
+  * Spearheaded team migration of distributed microservices to containerized environments utilizing Docker and Kubernetes on AWS.
+
+Software Developer - DataStream Systems (06/2018 – 09/2021) | San Jose, CA
+  * Developed responsive web applications and backend services using TypeScript, React, and modern component design systems.
+  * Implemented secure JWT-based authentication and role-based access controls across distributed backend microservices.
+  * Collaborated with QA to establish automated CI/CD testing pipelines, achieving 90%+ code coverage.
+
+KEY PROJECTS
+------------------------------
+Distributed Consensus Engine [Go, Raft, gRPC, Docker]
+  Link: github.com/alex/raft-engine
+  * Implemented fault-tolerant Raft distributed state machine achieving 99.99% availability under split-brain network simulations.
+
+EDUCATION
+------------------------------
+Bachelor of Science (B.Sc.) in Computer Science, University of California, Berkeley (2014 – 2018)
+
+CERTIFICATIONS & CREDENTIALS
+------------------------------
+  * AWS Certified Solutions Architect – Associate
+  * Certified Kubernetes Application Developer (CKAD)
+
+============================================================
+ADVISORY NOTE: RECOMMENDED KEYWORDS FOR THIS JOB DESCRIPTION
+(Note: These were missing from candidate resume and NOT included in qualifications)
+------------------------------------------------------------
+- GraphQL (Framework / API): If you have exposure to GraphQL through personal or professional projects not listed on your resume, you may add it after confirming your proficiency.
+- Kafka (Data Pipeline / Streaming): Highlight any event-driven streaming experience you possess; otherwise, focus on your FastAPI event streaming and distributed systems background.

@@ -54,10 +54,10 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
   return (
     <div className="space-y-8">
-      {/* SECTION 1: CIRCULAR SCORING OVERVIEW (Inspired by reference, refined) */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-2xl relative overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#7C4DFF]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* SECTION 1: HERO CIRCULAR SCORING OVERVIEW (Deep Aubergine Dark Surface with Burnished Copper Glow) */}
+      <div className="p-6 sm:p-8 rounded-2xl bg-[#291B32] border border-[#3D294B] shadow-xl relative overflow-hidden text-white">
+        {/* Subtle Burnished Copper background glow */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C45D39]/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
           {/* Main Hero Circular Score Ring */}
@@ -66,32 +66,32 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
               score={overallScore}
               size={140}
               strokeWidth={12}
-              color="#7C4DFF"
-              trackColor="#1B2231"
+              color="#C45D39"
+              trackColor="#3D294B"
               label=""
             />
             <div className="space-y-1.5 max-w-sm">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2C224B] border border-[#7C4DFF]/40 text-xs font-semibold text-[#B89AFF]">
-                <Sparkles className="w-3.5 h-3.5 text-[#7C4DFF]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3D294B] border border-[#C45D39]/40 text-xs font-semibold text-[#E8D9E8]">
+                <Sparkles className="w-3.5 h-3.5 text-[#C45D39]" />
                 <span>Overall ATS Match Score</span>
               </div>
-              <h3 className="font-heading font-extrabold text-2xl text-[#F7F7FA]">
+              <h3 className="font-heading font-extrabold text-2xl text-white">
                 {overallScore >= 85
                   ? "Outstanding ATS Alignment"
                   : overallScore >= 70
                   ? "Strong Role Alignment"
                   : "Requires Targeted Optimization"}
               </h3>
-              <p className="text-xs text-[#B8B9D0] leading-relaxed">
+              <p className="text-xs text-[#DDD0D7] leading-relaxed">
                 Evaluated against explicit job requirements across 6 verified dimensions. Re-check score as you edit your draft.
               </p>
               {atsAssessment && (
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#1B2231] border border-[#30384B] text-[#B8B9D0]">
-                    Score A (JD Match): <strong className="text-[#F7F7FA] font-mono">{overallScore}%</strong>
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#352340] border border-[#442D52] text-[#DDD0D7]">
+                    Score A (JD Match): <strong className="text-white font-mono">{overallScore}%</strong>
                   </span>
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#2C224B] border border-[#7C4DFF]/40 text-[#B89AFF]">
-                    Score B (ATS Quality): <strong className="text-[#F7F7FA] font-mono">{atsAssessment.overall_score}%</strong> ({audit?.grade || "Grade A"})
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#3D294B] border border-[#C45D39]/40 text-[#E8D9E8]">
+                    Score B (ATS Quality): <strong className="text-white font-mono">{atsAssessment.overall_score}%</strong> ({audit?.grade || "Grade A"})
                   </span>
                 </div>
               )}
@@ -100,60 +100,64 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
           {/* Sub-Metrics Circular Rings */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full lg:w-auto">
-            <div className="p-3.5 rounded-xl bg-[#1B2231]/70 border border-[#30384B] flex flex-col items-center">
+            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
               <CircularScoreRing
                 score={matchBreakdown?.required_skill_score ?? 85}
                 size={76}
                 strokeWidth={7}
-                color="#7C4DFF"
+                color="#C45D39"
+                trackColor="#291B32"
                 sublabel="/ 100"
               />
-              <span className="text-[11px] font-bold text-[#F7F7FA] mt-2 text-center">
+              <span className="text-[11px] font-bold text-white mt-2 text-center">
                 Required Skills
               </span>
-              <span className="text-[10px] text-[#B8B9D0]">35% weight</span>
+              <span className="text-[10px] text-[#DDD0D7]">35% weight</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#1B2231]/70 border border-[#30384B] flex flex-col items-center">
+            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
               <CircularScoreRing
                 score={matchBreakdown?.experience_score ?? 80}
                 size={76}
                 strokeWidth={7}
-                color="#B89AFF"
+                color="#E8D9E8"
+                trackColor="#291B32"
                 sublabel="/ 100"
               />
-              <span className="text-[11px] font-bold text-[#F7F7FA] mt-2 text-center">
+              <span className="text-[11px] font-bold text-white mt-2 text-center">
                 Role Alignment
               </span>
-              <span className="text-[10px] text-[#B8B9D0]">20% weight</span>
+              <span className="text-[10px] text-[#DDD0D7]">20% weight</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#1B2231]/70 border border-[#30384B] flex flex-col items-center">
+            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
               <CircularScoreRing
                 score={matchBreakdown?.keyword_score ?? 78}
                 size={76}
                 strokeWidth={7}
-                color="#FDBB83"
+                color="#C45D39"
+                trackColor="#291B32"
                 sublabel="/ 100"
               />
-              <span className="text-[11px] font-bold text-[#F7F7FA] mt-2 text-center">
+              <span className="text-[11px] font-bold text-white mt-2 text-center">
                 Keywords
               </span>
-              <span className="text-[10px] text-[#B8B9D0]">10% weight</span>
+              <span className="text-[10px] text-[#DDD0D7]">10% weight</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-[#1B2231]/70 border border-[#30384B] flex flex-col items-center">
+            <div className="p-3.5 rounded-xl bg-[#352340]/80 border border-[#442D52] flex flex-col items-center">
               <CircularScoreRing
                 score={matchBreakdown?.structure_score ?? 95}
                 size={76}
                 strokeWidth={7}
-                color="#7C4DFF"
+                color="#E8D9E8"
+                trackColor="#291B32"
                 sublabel="/ 100"
               />
-              <span className="text-[11px] font-bold text-[#F7F7FA] mt-2 text-center">
+              <span className="text-[11px] font-bold text-white mt-2 text-center">
                 Formatting
               </span>
-              <span className="text-[10px] text-[#B8B9D0]">5% weight</span>
+              <span className="text-[10px] text-[#DDD0D7]">5% weight</span>
             </div>
           </div>
         </div>
@@ -161,138 +165,138 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
       {/* SECTION 2: 6-FACTOR EXPLAINABLE MATCH BREAKDOWN */}
       {matchBreakdown && (
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-[#30384B]">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+          <div className="flex items-center justify-between pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2">
-              <Layers className="w-5 h-5 text-[#7C4DFF]" />
-              <h4 className="font-heading font-bold text-base text-[#F7F7FA]">
+              <Layers className="w-5 h-5 text-[#C45D39]" />
+              <h4 className="font-heading font-bold text-base text-[#291B32]">
                 Explainable Six-Factor Evaluation
               </h4>
             </div>
-            <span className="text-xs text-[#B8B9D0] hidden sm:inline">
+            <span className="text-xs text-[#674E61] hidden sm:inline">
               Documented Weight Distribution
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Factor 1: Required Skills */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Required Skills Coverage</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">Required Skills Coverage</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {matchBreakdown.required_skill_score}% (35% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.required_skill_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Strict mandatory technical proficiencies extracted directly from the requirements section.
               </p>
             </div>
 
             {/* Factor 2: Preferred Skills */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Preferred / Bonus Skills</span>
-                <span className="font-mono font-bold text-[#B89AFF]">
+                <span className="font-bold text-[#291B32]">Preferred / Bonus Skills</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {matchBreakdown.preferred_skill_score}% (15% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#B89AFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.preferred_skill_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Nice-to-have or bonus qualifications providing competitive differentiation.
               </p>
             </div>
 
             {/* Factor 3: Experience Alignment */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Role & Seniority Alignment</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">Role & Seniority Alignment</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {matchBreakdown.experience_score}% (20% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.experience_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Alignment with required job title, demonstrated seniority, and scope of leadership.
               </p>
             </div>
 
             {/* Factor 4: Responsibility Alignment */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Responsibilities & Action Verbs</span>
-                <span className="font-mono font-bold text-[#B89AFF]">
+                <span className="font-bold text-[#291B32]">Responsibilities & Action Verbs</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {matchBreakdown.responsibility_score}% (15% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#B89AFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.responsibility_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Verifiable overlap with core day-to-day duties and active functional ownership verbs.
               </p>
             </div>
 
             {/* Factor 5: Keyword Coverage */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Domain Keyword Density</span>
-                <span className="font-mono font-bold text-[#FDBB83]">
+                <span className="font-bold text-[#291B32]">Domain Keyword Density</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {matchBreakdown.keyword_score}% (10% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#FDBB83] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.keyword_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Presence and contextual relevance of specialized technical industry terminology.
               </p>
             </div>
 
             {/* Factor 6: Structure Score */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">ATS Parseability & Layout</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">ATS Parseability & Layout</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {matchBreakdown.structure_score}% (5% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${matchBreakdown.structure_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Standard section headings, unambiguous contact data, and clean hierarchical parsing.
               </p>
             </div>
           </div>
 
           {/* Explanation Text */}
-          <div className="p-4 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] leading-relaxed">
-            <span className="font-semibold text-[#F7F7FA] block mb-1">
+          <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61] leading-relaxed">
+            <span className="font-semibold text-[#291B32] block mb-1">
               Methodology Explanation:
             </span>
             {matchBreakdown.explanation}
@@ -302,25 +306,25 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
       {/* SECTION 2B: ATS & RESUME QUALITY ASSESSMENT (TRACK B) */}
       {atsAssessment && (
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#30384B]">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#7C4DFF]" />
+              <ShieldCheck className="w-5 h-5 text-[#C45D39]" />
               <div>
-                <h4 className="font-heading font-bold text-base text-[#F7F7FA]">
+                <h4 className="font-heading font-bold text-base text-[#291B32]">
                   ATS & Resume Quality Assessment (Track B)
                 </h4>
-                <p className="text-xs text-[#B8B9D0]">
+                <p className="text-xs text-[#674E61]">
                   Deterministic document health evaluated independently of job description keywords
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/40 text-xs font-bold text-[#F7F7FA]">
+              <span className="px-3 py-1 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-bold text-[#291B32]">
                 Quality Score: {atsAssessment.overall_score}%
               </span>
               {audit?.grade && (
-                <span className="px-2.5 py-1 rounded-xl bg-[#1B2231] border border-[#30384B] text-xs font-mono font-bold text-[#B89AFF]">
+                <span className="px-2.5 py-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-mono font-bold text-[#291B32]">
                   Grade {audit.grade}
                 </span>
               )}
@@ -329,122 +333,122 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* ATS Factor 1: Single-Column Parseability */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Single-Column Parseability</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">Single-Column Parseability</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {atsAssessment.parseability_score}% (25% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.parseability_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Single-stream text layout free from tables, floating text boxes, or multi-column barriers.
               </p>
             </div>
 
             {/* ATS Factor 2: Section Structure */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Section Structure</span>
-                <span className="font-mono font-bold text-[#B89AFF]">
+                <span className="font-bold text-[#291B32]">Section Structure</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {atsAssessment.structure_score}% (20% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#B89AFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.structure_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Recognized reverse-chronological section headers adapted to candidate experience level.
               </p>
             </div>
 
             {/* ATS Factor 3: Readability & Voice */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Readability & Voice</span>
-                <span className="font-mono font-bold text-[#FDBB83]">
+                <span className="font-bold text-[#291B32]">Readability & Voice</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {atsAssessment.readability_score}% (15% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#FDBB83] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.readability_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Action verb lead-ins, no first-person pronouns, and concise professional accomplishment bullets.
               </p>
             </div>
 
             {/* ATS Factor 4: Formatting Consistency */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Formatting Consistency</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">Formatting Consistency</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {atsAssessment.formatting_consistency_score}% (15% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.formatting_consistency_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Standard date formats, bullet point consistency, and clean character typography.
               </p>
             </div>
 
             {/* ATS Factor 5: Relevant Content Coverage */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Content Coverage</span>
-                <span className="font-mono font-bold text-[#B89AFF]">
+                <span className="font-bold text-[#291B32]">Content Coverage</span>
+                <span className="font-mono font-bold text-[#C45D39]">
                   {atsAssessment.content_coverage_score}% (15% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#B89AFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#C45D39] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.content_coverage_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Verified experience, featured projects, core skills, and educational qualifications.
               </p>
             </div>
 
             {/* ATS Factor 6: Basic Document Completeness */}
-            <div className="p-4 rounded-xl bg-[#1B2231]/60 border border-[#30384B] space-y-2">
+            <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#F7F7FA]">Document Completeness</span>
-                <span className="font-mono font-bold text-[#7C4DFF]">
+                <span className="font-bold text-[#291B32]">Document Completeness</span>
+                <span className="font-mono font-bold text-[#291B32]">
                   {atsAssessment.completeness_score}% (10% wt)
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[#0B101A] overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-[#DDD0D7] overflow-hidden">
                 <div
-                  className="h-full bg-[#7C4DFF] rounded-full transition-all duration-700"
+                  className="h-full bg-[#291B32] rounded-full transition-all duration-700"
                   style={{ width: `${atsAssessment.completeness_score}%` }}
                 />
               </div>
-              <p className="text-[11px] text-[#B8B9D0]">
+              <p className="text-[11px] text-[#674E61]">
                 Candidate name, verified contact email, phone, location, and absence of empty sections.
               </p>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0] leading-relaxed">
-            <span className="font-semibold text-[#F7F7FA] block mb-1">
+          <div className="p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61] leading-relaxed">
+            <span className="font-semibold text-[#291B32] block mb-1">
               Methodology & Non-Vendor Notice:
             </span>
             {atsAssessment.explanation} {atsAssessment.disclaimer}
@@ -454,27 +458,27 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
       {/* SECTION 2C: DETERMINISTIC RESUME QUALITY AUDIT REPORT */}
       {audit && (
-        <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-[#30384B]">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-[#DDD0D7]">
             <div className="flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-[#7C4DFF]" />
+              <FileCheck className="w-5 h-5 text-[#C45D39]" />
               <div>
-                <h4 className="font-heading font-bold text-base text-[#F7F7FA]">
+                <h4 className="font-heading font-bold text-base text-[#291B32]">
                   Deterministic Resume Quality Audit
                 </h4>
-                <p className="text-xs text-[#B8B9D0]">
+                <p className="text-xs text-[#674E61]">
                   Automated validation layer checking format, readability, dates, and ATS parseability
                 </p>
               </div>
             </div>
 
             {/* Filter buttons */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs">
               <button
                 type="button"
                 onClick={() => setAuditFilter("all")}
                 className={`px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider text-[10px] transition-all ${
-                  auditFilter === "all" ? "bg-[#7C4DFF] text-white" : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  auditFilter === "all" ? "bg-[#291B32] text-white" : "text-[#674E61] hover:text-[#291B32]"
                 }`}
               >
                 All ({allAuditIssues.length})
@@ -483,7 +487,7 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                 type="button"
                 onClick={() => setAuditFilter("error")}
                 className={`px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider text-[10px] transition-all ${
-                  auditFilter === "error" ? "bg-rose-600 text-white" : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  auditFilter === "error" ? "bg-rose-700 text-white" : "text-[#674E61] hover:text-rose-700"
                 }`}
               >
                 Errors ({audit.errors.length})
@@ -492,7 +496,7 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                 type="button"
                 onClick={() => setAuditFilter("warning")}
                 className={`px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider text-[10px] transition-all ${
-                  auditFilter === "warning" ? "bg-amber-600 text-white" : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  auditFilter === "warning" ? "bg-amber-700 text-white" : "text-[#674E61] hover:text-amber-700"
                 }`}
               >
                 Warnings ({audit.warnings.length})
@@ -501,7 +505,7 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                 type="button"
                 onClick={() => setAuditFilter("suggestion")}
                 className={`px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider text-[10px] transition-all ${
-                  auditFilter === "suggestion" ? "bg-[#7C4DFF] text-white" : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                  auditFilter === "suggestion" ? "bg-[#C45D39] text-white" : "text-[#674E61] hover:text-[#C45D39]"
                 }`}
               >
                 Suggestions ({audit.suggestions.length})
@@ -511,27 +515,27 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
           {/* Document Metrics Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 rounded-xl bg-[#1B2231]/60 border border-[#30384B] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Total Words</span>
-              <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+            <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+              <span className="text-[10px] uppercase font-bold text-[#674E61] block">Total Words</span>
+              <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                 {audit.metrics.word_count ?? "—"}
               </span>
             </div>
-            <div className="p-3 rounded-xl bg-[#1B2231]/60 border border-[#30384B] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Bullet Points</span>
-              <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+            <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+              <span className="text-[10px] uppercase font-bold text-[#674E61] block">Bullet Points</span>
+              <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                 {audit.metrics.bullet_count ?? "—"}
               </span>
             </div>
-            <div className="p-3 rounded-xl bg-[#1B2231]/60 border border-[#30384B] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Avg Bullet Length</span>
-              <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+            <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+              <span className="text-[10px] uppercase font-bold text-[#674E61] block">Avg Bullet Length</span>
+              <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                 {audit.metrics.avg_bullet_words ? `${audit.metrics.avg_bullet_words} words` : "—"}
               </span>
             </div>
-            <div className="p-3 rounded-xl bg-[#1B2231]/60 border border-[#30384B] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#B8B9D0] block">Duplicate Skills</span>
-              <span className="text-base font-bold text-[#F7F7FA] font-mono mt-0.5 block">
+            <div className="p-3 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center">
+              <span className="text-[10px] uppercase font-bold text-[#674E61] block">Duplicate Skills</span>
+              <span className="text-base font-bold text-[#291B32] font-mono mt-0.5 block">
                 {audit.metrics.duplicate_skills_count ?? 0}
               </span>
             </div>
@@ -539,9 +543,9 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
 
           {/* Issues List */}
           {filteredAuditIssues.length === 0 ? (
-            <div className="p-6 rounded-xl bg-[#1B2231]/40 border border-[#30384B] text-center text-xs text-[#B8B9D0] space-y-1">
-              <CheckCircle2 className="w-6 h-6 text-[#7C4DFF] mx-auto mb-1.5" />
-              <p className="font-semibold text-[#F7F7FA]">No Issues Found in this Category</p>
+            <div className="p-6 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-center text-xs text-[#674E61] space-y-1">
+              <CheckCircle2 className="w-6 h-6 text-[#C45D39] mx-auto mb-1.5" />
+              <p className="font-semibold text-[#291B32]">No Issues Found in this Category</p>
               <p>{audit.summary}</p>
             </div>
           ) : (
@@ -551,10 +555,10 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                   key={issue.id}
                   className={`p-3.5 rounded-xl border text-xs space-y-1 transition-all ${
                     issue.type === "error"
-                      ? "bg-rose-950/20 border-rose-500/40 text-rose-200"
+                      ? "bg-rose-50 border-rose-200 text-rose-900"
                       : issue.type === "warning"
-                      ? "bg-amber-950/20 border-amber-500/40 text-amber-200"
-                      : "bg-[#1B2231]/60 border-[#30384B] text-[#F7F7FA]"
+                      ? "bg-amber-50 border-amber-200 text-amber-900"
+                      : "bg-[#F7F2EB] border-[#DDD0D7] text-[#291B32]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -562,30 +566,30 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                           issue.type === "error"
-                            ? "bg-rose-500/30 text-rose-300"
+                            ? "bg-rose-100 text-rose-800"
                             : issue.type === "warning"
-                            ? "bg-amber-500/30 text-amber-300"
-                            : "bg-[#2C224B] text-[#B89AFF]"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-[#E8D9E8] text-[#291B32]"
                         }`}
                       >
                         {issue.type}
                       </span>
-                      <strong className="font-semibold text-[#F7F7FA]">{issue.message}</strong>
+                      <strong className="font-semibold text-[#291B32]">{issue.message}</strong>
                     </div>
                     {issue.category && (
-                      <span className="text-[10px] font-mono text-[#B8B9D0] uppercase">
+                      <span className="text-[10px] font-mono text-[#674E61] uppercase">
                         {issue.category}
                       </span>
                     )}
                   </div>
                   {issue.location && (
-                    <p className="text-[11px] text-[#B8B9D0]">
-                      <span className="font-medium">Section:</span> {issue.location}
+                    <p className="text-[11px] text-[#674E61]">
+                      <span className="font-medium text-[#291B32]">Section:</span> {issue.location}
                     </p>
                   )}
                   {issue.recommendation && (
-                    <p className="text-[11px] text-[#B89AFF] pt-0.5">
-                      <span className="font-medium text-[#F7F7FA]">Guidance:</span> {issue.recommendation}
+                    <p className="text-[11px] text-[#C45D39] pt-0.5">
+                      <span className="font-medium text-[#291B32]">Guidance:</span> {issue.recommendation}
                     </p>
                   )}
                 </div>
@@ -596,10 +600,10 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
       )}
 
       {/* SECTION 3: SKILLS ALIGNMENT AUDIT */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-        <div className="flex items-center gap-2 pb-3 border-b border-[#30384B]">
-          <Search className="w-5 h-5 text-[#7C4DFF]" />
-          <h4 className="font-heading font-bold text-base text-[#F7F7FA]">
+      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+        <div className="flex items-center gap-2 pb-3 border-b border-[#DDD0D7]">
+          <Search className="w-5 h-5 text-[#C45D39]" />
+          <h4 className="font-heading font-bold text-base text-[#291B32]">
             Structured Technical Skills Audit
           </h4>
         </div>
@@ -607,14 +611,14 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
         <div className="space-y-4">
           {/* Matched in Primary Skills */}
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#B89AFF] block mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#C45D39] block mb-2">
               ✓ Verified in Resume ({resumeData.skills.matching_skills.length})
             </span>
             <div className="flex flex-wrap gap-2">
               {resumeData.skills.matching_skills.map((skill, i) => (
                 <span
                   key={i}
-                  className="px-3 py-1.5 rounded-xl bg-[#2C224B] border border-[#7C4DFF]/40 text-xs font-medium text-[#F7F7FA]"
+                  className="px-3 py-1.5 rounded-xl bg-[#E8D9E8] border border-[#DDD0D7] text-xs font-semibold text-[#291B32]"
                 >
                   {skill}
                 </span>
@@ -625,14 +629,14 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
           {/* Evidenced in Experience / Complementary */}
           {resumeData.skills.additional_skills.length > 0 && (
             <div className="pt-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#B8B9D0] block mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#674E61] block mb-2">
                 • Complementary & Foundational Skills ({resumeData.skills.additional_skills.length})
               </span>
               <div className="flex flex-wrap gap-2">
                 {resumeData.skills.additional_skills.map((skill, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1.5 rounded-xl bg-[#1B2231] border border-[#30384B] text-xs font-medium text-[#B8B9D0]"
+                    className="px-3 py-1.5 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs font-medium text-[#674E61]"
                   >
                     {skill}
                   </span>
@@ -644,20 +648,20 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
           {/* Missing Keywords Advisory */}
           {resumeData.missing_keywords && resumeData.missing_keywords.length > 0 && (
             <div className="pt-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#FDBB83] block mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C45D39] block mb-2">
                 ⚠ Missing Job Description Requirements ({resumeData.missing_keywords.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {resumeData.missing_keywords.map((mk, i) => (
                   <div
                     key={i}
-                    className="p-3.5 rounded-xl bg-[#1B2231]/60 border border-[#FDBB83]/30 text-xs space-y-1"
+                    className="p-3.5 rounded-xl bg-[#FDF6F3] border border-[#C45D39]/30 text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between">
-                      <strong className="text-[#FDBB83] font-semibold">{mk.keyword}</strong>
-                      <span className="text-[10px] text-[#B8B9D0] uppercase font-bold">{mk.category}</span>
+                      <strong className="text-[#C45D39] font-semibold">{mk.keyword}</strong>
+                      <span className="text-[10px] text-[#674E61] uppercase font-bold">{mk.category}</span>
                     </div>
-                    <p className="text-[#B8B9D0]">{mk.recommendation}</p>
+                    <p className="text-[#674E61]">{mk.recommendation}</p>
                   </div>
                 ))}
               </div>
@@ -667,17 +671,17 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
       </div>
 
       {/* SECTION 4: PRIORITIZED RECOMMENDATIONS */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#111827] border border-[#30384B] shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-[#30384B]">
+      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#DDD0D7] shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-[#DDD0D7]">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-[#7C4DFF]" />
-            <h4 className="font-heading font-bold text-base text-[#F7F7FA]">
+            <CheckCircle2 className="w-5 h-5 text-[#C45D39]" />
+            <h4 className="font-heading font-bold text-base text-[#291B32]">
               Prioritized Optimization Recommendations ({recommendations.length})
             </h4>
           </div>
 
           {/* Filter tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs">
             {(["all", "high", "medium", "low"] as const).map((filter) => (
               <button
                 key={filter}
@@ -685,8 +689,8 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
                 onClick={() => setPriorityFilter(filter)}
                 className={`px-3 py-1 rounded-lg font-semibold uppercase tracking-wider text-[10px] transition-all ${
                   priorityFilter === filter
-                    ? "bg-[#7C4DFF] text-white"
-                    : "text-[#B8B9D0] hover:text-[#F7F7FA]"
+                    ? "bg-[#C45D39] text-white"
+                    : "text-[#674E61] hover:text-[#291B32]"
                 }`}
               >
                 {filter}
@@ -696,7 +700,7 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
         </div>
 
         {filteredRecs.length === 0 ? (
-          <p className="text-xs text-[#B8B9D0] py-4 text-center italic">
+          <p className="text-xs text-[#674E61] py-4 text-center italic">
             No recommendations in this priority filter.
           </p>
         ) : (
@@ -706,57 +710,57 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
               return (
                 <div
                   key={idx}
-                  className="rounded-xl bg-[#1B2231]/70 border border-[#30384B] overflow-hidden transition-all"
+                  className="rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] overflow-hidden transition-all"
                 >
                   <button
                     type="button"
                     onClick={() => toggleRec(idx)}
-                    className="w-full p-4 flex items-center justify-between text-left gap-3 hover:bg-[#232C3E] transition-colors"
+                    className="w-full p-4 flex items-center justify-between text-left gap-3 hover:bg-[#EFE8DF] transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                           rec.priority === "high"
-                            ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                            ? "bg-rose-100 text-rose-800 border border-rose-200"
                             : rec.priority === "medium"
-                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                            : "bg-[#2C224B] text-[#B89AFF] border border-[#7C4DFF]/30"
+                            ? "bg-amber-100 text-amber-800 border border-amber-200"
+                            : "bg-[#E8D9E8] text-[#291B32] border border-[#DDD0D7]"
                         }`}
                       >
                         {rec.priority}
                       </span>
-                      <span className="text-xs font-semibold text-[#F7F7FA] line-clamp-1">
+                      <span className="text-xs font-semibold text-[#291B32] line-clamp-1">
                         {rec.issue}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {rec.requires_user_confirmation && (
-                        <span className="hidden sm:inline-flex text-[10px] font-semibold text-[#FDBB83] px-2 py-0.5 rounded bg-[#FDBB83]/10 border border-[#FDBB83]/20">
+                        <span className="hidden sm:inline-flex text-[10px] font-semibold text-[#C45D39] px-2 py-0.5 rounded bg-[#FDF6F3] border border-[#C45D39]/30">
                           Confirm Credentials
                         </span>
                       )}
                       {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-[#B8B9D0]" />
+                        <ChevronUp className="w-4 h-4 text-[#674E61]" />
                       ) : (
-                        <ChevronDown className="w-4 h-4 text-[#B8B9D0]" />
+                        <ChevronDown className="w-4 h-4 text-[#674E61]" />
                       )}
                     </div>
                   </button>
 
                   {isExpanded && (
-                    <div className="p-4 pt-1 border-t border-[#30384B] bg-[#0B101A]/60 space-y-2 text-xs">
+                    <div className="p-4 pt-1 border-t border-[#DDD0D7] bg-white space-y-2 text-xs">
                       <div>
-                        <strong className="text-[#F7F7FA]">Requirement Context:</strong>
-                        <p className="text-[#B8B9D0] mt-0.5">{rec.requirement}</p>
+                        <strong className="text-[#291B32]">Requirement Context:</strong>
+                        <p className="text-[#674E61] mt-0.5">{rec.requirement}</p>
                       </div>
                       <div>
-                        <strong className="text-[#F7F7FA]">Verifiable Evidence:</strong>
-                        <p className="text-[#B8B9D0] mt-0.5">{rec.evidence}</p>
+                        <strong className="text-[#291B32]">Verifiable Evidence:</strong>
+                        <p className="text-[#674E61] mt-0.5">{rec.evidence}</p>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-[#2C224B]/40 border border-[#7C4DFF]/30">
-                        <strong className="text-[#B89AFF]">Recommended Action:</strong>
-                        <p className="text-[#F7F7FA] mt-0.5">{rec.proposed_improvement}</p>
+                      <div className="p-2.5 rounded-lg bg-[#FDF6F3] border border-[#C45D39]/30">
+                        <strong className="text-[#C45D39]">Recommended Action:</strong>
+                        <p className="text-[#291B32] mt-0.5">{rec.proposed_improvement}</p>
                       </div>
                     </div>
                   )}
@@ -768,10 +772,10 @@ export const OptimizationDashboard: React.FC<OptimizationDashboardProps> = ({ re
       </div>
 
       {/* Honest Non-Guarantee Disclaimer */}
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-[#0B101A] border border-[#30384B] text-xs text-[#B8B9D0]">
-        <Info className="w-4 h-4 text-[#7C4DFF] flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-[#F7F2EB] border border-[#DDD0D7] text-xs text-[#674E61]">
+        <Info className="w-4 h-4 text-[#C45D39] flex-shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          <strong className="text-[#F7F7FA]">Transparent Scoring Notice:</strong> Match scores represent semantic and structural alignment calculated directly from the provided job description. They do not simulate or guarantee proprietary ATS vendor screening algorithms or employer hiring outcomes.
+          <strong className="text-[#291B32]">Transparent Scoring Notice:</strong> Match scores represent semantic and structural alignment calculated directly from the provided job description. They do not simulate or guarantee proprietary ATS vendor screening algorithms or employer hiring outcomes.
         </p>
       </div>
     </div>

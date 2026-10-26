@@ -102,9 +102,9 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-semibold text-[#F7F7FA] flex items-center gap-2">
+        <label className="text-sm font-semibold text-[#291B32] flex items-center gap-2">
           <span>Upload Your Resume</span>
-          <span className="text-xs font-normal text-[#B8B9D0]">(PDF or DOCX, max 5MB)</span>
+          <span className="text-xs font-normal text-[#674E61]">(PDF or DOCX, max 5MB)</span>
         </label>
         <div className="flex items-center gap-3">
           {!file && (
@@ -112,15 +112,15 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
               id="load-sample-resume-button"
               type="button"
               onClick={handleLoadSampleResume}
-              className="text-xs text-[#B89AFF] hover:text-[#F7F7FA] font-medium flex items-center gap-1.5 transition-colors focus-visible:ring-2 focus-visible:ring-[#7C4DFF] rounded"
+              className="text-xs text-[#C45D39] hover:text-[#B34E2C] font-semibold flex items-center gap-1.5 transition-colors focus-visible:ring-2 focus-visible:ring-[#C45D39] rounded px-1"
             >
-              <FileText className="w-3.5 h-3.5 text-[#7C4DFF]" />
+              <FileText className="w-3.5 h-3.5 text-[#C45D39]" />
               Load Sample Resume
             </button>
           )}
           {file && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-[#B89AFF] font-semibold bg-[#2C224B] border border-[#7C4DFF]/40 px-2.5 py-0.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#7C4DFF]" />
+            <span className="inline-flex items-center gap-1.5 text-xs text-[#291B32] font-semibold bg-[#E8D9E8] border border-[#DDD0D7] px-2.5 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#C45D39]" />
               Ready for Analysis
             </span>
           )}
@@ -136,8 +136,8 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
           onClick={() => inputRef.current?.click()}
           className={`cursor-pointer border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all ${
             isDragging
-              ? "border-[#7C4DFF] bg-[#2C224B]/40 scale-[1.01]"
-              : "border-[#30384B] hover:border-[#7C4DFF]/60 bg-[#0B101A]/60 hover:bg-[#111827]"
+              ? "border-[#C45D39] bg-[#FBEFEA] scale-[1.01]"
+              : "border-[#DDD0D7] hover:border-[#C45D39]/60 bg-[#F7F2EB]/50 hover:bg-[#FBEFEA]"
           }`}
         >
           <input
@@ -149,30 +149,30 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             className="hidden"
           />
           <div className="flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#2C224B] text-[#B89AFF] flex items-center justify-center shadow-md border border-[#7C4DFF]/30">
-              <UploadCloud className="w-6 h-6 text-[#7C4DFF]" />
+            <div className="w-12 h-12 rounded-2xl bg-[#FBEFEA] text-[#C45D39] flex items-center justify-center shadow-xs border border-[#C45D39]/20">
+              <UploadCloud className="w-6 h-6 text-[#C45D39]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#F7F7FA]">
+              <p className="text-sm font-semibold text-[#291B32]">
                 Click to browse or drag and drop candidate resume
               </p>
-              <p className="text-xs text-[#B8B9D0] mt-1">
+              <p className="text-xs text-[#674E61] mt-1">
                 Compatible with executive Adobe PDF (.pdf) and Microsoft Word (.docx)
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 rounded-xl border border-[#30384B] bg-[#1B2231] shadow-md">
+        <div className="flex items-center justify-between p-4 rounded-xl border border-[#DDD0D7] bg-[#F7F2EB] shadow-xs">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#2C224B] text-[#B89AFF] flex items-center justify-center shrink-0 border border-[#7C4DFF]/30">
-              <FileText className="w-5 h-5 text-[#7C4DFF]" />
+            <div className="w-10 h-10 rounded-xl bg-[#FBEFEA] text-[#C45D39] flex items-center justify-center shrink-0 border border-[#C45D39]/20">
+              <FileText className="w-5 h-5 text-[#C45D39]" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#F7F7FA] truncate">
+              <p className="text-sm font-semibold text-[#291B32] truncate">
                 {file.name}
               </p>
-              <p className="text-xs text-[#B8B9D0]">
+              <p className="text-xs text-[#674E61]">
                 {formatFileSize(file.size)} · {file.name.endsWith(".pdf") ? "PDF Document" : "Word Document"}
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
             id="remove-resume-button"
             type="button"
             onClick={handleRemove}
-            className="p-1.5 rounded-lg text-[#B8B9D0] hover:text-[#F7F7FA] hover:bg-[#111827] transition-colors"
+            className="p-1.5 rounded-lg text-[#674E61] hover:text-rose-600 hover:bg-white transition-colors"
             title="Remove and select different file"
           >
             <X className="w-5 h-5" />
@@ -190,8 +190,8 @@ export default function ResumeUpload({ file, onFileSelect, error }: ResumeUpload
       )}
 
       {(validationError || error) && (
-        <div className="flex items-center gap-2 p-3 text-xs text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl shadow-xs">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+        <div className="flex items-center gap-2 p-3 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl shadow-xs">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
           <span>{validationError || error}</span>
         </div>
       )}
