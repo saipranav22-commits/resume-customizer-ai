@@ -51,6 +51,7 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState<string>("Analyzing documents...");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tailoredResult, setTailoredResult] = useState<TailoredResumeResponse | null>(null);
+  const [activeDraft, setActiveDraft] = useState<TailoredResumeResponse | null>(null);
 
   // Active workspace tab
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("editor");
@@ -149,6 +150,7 @@ export default function Home() {
         token
       );
       setTailoredResult(result);
+      setActiveDraft(result);
       setIsDirty(true);
       setActiveTab("editor");
       // Smooth scroll to results
@@ -179,6 +181,7 @@ export default function Home() {
       }
     }
     setTailoredResult(null);
+    setActiveDraft(null);
     setErrorMessage(null);
     setActiveVersionId(null);
     setActiveVersionName(null);
@@ -187,11 +190,20 @@ export default function Home() {
     setIsSaved(false);
   };
 
-  const handleOpenSaveModal = (currentDraft?: TailoredResumeResponse) => {
-    if (currentDraft) {
-      setTailoredResult(currentDraft);
+  const handleDraftChange = (updatedDraft: TailoredResumeResponse) => {
+    setActiveDraft(updatedDraft);
+    if (tailoredResult && JSON.stringify(updatedDraft) !== JSON.stringify(tailoredResult)) {
+      setIsDirty(true);
     }
-    if (!tailoredResult && !currentDraft) return;
+  };
+
+  const handleOpenSaveModal = (currentDraft?: TailoredResumeResponse) => {
+    const draftToSave = currentDraft || activeDraft || tailoredResult;
+    if (draftToSave) {
+      setActiveDraft(draftToSave);
+      setTailoredResult(draftToSave);
+    }
+    if (!draftToSave) return;
     if (!user || !token) {
       setIsAuthModalOpen(true);
       return;
@@ -206,7 +218,8 @@ export default function Home() {
     version_notes?: string;
     version_tags?: string[];
   }) => {
-    if (!tailoredResult || !token) return;
+    const draftToSave = activeDraft || tailoredResult;
+    if (!draftToSave || !token) return;
 
     setIsSaving(true);
     try {
@@ -215,7 +228,7 @@ export default function Home() {
         title: options.title,
         job_description: jobDescription,
         target_role: jdFirstLine || "Target Position",
-        tailored_result: tailoredResult,
+        tailored_result: draftToSave,
         version_name: options.version_name,
         parent_id: options.parent_id,
         version_notes: options.version_notes,
@@ -248,7 +261,7 @@ export default function Home() {
   };
 
   const handleLoadHistory = (detail: CustomizationHistoryDetail) => {
-    if (isDirty && tailoredResult) {
+    if (isDirty && (activeDraft || tailoredResult)) {
       if (
         typeof window !== "undefined" &&
         !window.confirm(
@@ -259,6 +272,7 @@ export default function Home() {
       }
     }
     setTailoredResult(detail.tailored_result);
+    setActiveDraft(detail.tailored_result);
     setJobDescription(detail.job_description);
     setActiveVersionId(detail.id);
     setActiveVersionName(detail.version_name || detail.title);
@@ -280,8 +294,8 @@ export default function Home() {
     breakdown: MatchScoreBreakdown,
     recommendations: OptimizationRecommendation[]
   ) => {
-    if (!tailoredResult) return;
-    setTailoredResult((prev) => {
+    if (!tailoredResult && !activeDraft) return;
+    const updateScore = (prev: TailoredResumeResponse | null) => {
       if (!prev) return null;
       return {
         ...prev,
@@ -293,7 +307,9 @@ export default function Home() {
           score: updatedScore,
         },
       };
-    });
+    };
+    setTailoredResult(updateScore);
+    setActiveDraft(updateScore);
   };
 
   // Direct export handler for current draft
@@ -302,7 +318,9 @@ export default function Home() {
     currentDraft: TailoredResumeResponse
   ) => {
     try {
-      const result = await downloadExport(currentDraft, format);
+      const draftToExport = currentDraft || activeDraft || tailoredResult;
+      if (!draftToExport) return;
+      const result = await downloadExport(draftToExport, format);
       const url = window.URL.createObjectURL(result.blob);
       const a = document.createElement("a");
       a.href = url;
@@ -731,7 +749,7 @@ export default function Home() {
                 <span>Change Diff Analysis</span>
               </button>
 
-              {tailoredResult.generated_cover_letter && (
+              {(activeDraft?.generated_cover_letter || tailoredResult.generated_cover_letter) && (
                 <button
                   type="button"
                   onClick={() => setActiveTab("cover-letter")}
@@ -748,29 +766,30 @@ export default function Home() {
             </div>
 
             {/* Tab 1: Interactive Resume Editor */}
-            {activeTab === "editor" && (
+            <div className={activeTab === "editor" ? "block" : "hidden"}>
               <InteractiveResumeEditor
                 resumeData={tailoredResult}
                 jobDescription={jobDescription}
                 onSaveVersion={handleOpenSaveModal}
                 onExport={handleExportDraft}
                 onScoreUpdated={handleScoreUpdated}
+                onDraftChange={handleDraftChange}
               />
-            )}
+            </div>
 
             {/* Tab 2: ATS & Alignment Audit Dashboard */}
             {activeTab === "audit" && (
-              <OptimizationDashboard resumeData={tailoredResult} />
+              <OptimizationDashboard resumeData={activeDraft || tailoredResult} />
             )}
 
             {/* Tab 3: Change Diff View */}
             {activeTab === "diff" && (
-              <DiffView resume={tailoredResult} />
+              <DiffView resume={activeDraft || tailoredResult} />
             )}
 
             {/* Tab 4: Cover Letter View */}
-            {activeTab === "cover-letter" && tailoredResult.generated_cover_letter && (
-              <CoverLetterView resume={tailoredResult} />
+            {activeTab === "cover-letter" && (activeDraft?.generated_cover_letter || tailoredResult.generated_cover_letter) && (
+              <CoverLetterView resume={activeDraft || tailoredResult} />
             )}
           </section>
         ) : (

@@ -1,9 +1,14 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { normalizeCandidateName } from "@/lib/nameNormalizer";
+import {
+  normalizeCandidateName,
+  stripClosingSignature,
+  formatCoverLetterWithVerifiedSignature,
+} from "@/lib/nameNormalizer";
 import { BatchAIImproveModal } from "@/components/BatchAIImproveModal";
 import { InteractiveResumeEditor } from "@/components/InteractiveResumeEditor";
+import CoverLetterView from "@/components/CoverLetterView";
 import { sampleTailoredResume } from "./testFixtures";
 import * as api from "@/lib/api";
 
@@ -16,6 +21,10 @@ vi.mock("@/lib/api", async () => {
     recheckResumeScore: vi.fn(),
     auditResume: vi.fn(),
     improveResumeText: vi.fn(),
+    downloadCoverLetterPdf: vi.fn().mockResolvedValue({
+      blob: new Blob(["dummy pdf"], { type: "application/pdf" }),
+      filename: "B_SAI_PRANAV_Cover_Letter.pdf",
+    }),
   };
 });
 
@@ -240,3 +249,94 @@ describe("Phase 6.5: InteractiveResumeEditor Candidate Name & Hybrid AI Improve 
     expect(screen.getByText(/Recruiter Preview Mode: Clean ATS document appearance/i)).toBeInTheDocument();
   });
 });
+
+describe("Phase 6.5.1: Cover Letter Candidate Name Integrity & Deterministic Signature", () => {
+  const sampleCoverLetterWithKerningGlitch =
+    "Dear Hiring Team,\n\nI am thrilled to submit my application for this role.\n\nSincerely,\nB Sai Prana V";
+
+  it("strips closing salutations and trailing signatures cleanly", () => {
+    const stripped = stripClosingSignature(sampleCoverLetterWithKerningGlitch);
+    expect(stripped).toBe("Dear Hiring Team,\n\nI am thrilled to submit my application for this role.");
+    expect(stripped).not.toContain("Sincerely");
+    expect(stripped).not.toContain("Prana V");
+  });
+
+  it("formats cover letter deterministically with verified candidate name B SAI PRANAV", () => {
+    const formatted = formatCoverLetterWithVerifiedSignature(
+      sampleCoverLetterWithKerningGlitch,
+      "B SAI PRANAV"
+    );
+    expect(formatted).toContain("Sincerely,\nB SAI PRANAV");
+    expect(formatted).not.toContain("B Sai Prana V");
+    expect(formatted).not.toContain("PRANA V");
+    expect(formatted).toContain("Dear Hiring Team,\n\nI am thrilled to submit my application for this role.");
+
+    // Idempotent test
+    const formattedTwice = formatCoverLetterWithVerifiedSignature(formatted, "B SAI PRANAV");
+    expect(formattedTwice).toBe(formatted);
+  });
+
+  it("CoverLetterView renders identical authoritative candidate name in header and signature", async () => {
+    const resumeWithGlitch: typeof sampleTailoredResume = {
+      ...sampleTailoredResume,
+      candidate_name: "B SAI PRANAV",
+      generated_cover_letter: sampleCoverLetterWithKerningGlitch,
+    };
+
+    render(<CoverLetterView resume={resumeWithGlitch} />);
+
+    // Header letterhead must render B SAI PRANAV
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent("B SAI PRANAV");
+
+    // Letter body preview must render B SAI PRANAV and never B Sai Prana V
+    const previewContainer = document.getElementById("cover-letter-preview");
+    expect(previewContainer).toBeInTheDocument();
+    expect(previewContainer?.textContent).toContain("B SAI PRANAV");
+    expect(previewContainer?.textContent).not.toContain("B Sai Prana V");
+    expect(previewContainer?.textContent).not.toContain("PRANA V");
+
+    // Trigger PDF download button and verify payload
+    const downloadBtn = screen.getByRole("button", { name: /Download Cover Letter PDF/i });
+    fireEvent.click(downloadBtn);
+
+    await waitFor(() => {
+      expect(api.downloadCoverLetterPdf).toHaveBeenCalledWith(
+        expect.objectContaining({
+          candidate_name: "B SAI PRANAV",
+          cover_letter_text: expect.stringContaining("Sincerely,\nB SAI PRANAV"),
+        })
+      );
+    });
+  });
+
+  it("synchronizes name updates from InteractiveResumeEditor to cover letter", () => {
+    const onDraftChange = vi.fn();
+    const resumeWithGlitch: typeof sampleTailoredResume = {
+      ...sampleTailoredResume,
+      candidate_name: "B SAI PRANAV",
+      generated_cover_letter: sampleCoverLetterWithKerningGlitch,
+    };
+
+    render(
+      <InteractiveResumeEditor
+        resumeData={resumeWithGlitch}
+        jobDescription="Software Engineer JD"
+        onSaveVersion={vi.fn()}
+        onExport={vi.fn()}
+        onDraftChange={onDraftChange}
+      />
+    );
+
+    const nameInput = screen.getByPlaceholderText("Candidate Full Name");
+    fireEvent.change(nameInput, { target: { value: "Jane Doe" } });
+
+    expect(onDraftChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        candidate_name: "Jane Doe",
+        generated_cover_letter: expect.stringContaining("Sincerely,\nJane Doe"),
+      })
+    );
+  });
+});
+

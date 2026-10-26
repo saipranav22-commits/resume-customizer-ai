@@ -6,9 +6,12 @@ from app.services.name_normalizer import (
     normalize_candidate_name,
     extract_authoritative_name,
     reconcile_candidate_name,
+    strip_closing_signature,
+    format_cover_letter_with_verified_signature,
 )
 from app.services.parser import clean_extracted_text
-from app.services.exporter import export_txt, export_docx, export_pdf
+from app.services.exporter import export_txt, export_docx, export_pdf, export_cover_letter_pdf
+from app.services.optimization_engine import validate_and_normalize_ai_output
 from app.models.schemas import (
     TailoredResumeResponse,
     ContactInfo,
@@ -283,3 +286,123 @@ def test_batch_improve_validation_errors():
     }
     response = client.post("/api/editor/batch-improve", json=payload)
     assert response.status_code in (400, 422)
+
+
+# =====================================================================
+# 6. Cover Letter Candidate Name Integrity & Deterministic Closing Tests
+# =====================================================================
+
+def test_strip_closing_signature_variations():
+    """Verify various closing salutations and trailing signatures/placeholders are cleanly stripped."""
+    test_cases = [
+        "Dear Hiring Team,\n\nI am qualified.\n\nSincerely,\nB Sai Prana V",
+        "Dear Hiring Team,\n\nI am qualified.\n\nBest regards,\n[Your Name]",
+        "Dear Hiring Team,\n\nI am qualified.\n\nWarm regards,\n<candidate name>",
+        "Dear Hiring Team,\n\nI am qualified.\n\nYours faithfully,\nB Sai Pranav",
+        "Dear Hiring Team,\n\nI am qualified.\n\nCordially,",
+        "Dear Hiring Team,\n\nI am qualified.\n\nWarmly,\nB. Sai Pranav",
+        "Dear Hiring Team,\n\nI am qualified.\n\nSincerely\nB Sai Prana V",
+        "Dear Hiring Team,\n\nI am qualified.\n\n[Your Name]",
+    ]
+    for case in test_cases:
+        stripped = strip_closing_signature(case)
+        assert stripped == "Dear Hiring Team,\n\nI am qualified."
+        assert "Sincerely" not in stripped
+        assert "regards" not in stripped.lower()
+        assert "Prana V" not in stripped
+        assert "[Your Name]" not in stripped
+
+
+def test_format_cover_letter_with_verified_signature_b_sai_pranav():
+    """Verify deterministic formatting with B SAI PRANAV: healing kerning, no duplicates, idempotence."""
+    raw_letter = "Dear Hiring Team,\n\nI am an experienced engineer.\n\nSincerely,\nB Sai Prana V"
+    formatted = format_cover_letter_with_verified_signature(raw_letter, "B SAI PRANAV")
+    
+    assert formatted.endswith("Sincerely,\nB SAI PRANAV")
+    assert "B Sai Prana V" not in formatted
+    assert "PRANA V" not in formatted
+    assert "Dear Hiring Team,\n\nI am an experienced engineer." in formatted
+    assert formatted.count("Sincerely,") == 1
+
+    # Test idempotence (formatting formatted letter produces identical output)
+    reformatted = format_cover_letter_with_verified_signature(formatted, "B SAI PRANAV")
+    assert reformatted == formatted
+
+
+def test_cover_letter_pdf_exporter_name_integrity():
+    """Verify cover letter PDF export renders exact verified name in header and signature with no kerning errors."""
+    import io
+    import pypdf
+
+    cover_letter_text = (
+        "Dear Hiring Team,\n\n"
+        "I am writing to express my strong enthusiasm for the role.\n\n"
+        "Sincerely,\n"
+        "B Sai Prana V"
+    )
+    pdf_bytes = export_cover_letter_pdf(
+        candidate_name="B SAI PRANAV",
+        contact_info_line="saipranav@example.com • +91 9876543210 • Hyderabad, India",
+        cover_letter_text=cover_letter_text,
+        target_role="Senior Software Engineer",
+    )
+    assert len(pdf_bytes) > 0
+    assert pdf_bytes.startswith(b"%PDF")
+
+    reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
+    full_text = "".join(page.extract_text() or "" for page in reader.pages)
+
+    # Header and signature must both contain verified name
+    assert "B SAI PRANAV" in full_text
+    # Corrupted kerning signature must NOT appear anywhere in the PDF
+    assert "B Sai Prana V" not in full_text
+    assert "PRANA V" not in full_text
+    # Body text preserved
+    assert "strong enthusiasm for the role" in full_text
+
+
+def test_ai_output_normalization_cover_letter_reconciliation():
+    """Verify validate_and_normalize_ai_output heals candidate_name and cover letter signature."""
+    source_resume = "B SAI PRANAV\nsaipranav@example.com\nSenior Backend Engineer"
+    ai_output = {
+        "candidate_name": "B SAI PRANA V",
+        "generated_cover_letter": "Dear Hiring Team,\n\nI am a great match.\n\nWarm regards,\nB Sai Prana V",
+        "skills": {"matching_skills": ["Python"], "additional_skills": []},
+    }
+    normalized = validate_and_normalize_ai_output(ai_output, source_resume, SAMPLE_JD)
+
+    assert normalized["candidate_name"] == "B SAI PRANAV"
+    cl = normalized["generated_cover_letter"]
+    assert cl.endswith("Sincerely,\nB SAI PRANAV")
+    assert "Prana V" not in cl
+    assert "Dear Hiring Team,\n\nI am a great match." in cl
+
+
+def test_cover_letter_pdf_api_endpoint_success():
+    """Verify /api/export/cover-letter/pdf endpoint returns PDF with normalized filename and valid content."""
+    import io
+    import pypdf
+
+    payload = {
+        "candidate_name": "B SAI PRANA V",  # Parser or client kerning glitch
+        "contact_info": {
+            "email": "saipranav@example.com",
+            "phone": "+91 9876543210",
+            "location": "Hyderabad, India",
+            "linkedin": "linkedin.com/in/bsaipranav",
+        },
+        "cover_letter_text": "Dear Hiring Team,\n\nI am eager to contribute.\n\nSincerely,\nB Sai Prana V",
+        "target_role": "Senior Backend Engineer",
+        "company_name": "Tech Corp",
+    }
+    response = client.post("/api/export/cover-letter/pdf", json=payload)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert 'filename="B_SAI_PRANAV_Cover_Letter.pdf"' in response.headers["content-disposition"]
+
+    # Verify extracted text has healed name
+    reader = pypdf.PdfReader(io.BytesIO(response.content))
+    extracted = "".join(page.extract_text() or "" for page in reader.pages)
+    assert "B SAI PRANAV" in extracted
+    assert "PRANA V" not in extracted
+

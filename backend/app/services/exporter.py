@@ -18,7 +18,10 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 from app.models.schemas import TailoredResumeResponse
-from app.services.name_normalizer import normalize_candidate_name
+from app.services.name_normalizer import (
+    normalize_candidate_name,
+    format_cover_letter_with_verified_signature,
+)
 
 # Palette for PDF
 COLOR_PRIMARY = HexColor("#1E293B")     # Slate 800 - Deep charcoal
@@ -588,6 +591,9 @@ def export_cover_letter_pdf(
     target_role: str = "Position"
 ) -> bytes:
     """Generate executive letterhead PDF for tailored cover letter."""
+    candidate_name = normalize_candidate_name(candidate_name) or "Candidate Name"
+    formatted_text = format_cover_letter_with_verified_signature(cover_letter_text, candidate_name)
+
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -640,7 +646,7 @@ def export_cover_letter_pdf(
     elements.append(HRFlowable(width="100%", thickness=1.5, color=COLOR_SECONDARY, spaceAfter=18))
 
     # Body paragraphs
-    paragraphs = cover_letter_text.strip().split("\n\n")
+    paragraphs = formatted_text.strip().split("\n\n")
     for para in paragraphs:
         cleaned_para = clean_pdf_text(para.strip()).replace("\n", "<br/>")
         if cleaned_para:

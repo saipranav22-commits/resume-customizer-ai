@@ -33,7 +33,7 @@ import { recheckResumeScore, auditResume, ApiError } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import AIImproveModal from "@/components/AIImproveModal";
 import BatchAIImproveModal from "@/components/BatchAIImproveModal";
-import { normalizeCandidateName } from "@/lib/nameNormalizer";
+import { normalizeCandidateName, formatCoverLetterWithVerifiedSignature } from "@/lib/nameNormalizer";
 
 export interface InteractiveResumeEditorProps {
   resumeData: TailoredResumeResponse;
@@ -45,6 +45,7 @@ export interface InteractiveResumeEditorProps {
     breakdown: MatchScoreBreakdown,
     recommendations: OptimizationRecommendation[]
   ) => void;
+  onDraftChange?: (currentDraft: TailoredResumeResponse) => void;
 }
 
 export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = ({
@@ -53,6 +54,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   onSaveVersion,
   onExport,
   onScoreUpdated,
+  onDraftChange,
 }) => {
   // Deep clone initial resume to avoid mutating parent props; normalize candidate name
   const [draft, setDraft] = useState<TailoredResumeResponse>(() => {
@@ -133,18 +135,28 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     return false;
   }, [draft.experience, draft.projects]);
 
+  const lastEmittedDraftRef = useRef<TailoredResumeResponse | null>(null);
+
   // Update draft whenever parent resumeData completely resets (e.g. from version restore)
   useEffect(() => {
+    if (lastEmittedDraftRef.current && resumeData === lastEmittedDraftRef.current) {
+      return;
+    }
     const cloned = JSON.parse(JSON.stringify(resumeData)) as TailoredResumeResponse;
     if (cloned.candidate_name) {
       cloned.candidate_name = normalizeCandidateName(cloned.candidate_name);
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(cloned);
     setUndoHistory([]);
     setIsScoreStale(false);
     setRecheckMessage(null);
   }, [resumeData]);
+
+  // Synchronize draft updates to parent workspace in real time
+  useEffect(() => {
+    lastEmittedDraftRef.current = draft;
+    onDraftChange?.(draft);
+  }, [draft, onDraftChange]);
 
   // Close export menu and AI improve menu on outside click
   useEffect(() => {
@@ -181,10 +193,22 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   // --- Handlers for Document Fields ---
   const handleFieldChange = (field: string, value: unknown) => {
     pushUndo(draft);
-    setDraft((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setDraft((prev) => {
+      const updated: TailoredResumeResponse = {
+        ...prev,
+        [field]: value,
+      };
+      if (field === "candidate_name" && typeof value === "string") {
+        const norm = normalizeCandidateName(value);
+        if (updated.generated_cover_letter) {
+          updated.generated_cover_letter = formatCoverLetterWithVerifiedSignature(
+            updated.generated_cover_letter,
+            norm
+          );
+        }
+      }
+      return updated;
+    });
     setIsScoreStale(true);
   };
 

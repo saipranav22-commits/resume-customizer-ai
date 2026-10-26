@@ -409,6 +409,14 @@ def validate_and_normalize_ai_output(
     validated_name = reconcile_candidate_name(raw_ai_name, resume_text)
     parsed_dict["candidate_name"] = validated_name
 
+    # Deterministically format cover letter closing signature with verified candidate name
+    raw_cover_letter = parsed_dict.get("generated_cover_letter")
+    if raw_cover_letter:
+        from app.services.name_normalizer import format_cover_letter_with_verified_signature
+        parsed_dict["generated_cover_letter"] = format_cover_letter_with_verified_signature(
+            raw_cover_letter, validated_name, resume_text
+        )
+
     resume_lower = resume_text.lower()
     
     # Extract skills

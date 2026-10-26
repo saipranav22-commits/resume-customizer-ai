@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Download, Copy, Check, Mail } from "lucide-react";
 import { TailoredResumeResponse } from "@/types/resume";
 import { downloadCoverLetterPdf } from "@/lib/api";
+import { normalizeCandidateName, formatCoverLetterWithVerifiedSignature } from "@/lib/nameNormalizer";
 
 interface CoverLetterViewProps {
   resume: TailoredResumeResponse;
@@ -13,9 +14,13 @@ export default function CoverLetterView({ resume }: CoverLetterViewProps) {
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const coverLetterText =
-    resume.generated_cover_letter ||
-    `Dear Hiring Team,\n\nI am pleased to submit my application for the role. With strong background in modern software engineering and a track record of delivering high-impact solutions, I am excited about the opportunity to contribute to your team.\n\nSincerely,\n${resume.candidate_name}`;
+  const normalizedCandidateName = normalizeCandidateName(resume.candidate_name) || "Candidate Name";
+  const defaultLetterBody = "Dear Hiring Team,\n\nI am pleased to submit my application for the role. With strong background in modern software engineering and a track record of delivering high-impact solutions, I am excited about the opportunity to contribute to your team.";
+
+  const coverLetterText = formatCoverLetterWithVerifiedSignature(
+    resume.generated_cover_letter || defaultLetterBody,
+    normalizedCandidateName
+  );
 
   const handleCopy = async () => {
     try {
@@ -31,7 +36,7 @@ export default function CoverLetterView({ resume }: CoverLetterViewProps) {
     try {
       setDownloading(true);
       const { blob, filename } = await downloadCoverLetterPdf({
-        candidate_name: resume.candidate_name,
+        candidate_name: normalizedCandidateName,
         contact_info: resume.contact_info,
         cover_letter_text: coverLetterText,
         target_role: "Software Engineering Role",
@@ -109,7 +114,7 @@ export default function CoverLetterView({ resume }: CoverLetterViewProps) {
         {/* Letterhead */}
         <div className="pb-6 border-b-2 border-[#DDD0D7]">
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#291B32]">
-            {resume.candidate_name}
+            {normalizedCandidateName}
           </h1>
           <div className="mt-1.5 flex flex-wrap gap-3 text-xs text-[#674E61]">
             {resume.contact_info.email && <span>{resume.contact_info.email}</span>}

@@ -209,3 +209,83 @@ def reconcile_candidate_name(ai_name: Optional[str], source_text: str) -> str:
         return auth_name
 
     return norm_ai_name or auth_name
+
+
+# Regular expression to identify structural cover letter closing blocks:
+# Matches standard salutations at the end of the letter and any trailing candidate/placeholder name.
+CLOSING_SALUTATION_REGEX = re.compile(
+    r"""
+    \n+
+    [ \t]*
+    (?:
+        (?:with\s+)?(?:warmest|warm|best|kind|kindest)?\s*regards
+        |sincerely(?:\s+yours)?
+        |yours\s+(?:sincerely|truly|faithfully|respectfully)
+        |respectfully(?:\s+submitted|\s+yours)?
+        |cordially
+        |warmly
+        |with\s+(?:appreciation|gratitude|best\s+regards|warm\s+regards)
+    )
+    [,\.]?
+    [ \t]*
+    (?:\n+.*)?$
+    """,
+    re.IGNORECASE | re.VERBOSE | re.DOTALL,
+)
+
+# Trailing standalone bracket placeholders, e.g. \n\n[Your Name] or \n\n[Candidate Name]
+TRAILING_PLACEHOLDER_REGEX = re.compile(
+    r"""
+    \n+
+    [ \t]*
+    (?:\[(?:your\s+name|candidate\s+name|name|applicant\s+name)\]|\<(?:your\s+name|candidate\s+name|name)\>)
+    [ \t]*$
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+
+def strip_closing_signature(cover_letter_text: Optional[str]) -> str:
+    """
+    Safely strips any formal closing salutation (e.g. 'Sincerely,', 'Best regards,')
+    and trailing candidate signature/placeholder from the end of a cover letter.
+    Preserves all preceding letter body paragraphs intact without broad replacements.
+    """
+    if not cover_letter_text:
+        return ""
+
+    text = unicodedata.normalize("NFC", cover_letter_text).rstrip()
+
+    # 1. Check and strip formal closing salutation and anything following it
+    text = CLOSING_SALUTATION_REGEX.sub("", text).rstrip()
+
+    # 2. Check and strip any trailing isolated placeholder
+    text = TRAILING_PLACEHOLDER_REGEX.sub("", text).rstrip()
+
+    return text
+
+
+def format_cover_letter_with_verified_signature(
+    cover_letter_text: Optional[str],
+    candidate_name: Optional[str],
+    source_text: Optional[str] = None
+) -> str:
+    """
+    Deterministically formats a cover letter by:
+    1. Normalizing the verified candidate name (healing kerning splits, initials, unicode).
+    2. Stripping any existing/corrupted closing salutation or embedded signature from the body.
+    3. Deterministically appending the authoritative closing: 'Sincerely,\\n{verified_candidate_name}'.
+    Guarantees no duplicate signatures, no AI identity hallucinations, and full identity integrity.
+    """
+    clean_body = strip_closing_signature(cover_letter_text)
+    clean_name = normalize_candidate_name(candidate_name, source_text)
+
+    if not clean_body:
+        if clean_name:
+            return f"Sincerely,\n{clean_name}"
+        return "Sincerely,"
+
+    if clean_name:
+        return f"{clean_body}\n\nSincerely,\n{clean_name}"
+    return f"{clean_body}\n\nSincerely,"
+

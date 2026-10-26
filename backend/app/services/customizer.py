@@ -40,6 +40,8 @@ from app.services.name_normalizer import (
     normalize_candidate_name,
     extract_authoritative_name,
     reconcile_candidate_name,
+    strip_closing_signature,
+    format_cover_letter_with_verified_signature,
 )
 
 logger = logging.getLogger("customizer")
@@ -63,6 +65,9 @@ CRITICAL ETHICAL & ACCURACY REQUIREMENTS:
    - Extract the candidate's exact full name verbatim as it appears on the original resume.
    - DO NOT alter initials (e.g. 'B '), DO NOT detach letters or add accidental internal spaces (e.g. maintain 'B SAI PRANAV', never output 'B SAI PRANA V').
    - Preserve hyphens, apostrophes, initials, and accents exactly.
+8. COVER LETTER INTEGRITY:
+   - Provide a personalized 3-paragraph professional cover letter addressing the hiring team.
+   - Stop immediately after the final body paragraph. Do NOT attempt to append closing salutations (e.g. 'Sincerely,', 'Best regards,') or candidate signatures. The verified candidate name and formal closing will be rendered deterministically.
 
 You MUST respond strictly with a valid JSON object matching the following structure:
 {
@@ -166,7 +171,7 @@ You MUST respond strictly with a valid JSON object matching the following struct
     "improvements": ["Consider addressing missing keywords in a cover letter"]
   },
   "job_description_summary": "1-2 sentence distillation of target role expectations",
-  "generated_cover_letter": "A compelling, personalized 3-paragraph professional cover letter addressing the hiring team, referencing candidate's actual qualifications that match the JD, and articulating why they are an outstanding fit."
+  "generated_cover_letter": "A compelling, personalized 3-paragraph professional cover letter addressing the hiring team, referencing candidate's actual qualifications that match the JD, and articulating why they are an outstanding fit. Conclude after final body paragraph without closing salutation or signature."
 }
 """
 
@@ -352,18 +357,17 @@ def build_deterministic_fallback(
         tailored_summary = orig_summary
         
     skills_phrase = f"hands-on expertise in {', '.join(matching[:4])}" if matching else "a solid foundation in modern software engineering"
-    cover_letter = f"""Dear Hiring Team,
+    cover_letter_body = f"""Dear Hiring Team,
 
 I am writing to express my strong interest in the {target_role_str} position described in your job posting. With {skills_phrase} and a proven track record of delivering robust, maintainable solutions, I am confident in my ability to make an immediate positive contribution to your team.
 
-Throughout my career, I have prioritized solving complex technical problems while maintaining high standards for code quality, architectural reliability, and team velocity. Reviewing your requirements, I was particularly excited to see your emphasis on {', '.join(jd_analysis.tools_frameworks[:2]) if jd_analysis.tools_frameworks else 'scalable architecture'} and modern engineering best practices?areas where my genuine technical background directly aligns with your current priorities.
+Throughout my career, I have prioritized solving complex technical problems while maintaining high standards for code quality, architectural reliability, and team velocity. Reviewing your requirements, I was particularly excited to see your emphasis on {', '.join(jd_analysis.tools_frameworks[:2]) if jd_analysis.tools_frameworks else 'scalable architecture'} and modern engineering best practices—areas where my genuine technical background directly aligns with your current priorities.
 
-I welcome the opportunity to discuss how my qualifications, verified technical experience, and dedication to engineering excellence will help your organization achieve its goals. Thank you for your time and consideration.
+I welcome the opportunity to discuss how my qualifications, verified technical experience, and dedication to engineering excellence will help your organization achieve its goals. Thank you for your time and consideration."""
 
-Sincerely,
-{candidate_name}"""
+    cover_letter = format_cover_letter_with_verified_signature(cover_letter_body, candidate_name, resume_text)
 
-    return TailoredResumeResponse(
+    fallback_response = TailoredResumeResponse(
         candidate_name=candidate_name,
         contact_info=ContactInfo(
             email=email_match.group(0) if email_match else None,
@@ -473,6 +477,12 @@ Remember: Return ONLY valid JSON adhering strictly to the schema. Do not include
         normalized_dict["customization_engine"] = "gemini"
         
         validated_response = TailoredResumeResponse(**normalized_dict)
+        if validated_response.generated_cover_letter:
+            validated_response.generated_cover_letter = format_cover_letter_with_verified_signature(
+                validated_response.generated_cover_letter,
+                validated_response.candidate_name,
+                resume_text
+            )
         audit = audit_resume_quality(validated_response, jd_text)
         ats_assessment = calculate_ats_quality_assessment(validated_response, audit)
         validated_response.audit = audit

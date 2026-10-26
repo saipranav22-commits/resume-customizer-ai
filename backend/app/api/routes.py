@@ -38,6 +38,7 @@ from app.services.customizer import (
 )
 from app.services.audit import audit_resume_quality
 from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
+from app.services.name_normalizer import normalize_candidate_name
 
 router = APIRouter(prefix="/api", tags=["Resume Customization"])
 
@@ -298,6 +299,7 @@ def export_txt_endpoint(resume_data: TailoredResumeResponse):
 def export_cover_letter_pdf_endpoint(req: CoverLetterRequest):
     """Export tailored cover letter as styled executive letterhead PDF."""
     try:
+        norm_name = normalize_candidate_name(req.candidate_name) or "Candidate Name"
         contact_line = " • ".join(filter(None, [
             req.contact_info.email,
             req.contact_info.phone,
@@ -305,12 +307,12 @@ def export_cover_letter_pdf_endpoint(req: CoverLetterRequest):
             req.contact_info.linkedin
         ]))
         pdf_bytes = export_cover_letter_pdf(
-            candidate_name=req.candidate_name,
+            candidate_name=norm_name,
             contact_info_line=contact_line,
             cover_letter_text=req.cover_letter_text,
             target_role=req.target_role or "Target Role"
         )
-        safe_name = "".join(c for c in req.candidate_name if c.isalnum() or c in (' ', '_', '-')).strip() or "Tailored"
+        safe_name = "".join(c for c in norm_name if c.isalnum() or c in (' ', '_', '-')).strip() or "Tailored"
         filename = f"{safe_name.replace(' ', '_')}_Cover_Letter.pdf"
         
         return Response(
