@@ -21,6 +21,17 @@ COMMON_TECH_SKILLS = [
     "agile", "scrum", "microservices", "system design", "distributed systems"
 ]
 
+COMMON_GENERIC_WORDS = {
+    "with", "from", "that", "this", "will", "your", "team", "using", "work",
+    "help", "role", "good", "part", "such", "well", "into", "also", "than",
+    "more", "most", "high", "level", "across", "other", "their", "have", "been",
+    "were", "what", "when", "where", "which", "make", "made", "like", "need",
+    "time", "year", "years", "ensure", "collaborate", "participate", "deliver",
+    "maintain", "support", "daily", "peer", "peers", "code", "best", "practices",
+    "strong", "ability", "proven", "track", "record", "about", "including", "within",
+    "experienced", "dedication", "focus"
+}
+
 def sanitize_untrusted_input(text: str) -> str:
     """Sanitize untrusted resume and JD inputs against prompt injection and delimiter manipulation."""
     if not text:
@@ -193,57 +204,106 @@ def calculate_explainable_match(
 
     # 1. Required skills score (0-100)
     if req_skills:
-        matched_req = [s for s in req_skills if s.lower() in resume_lower or s.lower() in grounded_skills_lower]
+        matched_req = [
+            s for s in req_skills 
+            if re.search(r'\b' + re.escape(s.lower()) + r'\b', resume_lower) or s.lower() in grounded_skills_lower
+        ]
         req_score = int((len(matched_req) / len(req_skills)) * 100)
     else:
         matched_req = []
         req_score = 85
 
     # 2. Preferred skills score (0-100)
+    # When no preferred skills in JD, weight is redistributed to required; report 0 to avoid misleading 100%
     if pref_skills:
-        matched_pref = [s for s in pref_skills if s.lower() in resume_lower or s.lower() in grounded_skills_lower]
+        matched_pref = [
+            s for s in pref_skills 
+            if re.search(r'\b' + re.escape(s.lower()) + r'\b', resume_lower) or s.lower() in grounded_skills_lower
+        ]
         pref_score = int((len(matched_pref) / len(pref_skills)) * 100)
     else:
         matched_pref = []
-        pref_score = 100
+        pref_score = 0
 
     # 3. Experience score (0-100)
     target_role = (jd_analysis.target_role or "").lower()
-    role_tokens = [t for t in target_role.split() if len(t) > 3 and t not in ["senior", "lead", "junior", "staff", "role", "engineer", "developer"]]
-    role_alignment = sum(1 for t in role_tokens if t in resume_lower) / max(1, len(role_tokens))
+    role_tokens = [
+        t for t in target_role.split() 
+        if len(t) > 3 and t not in ["senior", "lead", "junior", "staff", "role"]
+    ]
     
-    bullet_count = len(re.findall(r'(?m)^[-?*?\s]+', resume_text))
-    bullet_depth_score = min(1.0, bullet_count / 8.0)
+    title_matches = 0
+    for t in role_tokens:
+        if re.search(r'\b' + re.escape(t) + r'\b', resume_lower):
+            title_matches += 1
+    role_alignment = title_matches / max(1, len(role_tokens))
+
+    software_domains = ["software", "backend", "frontend", "full stack", "fullstack", "developer", "engineer", "devops", "cloud", "systems"]
+    has_software_background = any(re.search(r'\b' + re.escape(d) + r'\b', resume_lower) for d in software_domains)
+    if not has_software_background:
+        role_alignment = 0.0
+
+    raw_lines = [l.strip() for l in resume_text.splitlines() if l.strip()]
+    substantive_bullets = [
+        l for l in raw_lines 
+        if (re.match(r'^[-•*▪]\s+\w+', l) or any(l.lower().startswith(v) for v in ["built", "designed", "developed", "led", "managed", "engineered", "optimized", "architected"]))
+        and len(l.split()) >= 6
+    ]
+    bullet_count = len(substantive_bullets)
     
-    has_seniority_gap = ("senior" in target_role or "lead" in target_role) and not any(k in resume_lower for k in ["senior", "lead", "years", "architect", "scale", "managed"])
-    seniority_factor = 0.75 if has_seniority_gap else 1.0
+    metric_matches = re.findall(r'\b\d+(?:\.\d+)?%|\b\$\d+|\b\d+\s*(?:ms|k|m|million|users|req/s|x)\b', resume_lower)
+    metric_factor = min(1.0, len(metric_matches) / 2.0)
     
-    exp_score = int(((role_alignment * 0.45) + (bullet_depth_score * 0.35) + (seniority_factor * 0.20)) * 100)
-    exp_score = max(40, min(100, exp_score))
+    if role_alignment > 0:
+        bullet_depth_score = min(1.0, bullet_count / 6.0) * 0.70 + metric_factor * 0.30
+    else:
+        bullet_depth_score = min(0.30, (bullet_count / 10.0) * 0.30)
+
+    is_senior_target = any(k in target_role for k in ["senior", "lead", "staff", "principal", "architect"])
+    has_seniority_evidence = any(
+        re.search(r'\b' + re.escape(k) + r'\b', resume_lower) 
+        for k in ["senior", "lead", "staff", "architect", "5+ years", "6+ years", "7+ years", "8+ years"]
+    )
+    
+    if is_senior_target:
+        seniority_factor = 1.0 if (has_seniority_evidence and role_alignment >= 0.50) else (0.40 if role_alignment >= 0.50 else 0.0)
+    else:
+        seniority_factor = 1.0 if role_alignment >= 0.50 else 0.0
+
+    exp_score = int(((role_alignment * 0.50) + (bullet_depth_score * 0.30) + (seniority_factor * 0.20)) * 100)
+    exp_score = max(0, min(100, exp_score))
 
     # 4. Responsibility alignment (0-100)
-    action_verbs = ["built", "designed", "implemented", "optimized", "architected", "developed", "led", "managed", "deployed", "scaled"]
-    verbs_in_resume = sum(1 for v in action_verbs if v in resume_lower)
-    verb_score = min(1.0, verbs_in_resume / 5.0)
-    
+    action_verbs = ["built", "designed", "implemented", "optimized", "architected", "developed", "led", "managed", "deployed", "scaled", "engineered", "automated"]
+    verbs_in_resume = sum(1 for v in action_verbs if re.search(r'\b' + v + r'\b', resume_lower))
+    verb_score = min(1.0, verbs_in_resume / 5.0) if role_alignment > 0 else min(0.30, verbs_in_resume / 10.0)
+
     resp_overlap = 0
-    if responsibilities:
+    if responsibilities and role_alignment > 0:
         for resp in responsibilities:
-            words = [w.lower() for w in re.findall(r'\b[A-Za-z]{4,}\b', resp) if w.lower() not in ["with", "from", "that", "this", "will", "your", "team", "using", "work"]]
-            if any(w in resume_lower for w in words):
+            key_terms = [
+                w.lower() for w in re.findall(r'\b[A-Za-z]{4,}\b', resp)
+                if w.lower() not in COMMON_GENERIC_WORDS and len(w) >= 4
+            ]
+            if not key_terms:
+                continue
+            matched_terms = [kt for kt in key_terms if re.search(r'\b' + re.escape(kt) + r'\b', resume_lower)]
+            min_required = 1 if len(key_terms) == 1 else min(2, len(key_terms))
+            if len(matched_terms) >= min_required and (len(matched_terms) / len(key_terms)) >= 0.30:
                 resp_overlap += 1
         resp_alignment = resp_overlap / len(responsibilities)
     else:
-        resp_alignment = 0.8
-    resp_score = int(((resp_alignment * 0.65) + (verb_score * 0.35)) * 100)
-    resp_score = max(35, min(100, resp_score))
+        resp_alignment = 0.0
+
+    resp_score = int(((resp_alignment * 0.70) + (verb_score * 0.30)) * 100)
+    resp_score = max(0, min(100, resp_score))
 
     # 5. Keyword coverage (0-100)
     if keywords:
-        matched_kw = [k for k in keywords if k.lower() in resume_lower]
+        matched_kw = [k for k in keywords if re.search(r'\b' + re.escape(k.lower()) + r'\b', resume_lower)]
         kw_score = int((len(matched_kw) / len(keywords)) * 100)
     else:
-        kw_score = 80
+        kw_score = 75 if role_alignment > 0 else 0
 
     # 6. Structure score (0-100)
     sections = ["experience", "education", "skills", "projects", "summary"]
@@ -279,7 +339,7 @@ def calculate_explainable_match(
         kw_score * weights["keyword_coverage"] +
         struct_score * weights["structure"]
     )
-    overall = max(20, min(98, overall))
+    overall = max(0, min(100, overall))
 
     explanation = (
         f"Overall match score of {overall}% is computed from: "

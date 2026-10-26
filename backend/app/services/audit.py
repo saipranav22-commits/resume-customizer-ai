@@ -1,6 +1,7 @@
 import re
 import logging
 from typing import List, Dict, Any, Optional, Tuple
+from app.services.optimization_engine import COMMON_TECH_SKILLS
 from app.models.schemas import (
     TailoredResumeResponse,
     AuditIssue,
@@ -270,6 +271,9 @@ def audit_resume_quality(
     excessive_bullets = []
     first_person_bullets = []
     weak_starter_bullets = []
+    keyword_stuffed_bullets = []
+    metric_bullets = []
+    duplicate_bullets_count = 0
 
     for b_text, b_loc in all_bullets:
         clean_b = b_text.strip()
@@ -288,6 +292,7 @@ def audit_resume_quality(
         # Duplicate bullet text check
         normalized_b = re.sub(r"\s+", " ", clean_b.lower())
         if normalized_b in seen_bullet_texts:
+            duplicate_bullets_count += 1
             warnings.append(AuditIssue(
                 id=make_id("bullet"),
                 type="warning",
@@ -300,8 +305,20 @@ def audit_resume_quality(
         else:
             seen_bullet_texts[normalized_b] = b_loc
 
+        # Metrics check
+        if re.search(r'\b\d+(?:\.\d+)?%|\b\$\d+|\b\d+\s*(?:ms|k|m|million|users|req/s|x)\b', clean_b.lower()):
+            metric_bullets.append(b_loc)
+
+        # Keyword stuffing check: bullet is mostly skill keywords without verbs
+        words = clean_b.split()
+        word_count = len(words)
+        skill_words_count = sum(1 for w in words if w.lower().strip(",.") in COMMON_TECH_SKILLS)
+        has_action_verb = any(v in clean_b.lower() for v in STRONG_ACTION_VERBS)
+        
+        if word_count >= 4 and (skill_words_count / max(1, word_count)) >= 0.50 and not has_action_verb:
+            keyword_stuffed_bullets.append((clean_b[:50], b_loc))
+
         # Length check
-        word_count = len(clean_b.split())
         if word_count > 42 or len(clean_b) > 280:
             excessive_bullets.append((clean_b[:50], word_count, b_loc))
         elif word_count < 5:
@@ -327,6 +344,17 @@ def audit_resume_quality(
             if first_few_words.startswith(weak):
                 weak_starter_bullets.append((clean_b[:50], b_loc, weak))
                 break
+
+    if keyword_stuffed_bullets:
+        warnings.append(AuditIssue(
+            id=make_id("bullet"),
+            type="warning",
+            category="bullet_quality",
+            message=f"{len(keyword_stuffed_bullets)} experience bullet(s) consist predominantly of raw keywords without narrative context.",
+            detail="ATS parsers and recruiters penalize unstructured keyword dumping in experience sections.",
+            location=keyword_stuffed_bullets[0][1],
+            recommendation="Rephrase bullets with an action verb, engineering contribution, and verified outcome."
+        ))
 
     if excessive_bullets:
         warnings.append(AuditIssue(
@@ -385,10 +413,12 @@ def audit_resume_quality(
     # -------------------------------------------------------------
     # 5. Inconsistent Dates Check
     # -------------------------------------------------------------
+    missing_dates_count = 0
     for exp_idx, exp in enumerate(experiences):
         duration = (exp.duration or "").strip()
         exp_loc = f"Experience: {exp.role} at {exp.company}"
         if not duration:
+            missing_dates_count += 1
             warnings.append(AuditIssue(
                 id=make_id("dates"),
                 type="warning",
@@ -413,7 +443,6 @@ def audit_resume_quality(
                 recommendation="Add completion year (e.g. '2022' or 'Expected 2025')."
             ))
 
-    # -------------------------------------------------------------
     # 6. Overall Document Length & Metrics
     # -------------------------------------------------------------
     # Build full document text
@@ -504,6 +533,12 @@ def audit_resume_quality(
         "word_count": total_word_count,
         "bullet_count": len(all_bullets),
         "avg_bullet_words": round(sum(len(b[0].split()) for b in all_bullets) / max(1, len(all_bullets)), 1),
+        "metric_bullets_count": len(metric_bullets),
+        "first_person_bullet_count": len(first_person_bullets),
+        "weak_starter_bullet_count": len(weak_starter_bullets),
+        "keyword_stuffed_bullet_count": len(keyword_stuffed_bullets),
+        "duplicate_bullets_count": duplicate_bullets_count,
+        "missing_dates_count": missing_dates_count,
         "duplicate_skills_count": len(duplicate_skill_names),
         "experience_entries_count": len(experiences),
         "project_entries_count": len(projects),
@@ -534,44 +569,68 @@ def calculate_ats_quality_assessment(
     5. Relevant content coverage (15% weight)
     6. Basic document completeness (10% weight)
     """
-    # 1. Parseability (25%): Absence of control chars, clean email/phone, extractable text
+    # 1. Parseability (25%): Absence of control chars, verified email, phone, location
     parse_errors = [e for e in audit.errors if e.category in ("ats_parseability", "contact_info")]
     parse_score = 100 - (len(parse_errors) * 30)
     if not (resume.contact_info and resume.contact_info.email):
         parse_score -= 25
-    parse_score = max(30, min(100, parse_score))
+    if not (resume.contact_info and resume.contact_info.phone):
+        parse_score -= 15
+    if not (resume.contact_info and resume.contact_info.location):
+        parse_score -= 5
+    parse_score = max(20, min(100, parse_score))
 
-    # 2. Section Structure (20%): Standard recognizable headings, clear reverse-chronological flow
+    # 2. Section Structure (20%): Standard recognizable headings, reverse-chronological flow
     struct_issues = [i for i in (audit.errors + audit.warnings) if i.category in ("section_structure", "length")]
-    struct_score = 100 - (len(struct_issues) * 20)
+    struct_score = 100 - (len(struct_issues) * 15)
     if not resume.experience and not resume.projects:
         struct_score -= 35
-    struct_score = max(30, min(100, struct_score))
+    if not resume.education:
+        struct_score -= 20
+    if not resume.tailored_summary:
+        struct_score -= 15
+    struct_score = max(20, min(100, struct_score))
 
-    # 3. Readability (15%): Pronouns absence, bullet brevity (15-35 words), active technical verbs
+    # 3. Readability (15%): Pronouns absence, active voice verbs, bullet brevity, no keyword stuffing
+    first_person_count = audit.metrics.get("first_person_bullet_count", 0)
+    weak_starters = audit.metrics.get("weak_starter_bullet_count", 0)
+    stuffed_bullets = audit.metrics.get("keyword_stuffed_bullet_count", 0)
+    
+    read_deductions = (first_person_count * 10) + (weak_starters * 6) + (stuffed_bullets * 15)
     read_issues = [i for i in (audit.warnings + audit.suggestions) if i.category in ("readability", "bullet_quality")]
-    read_score = 100 - (len(read_issues) * 12)
-    read_score = max(35, min(100, read_score))
+    read_deductions += max(0, (len(read_issues) - (1 if first_person_count else 0) - (1 if weak_starters else 0) - (1 if stuffed_bullets else 0))) * 6
+    read_score = max(20, min(100, 100 - read_deductions))
 
-    # 4. Formatting Consistency (15%): Date consistency, deduplicated skills, no duplicate sentences
-    format_issues = [i for i in (audit.warnings + audit.suggestions) if i.category in ("dates", "skills")]
-    format_score = 100 - (len(format_issues) * 15)
-    format_score = max(40, min(100, format_score))
+    # 4. Formatting Consistency (15%): Date consistency, deduplicated skills, no duplicate bullets
+    dup_skills = audit.metrics.get("duplicate_skills_count", 0)
+    dup_bullets = audit.metrics.get("duplicate_bullets_count", 0)
+    missing_dates = audit.metrics.get("missing_dates_count", 0)
+    format_deductions = (dup_skills * 15) + (dup_bullets * 15) + (missing_dates * 15)
+    format_score = max(25, min(100, 100 - format_deductions))
 
-    # 5. Relevant Content Coverage (15%): Verified technical competency depth, accomplishments
-    total_skills = len(resume.skills.matching_skills) + len(resume.skills.additional_skills)
-    skill_depth_score = min(100, int((total_skills / 10.0) * 100))
-    bullet_depth_score = min(100, int((audit.metrics.get("bullet_count", 0) / 8.0) * 100))
-    coverage_score = int((skill_depth_score * 0.5) + (bullet_depth_score * 0.5))
-    coverage_score = max(40, min(100, coverage_score))
+    # 5. Relevant Content Coverage (15%): Technical competency breadth, accomplishment metrics
+    matching_count = len(resume.skills.matching_skills) if resume.skills else 0
+    additional_count = len(resume.skills.additional_skills) if resume.skills else 0
+    total_skills = matching_count + additional_count
+    
+    skill_depth_score = min(1.0, total_skills / 8.0)
+    bullet_depth_score = min(1.0, audit.metrics.get("bullet_count", 0) / 6.0)
+    metric_count = audit.metrics.get("metric_bullets_count", 0)
+    metric_score = min(1.0, metric_count / 2.0)
+    
+    coverage_score = int((skill_depth_score * 0.35 + bullet_depth_score * 0.35 + metric_score * 0.30) * 100)
+    coverage_score = max(20, min(100, coverage_score))
 
     # 6. Basic Document Completeness (10%): Complete contact info, summary, education
     comp_points = 0
-    if resume.candidate_name and resume.candidate_name.strip(): comp_points += 25
-    if resume.contact_info and resume.contact_info.email: comp_points += 25
+    if resume.candidate_name and resume.candidate_name.strip() and resume.candidate_name.lower() not in ["candidate", "untitled"]:
+        comp_points += 20
+    if resume.contact_info and resume.contact_info.email: comp_points += 20
     if resume.contact_info and resume.contact_info.phone: comp_points += 15
-    if resume.tailored_summary and len(resume.tailored_summary.strip()) > 30: comp_points += 20
-    if resume.education and len(resume.education) > 0: comp_points += 15
+    if resume.contact_info and resume.contact_info.location: comp_points += 10
+    if resume.contact_info and (resume.contact_info.linkedin or resume.contact_info.github): comp_points += 10
+    if resume.tailored_summary and len(resume.tailored_summary.strip()) >= 30: comp_points += 15
+    if resume.education and len(resume.education) > 0: comp_points += 10
     completeness_score = min(100, comp_points)
 
     weights = {
@@ -591,7 +650,7 @@ def calculate_ats_quality_assessment(
         coverage_score * weights["content_coverage"] +
         completeness_score * weights["completeness"]
     )
-    overall_ats = max(25, min(99, overall_ats))
+    overall_ats = max(20, min(100, overall_ats))
 
     explanation = (
         f"ATS & Resume Quality Score of {overall_ats}% is derived from: "

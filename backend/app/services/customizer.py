@@ -408,6 +408,7 @@ I welcome the opportunity to discuss how my qualifications, verified technical e
     ats_assessment = calculate_ats_quality_assessment(fallback_response, audit)
     fallback_response.audit = audit
     fallback_response.ats_quality_assessment = ats_assessment
+    fallback_response.ats_compatibility.score = ats_assessment.overall_score
     return fallback_response
 
 async def customize_resume(
@@ -487,6 +488,7 @@ Remember: Return ONLY valid JSON adhering strictly to the schema. Do not include
         ats_assessment = calculate_ats_quality_assessment(validated_response, audit)
         validated_response.audit = audit
         validated_response.ats_quality_assessment = ats_assessment
+        validated_response.ats_compatibility.score = ats_assessment.overall_score
         return validated_response
     except Exception as e:
         logger.error(f"LLM customization failed: {str(e)}. Falling back to deterministic engine.")
