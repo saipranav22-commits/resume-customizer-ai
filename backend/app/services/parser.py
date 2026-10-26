@@ -61,15 +61,27 @@ def parse_docx_bytes(data: bytes) -> str:
         raise ValueError(f"Failed to parse DOCX document: {str(e)}")
 
 def clean_extracted_text(text: str) -> str:
-    """Normalize whitespace and linebreaks while preserving markdown/section semantics."""
+    """Normalize whitespace, kerning artifacts, and linebreaks while preserving markdown/section semantics."""
     # Replace null bytes
     text = text.replace("\x00", "")
     # Normalize carriage returns and CRLF to standard newline
     text = text.replace("\r\n", "\n").replace("\r", "\n")
+    # Replace non-breaking spaces and zero-width spaces
+    text = text.replace('\xa0', ' ').replace('\u200b', '').replace('\u202f', ' ')
+    
+    # Process line by line to preserve section linebreaks while normalizing horizontal spacing
+    cleaned_lines = []
+    for idx, raw_line in enumerate(text.split("\n")):
+        line = re.sub(r'[ \t]+', ' ', raw_line).strip()
+        # For the first 5 lines (typically candidate header/name), heal detached single capital letter kerning splits
+        if idx < 5 and line:
+            # E.g. 'PRANA V' -> 'PRANAV'
+            line = re.sub(r'\b([A-Z]{2,})\s+([A-Z])\b', r'\1\2', line)
+        cleaned_lines.append(line)
+        
+    text = "\n".join(cleaned_lines)
     # Collapse 3 or more consecutive newlines into 2
     text = re.sub(r'\n{3,}', '\n\n', text)
-    # Replace non-breaking spaces
-    text = text.replace('\xa0', ' ')
     return text.strip()
 
 def validate_and_extract_resume(filename: str, content: bytes) -> Tuple[str, int]:

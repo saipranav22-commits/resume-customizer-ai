@@ -19,6 +19,8 @@ from app.models.schemas import (
     RecheckScoreRequest,
     RecheckScoreResponse,
     ResumeQualityAudit,
+    BatchImproveRequest,
+    BatchImproveResponse,
 )
 from app.services.auth import (
     AuthenticatedUser,
@@ -32,6 +34,7 @@ from app.services.customizer import (
     customize_resume,
     improve_text_snippet,
     recheck_draft_score,
+    batch_improve_resume,
 )
 from app.services.audit import audit_resume_quality
 from app.services.exporter import export_pdf, export_docx, export_txt, export_cover_letter_pdf
@@ -145,6 +148,38 @@ async def improve_text_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to improve text snippet: {str(e)}"
+        )
+
+
+@router.post("/editor/batch-improve", response_model=BatchImproveResponse)
+@router.post("/editor/improve-all", response_model=BatchImproveResponse)
+async def batch_improve_endpoint(
+    req: BatchImproveRequest,
+    current_user: Optional[AuthenticatedUser] = Depends(get_current_user_optional)
+):
+    """
+    Phase 6.5: Batch & Multi-Section AI Improvement:
+    - Scans scope ('all', 'summary', 'experience', 'projects')
+    - Generates evidence-grounded improvements for eligible sections
+    - Returns structured proposals for explicit user review and selective acceptance
+    """
+    if not req.job_description.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Target job description is required to perform contextual alignment."
+        )
+
+    try:
+        result = await batch_improve_resume(
+            resume_data=req.resume_data,
+            job_description=req.job_description.strip(),
+            scope=req.scope
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to perform batch resume improvement: {str(e)}"
         )
 
 

@@ -398,9 +398,17 @@ def validate_and_normalize_ai_output(
     """
     Validate LLM JSON output to enforce:
     1. Anti-hallucination: Remove skills from matching_skills if no evidence exists in resume_text.
-    2. Convert ungrounded claims into recommendations requiring candidate confirmation.
-    3. Ensure structured JobDescriptionAnalysis and MatchScoreBreakdown are populated and mathematically sound.
+    2. Candidate Identity Integrity: Reconcile candidate_name against authoritative source resume.
+    3. Convert ungrounded claims into recommendations requiring candidate confirmation.
+    4. Ensure structured JobDescriptionAnalysis and MatchScoreBreakdown are populated and mathematically sound.
     """
+    from app.services.name_normalizer import reconcile_candidate_name
+    
+    # 0. Candidate Name Integrity: reconcile against authoritative source resume
+    raw_ai_name = parsed_dict.get("candidate_name")
+    validated_name = reconcile_candidate_name(raw_ai_name, resume_text)
+    parsed_dict["candidate_name"] = validated_name
+
     resume_lower = resume_text.lower()
     
     # Extract skills

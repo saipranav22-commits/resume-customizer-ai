@@ -20,6 +20,9 @@ from app.models.schemas import (
     MatchScoreBreakdown,
     ResumeQualityAudit,
     AtsQualityAssessment,
+    SectionImprovementItem,
+    BatchImproveRequest,
+    BatchImproveResponse,
 )
 from app.services.optimization_engine import (
     COMMON_TECH_SKILLS,
@@ -32,6 +35,11 @@ from app.services.optimization_engine import (
 from app.services.audit import (
     audit_resume_quality,
     calculate_ats_quality_assessment,
+)
+from app.services.name_normalizer import (
+    normalize_candidate_name,
+    extract_authoritative_name,
+    reconcile_candidate_name,
 )
 
 logger = logging.getLogger("customizer")
@@ -51,10 +59,14 @@ CRITICAL ETHICAL & ACCURACY REQUIREMENTS:
    - Example: "Developed REST APIs using Spring Boot and PostgreSQL to support user authentication and account management."
    - DO NOT invent percentages, financial impact, user counts, performance improvements or other metrics unless verified in candidate's original text.
    - Avoid generic AI phrases, repetitive action verbs, exaggerated leadership claims, awkward keyword insertion, unsupported seniority, first-person pronouns (I, me, my, we), and filler sentences.
+7. CANDIDATE IDENTITY INTEGRITY:
+   - Extract the candidate's exact full name verbatim as it appears on the original resume.
+   - DO NOT alter initials (e.g. 'B '), DO NOT detach letters or add accidental internal spaces (e.g. maintain 'B SAI PRANAV', never output 'B SAI PRANA V').
+   - Preserve hyphens, apostrophes, initials, and accents exactly.
 
 You MUST respond strictly with a valid JSON object matching the following structure:
 {
-  "candidate_name": "Full Name",
+  "candidate_name": "Exact candidate full name verbatim from resume without altering initials or adding internal spaces",
   "contact_info": {
     "email": "email or null",
     "phone": "phone or null",
@@ -233,7 +245,9 @@ def build_deterministic_fallback(
     Extracts real entities, analyzes JD structure, computes mathematical match breakdown, and generates recommendations.
     """
     lines = [line.strip() for line in resume_text.split("\n") if line.strip()]
-    candidate_name = lines[0] if lines else "Candidate Name"
+    candidate_name = extract_authoritative_name(resume_text)
+    if not candidate_name:
+        candidate_name = normalize_candidate_name(lines[0] if lines else "Candidate Name", resume_text)
     
     email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', resume_text)
     phone_match = re.search(r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', resume_text)
@@ -420,9 +434,14 @@ async def customize_resume(
 
     safe_resume_text = sanitize_untrusted_input(resume_text)
     safe_jd_text = sanitize_untrusted_input(jd_text)
+    auth_name = extract_authoritative_name(resume_text)
         
     user_prompt = f"""
 {SYSTEM_PROMPT}
+
+VERIFIED CANDIDATE IDENTITY (PRESERVE EXACTLY):
+- Authoritative Candidate Name: {auth_name or "Extract accurately from resume"}
+(Mandatory rule: Return this exact name in "candidate_name". Never alter, split, or inject spaces).
 
 CUSTOMIZATION CONTROLS:
 - Customize Summary: {customize_summary}
@@ -713,3 +732,87 @@ def recheck_draft_score(
         audit=audit,
         ats_quality_assessment=ats_quality_assessment
     )
+
+async def batch_improve_resume(
+    resume_data: TailoredResumeResponse,
+    job_description: str,
+    scope: str = "all"
+) -> BatchImproveResponse:
+    """
+    Phase 6.5: Batch / Whole-Resume Grounded AI Enhancement:
+    - Scans eligible sections based on scope ('all', 'summary', 'experience', 'projects').
+    - Enhances phrasing using powerful action verbs and technical keywords.
+    - Preserves candidate factual integrity and never invents metrics/claims.
+    - Returns structured proposals with original and improved wording for explicit user review.
+    """
+    import asyncio
+
+    items_to_improve = []
+
+    # 1. Summary
+    if scope in ("all", "summary") and resume_data.tailored_summary and resume_data.tailored_summary.strip():
+        items_to_improve.append({
+            "id": "summary",
+            "section_type": "summary",
+            "location": "Professional Summary",
+            "text": resume_data.tailored_summary.strip(),
+            "context": f"Candidate: {resume_data.candidate_name}. Target Role in JD."
+        })
+
+    # 2. Experience Bullets
+    if scope in ("all", "experience"):
+        for exp_idx, exp in enumerate(resume_data.experience):
+            for b_idx, bullet in enumerate(exp.bullets or []):
+                if bullet.strip():
+                    items_to_improve.append({
+                        "id": f"exp-{exp_idx}-bullet-{b_idx}",
+                        "section_type": "experience",
+                        "location": f"{exp.role} at {exp.company}",
+                        "text": bullet.strip(),
+                        "context": f"Role: {exp.role} at {exp.company}"
+                    })
+
+    # 3. Project Bullets
+    if scope in ("all", "projects"):
+        for p_idx, proj in enumerate(resume_data.projects):
+            for b_idx, bullet in enumerate(proj.bullets or []):
+                if bullet.strip():
+                    tech_ctx = f" Technologies: {', '.join(proj.technologies)}" if proj.technologies else ""
+                    items_to_improve.append({
+                        "id": f"proj-{p_idx}-bullet-{b_idx}",
+                        "section_type": "project",
+                        "location": f"Project: {proj.name}",
+                        "text": bullet.strip(),
+                        "context": f"Project: {proj.name}.{tech_ctx}"
+                    })
+
+    # Run enhancements concurrently with concurrency semaphore of 4 to stay within safe API limits
+    sem = asyncio.Semaphore(4)
+    async def improve_one(item: dict) -> SectionImprovementItem:
+        async with sem:
+            res = await improve_text_snippet(
+                text=item["text"],
+                section_type=item["section_type"],
+                job_description=job_description,
+                context=item["context"]
+            )
+            return SectionImprovementItem(
+                id=item["id"],
+                section_type=item["section_type"],
+                location=item["location"],
+                original_text=item["text"],
+                improved_text=res.improved_text,
+                rationale=res.rationale,
+                impact_keywords=res.impact_keywords
+            )
+
+    tasks = [improve_one(item) for item in items_to_improve]
+    results = await asyncio.gather(*tasks) if tasks else []
+
+    return BatchImproveResponse(
+        scope=scope,
+        total_items=len(results),
+        improvements=results,
+        is_llm_generated=bool(settings.GEMINI_API_KEY.strip())
+    )
+

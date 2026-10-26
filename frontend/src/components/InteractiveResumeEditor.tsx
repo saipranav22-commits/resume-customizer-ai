@@ -27,10 +27,13 @@ import {
   ProjectItem,
   MatchScoreBreakdown,
   OptimizationRecommendation,
+  SectionImprovementItem,
 } from "@/types/resume";
 import { recheckResumeScore, auditResume, ApiError } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import AIImproveModal from "@/components/AIImproveModal";
+import BatchAIImproveModal from "@/components/BatchAIImproveModal";
+import { normalizeCandidateName } from "@/lib/nameNormalizer";
 
 export interface InteractiveResumeEditorProps {
   resumeData: TailoredResumeResponse;
@@ -51,10 +54,15 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   onExport,
   onScoreUpdated,
 }) => {
-  // Deep clone initial resume to avoid mutating parent props
-  const [draft, setDraft] = useState<TailoredResumeResponse>(() =>
-    resumeData ? JSON.parse(JSON.stringify(resumeData)) : ({} as TailoredResumeResponse)
-  );
+  // Deep clone initial resume to avoid mutating parent props; normalize candidate name
+  const [draft, setDraft] = useState<TailoredResumeResponse>(() => {
+    if (!resumeData) return {} as TailoredResumeResponse;
+    const cloned = JSON.parse(JSON.stringify(resumeData)) as TailoredResumeResponse;
+    if (cloned.candidate_name) {
+      cloned.candidate_name = normalizeCandidateName(cloned.candidate_name);
+    }
+    return cloned;
+  });
 
   // Undo history stack
   const [undoHistory, setUndoHistory] = useState<TailoredResumeResponse[]>([]);
@@ -74,6 +82,19 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
   // Export dropdown state
   const [showExportMenu, setShowExportMenu] = useState<boolean>(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Phase 6.5: Contextual & Toolbar AI Improve states
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [showAiImproveMenu, setShowAiImproveMenu] = useState<boolean>(false);
+  const aiImproveMenuRef = useRef<HTMLDivElement>(null);
+
+  const [batchModalState, setBatchModalState] = useState<{
+    isOpen: boolean;
+    scope: "all" | "summary" | "experience" | "projects";
+  }>({
+    isOpen: false,
+    scope: "all",
+  });
 
   // Track actively focused block for persistent toolbar AI Improve button
   const [activeFocus, setActiveFocus] = useState<{
@@ -114,18 +135,25 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
   // Update draft whenever parent resumeData completely resets (e.g. from version restore)
   useEffect(() => {
+    const cloned = JSON.parse(JSON.stringify(resumeData)) as TailoredResumeResponse;
+    if (cloned.candidate_name) {
+      cloned.candidate_name = normalizeCandidateName(cloned.candidate_name);
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDraft(JSON.parse(JSON.stringify(resumeData)));
+    setDraft(cloned);
     setUndoHistory([]);
     setIsScoreStale(false);
     setRecheckMessage(null);
   }, [resumeData]);
 
-  // Close export menu on outside click
+  // Close export menu and AI improve menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
         setShowExportMenu(false);
+      }
+      if (aiImproveMenuRef.current && !aiImproveMenuRef.current.contains(event.target as Node)) {
+        setShowAiImproveMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -451,20 +479,52 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
     });
   };
 
-  // Persistent Toolbar AI Improve Handler
-  const handleToolbarAiImprove = () => {
+  // Toolbar AI Improve Handlers
+  const handleToolbarAiImproveClick = () => {
     if (activeFocus && activeFocus.text.trim()) {
       openAiImprove(activeFocus);
     } else {
-      // Default to improving the professional summary
-      openAiImprove({
-        id: "summary",
-        text: draft.tailored_summary,
-        sectionType: "summary",
-        context: `Target Role: ${draft.job_analysis?.target_role || "Software Engineer"}`,
-        onApply: (improved) => handleFieldChange("tailored_summary", improved),
-      });
+      setShowAiImproveMenu((prev) => !prev);
     }
+  };
+
+  const openBatchImprove = (scope: "all" | "summary" | "experience" | "projects") => {
+    setShowAiImproveMenu(false);
+    setBatchModalState({
+      isOpen: true,
+      scope,
+    });
+  };
+
+  const handleAcceptBatchImprovements = (acceptedItems: SectionImprovementItem[]) => {
+    if (!acceptedItems || acceptedItems.length === 0) return;
+    pushUndo(draft);
+    setDraft((prev) => {
+      const next = JSON.parse(JSON.stringify(prev)) as TailoredResumeResponse;
+      for (const item of acceptedItems) {
+        if (item.id === "summary") {
+          next.tailored_summary = item.improved_text;
+        } else if (item.id.startsWith("exp-")) {
+          // exp-{expIdx}-{bIdx}
+          const parts = item.id.split("-");
+          const expIdx = parseInt(parts[1], 10);
+          const bIdx = parseInt(parts[2], 10);
+          if (next.experience[expIdx] && next.experience[expIdx].bullets[bIdx] !== undefined) {
+            next.experience[expIdx].bullets[bIdx] = item.improved_text;
+          }
+        } else if (item.id.startsWith("proj-")) {
+          // proj-{projIdx}-{bIdx}
+          const parts = item.id.split("-");
+          const projIdx = parseInt(parts[1], 10);
+          const bIdx = parseInt(parts[2], 10);
+          if (next.projects[projIdx] && next.projects[projIdx].bullets[bIdx] !== undefined) {
+            next.projects[projIdx].bullets[bIdx] = item.improved_text;
+          }
+        }
+      }
+      return next;
+    });
+    setIsScoreStale(true);
   };
 
   // --- Re-check Score Workflow ---
@@ -574,25 +634,89 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
               </button>
             </div>
 
-            {/* Persistent AI Improve Button */}
-            <button
-              type="button"
-              onClick={handleToolbarAiImprove}
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#FBEFEA] hover:bg-[#F7E1D7] active:bg-[#F2D0C1] border border-[#C45D39]/30 text-[#C45D39] text-xs font-bold transition-all shadow-xs min-h-[44px]"
-              title={
-                activeFocus
-                  ? `AI Improve focused: ${activeFocus.sectionType}`
-                  : "AI Improve selected section or summary"
-              }
-            >
-              <Sparkles className="w-4 h-4 text-[#C45D39]" />
-              <span>AI Improve</span>
-              {activeFocus && (
-                <span className="text-[10px] font-mono uppercase bg-[#C45D39] text-white px-1.5 py-0.5 rounded">
-                  {activeFocus.sectionType}
-                </span>
+            {/* Unified Toolbar AI Improve Button with Action Menu */}
+            <div className="relative" ref={aiImproveMenuRef}>
+              <div className="inline-flex rounded-xl shadow-xs">
+                <button
+                  type="button"
+                  onClick={handleToolbarAiImproveClick}
+                  className="flex items-center gap-2 px-3.5 py-2.5 rounded-l-xl bg-[#FBEFEA] hover:bg-[#F7E1D7] active:bg-[#F2D0C1] border border-[#C45D39]/30 text-[#C45D39] text-xs font-bold transition-all min-h-[44px]"
+                  title={
+                    activeFocus && activeFocus.text.trim()
+                      ? `AI Improve focused: ${activeFocus.sectionType}`
+                      : "AI Improve Resume"
+                  }
+                >
+                  <Sparkles className="w-4 h-4 text-[#C45D39]" />
+                  <span>
+                    {activeFocus && activeFocus.text.trim()
+                      ? `Improve Selected (${activeFocus.sectionType})`
+                      : "AI Improve"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAiImproveMenu((prev) => !prev)}
+                  className="px-2 py-2.5 rounded-r-xl bg-[#FBEFEA] hover:bg-[#F7E1D7] active:bg-[#F2D0C1] border-y border-r border-[#C45D39]/30 text-[#C45D39] text-xs font-bold transition-all min-h-[44px]"
+                  aria-label="Open AI Improve Options"
+                  title="Choose AI Improvement Scope"
+                >
+                  <ChevronDown className="w-3.5 h-3.5 text-[#C45D39]" />
+                </button>
+              </div>
+
+              {showAiImproveMenu && (
+                <div className="absolute left-0 mt-1.5 w-64 py-2 bg-white border border-[#DDD0D7] rounded-xl shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 border-b border-[#DDD0D7]/60 mb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#674E61]">
+                      AI Optimization Scope
+                    </p>
+                  </div>
+                  {activeFocus && activeFocus.text.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAiImproveMenu(false);
+                        openAiImprove(activeFocus);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#C45D39] hover:bg-[#FBEFEA] flex items-center gap-2 transition-colors"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Improve Selected Text ({activeFocus.sectionType})</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => openBatchImprove("all")}
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors"
+                  >
+                    <span>1. Improve Entire Resume</span>
+                    <span className="text-[10px] text-[#C45D39] font-mono bg-[#FBEFEA] px-1.5 py-0.5 rounded">All</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openBatchImprove("summary")}
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors"
+                  >
+                    <span>2. Improve Professional Summary</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openBatchImprove("experience")}
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors"
+                  >
+                    <span>3. Improve Experience</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openBatchImprove("projects")}
+                    className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#291B32] hover:bg-[#F7F2EB] hover:text-[#C45D39] flex items-center justify-between transition-colors"
+                  >
+                    <span>4. Improve Projects</span>
+                  </button>
+                </div>
               )}
-            </button>
+            </div>
 
             {/* Re-check Score Button */}
             <Button
@@ -797,18 +921,24 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         {/* Document Header: Candidate Name & Contact Details */}
         <div className="text-center pb-5 border-b border-[#291B32] space-y-2">
           {isEditing ? (
-            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight whitespace-normal break-normal">
               <span className="sr-only">{draft.candidate_name || "Candidate Name"}</span>
               <input
                 type="text"
                 value={draft.candidate_name || ""}
                 onChange={(e) => handleFieldChange("candidate_name", e.target.value)}
+                onBlur={(e) => {
+                  const normalized = normalizeCandidateName(e.target.value);
+                  if (normalized !== draft.candidate_name) {
+                    handleFieldChange("candidate_name", normalized);
+                  }
+                }}
                 placeholder="Candidate Full Name"
-                className="w-full text-center text-2xl sm:text-3xl font-black text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-1 outline-none bg-transparent transition-all placeholder-[#674E61]/40"
+                className="w-full text-center text-2xl sm:text-3xl font-black text-[#291B32] border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-2 py-1 outline-none bg-transparent transition-all placeholder-[#674E61]/40 whitespace-normal break-normal"
               />
             </h1>
           ) : (
-            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#291B32] tracking-tight whitespace-normal break-normal">
               {draft.candidate_name || "Candidate Name"}
             </h1>
           )}
@@ -888,12 +1018,16 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         </div>
 
         {/* Section: Professional Summary */}
-        <div className="mt-5 space-y-1.5">
+        <div
+          className="mt-5 space-y-1.5"
+          onMouseEnter={() => setHoveredItemId("summary")}
+          onMouseLeave={() => setHoveredItemId(null)}
+        >
           <div className="flex items-center justify-between border-b border-[#291B32] pb-1">
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#291B32]">
               Professional Summary
             </h2>
-            {isEditing && (
+            {isEditing && (hoveredItemId === "summary" || activeFocus?.id === "summary") && (
               <button
                 type="button"
                 onClick={() =>
@@ -905,11 +1039,11 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
                     onApply: (improved) => handleFieldChange("tailored_summary", improved),
                   })
                 }
-                className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[11px] font-bold text-[#C45D39] transition-all"
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[11px] font-bold text-[#C45D39] transition-all animate-in fade-in duration-150"
                 title="AI Improve Summary wording and impact"
               >
                 <Sparkles className="w-3 h-3 text-[#C45D39]" />
-                <span>AI Improve Summary</span>
+                <span>AI Improve</span>
               </button>
             )}
           </div>
@@ -1155,59 +1289,70 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
                     {/* Bullets List */}
                     <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs sm:text-sm text-[#291B32] pt-1">
-                      {exp.bullets.map((bullet, bIdx) => (
-                        <li key={bIdx} className="leading-relaxed group/bullet">
-                          {isEditing ? (
-                            <div className="flex items-start gap-1.5">
-                              <textarea
-                                rows={2}
-                                value={bullet}
-                                onFocus={() =>
-                                  setActiveFocus({
-                                    id: `exp-${expIdx}-${bIdx}`,
-                                    text: bullet,
-                                    sectionType: "experience",
-                                    context: `Role: ${exp.role} at ${exp.company}`,
-                                    onApply: (improved) => handleUpdateBullet(expIdx, bIdx, improved),
-                                  })
-                                }
-                                onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)}
-                                className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
-                              />
-
-                              <div className="flex items-center gap-1 shrink-0 pt-1">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    openAiImprove({
-                                      id: `exp-${expIdx}-${bIdx}`,
+                      {exp.bullets.map((bullet, bIdx) => {
+                        const itemKey = `exp-${expIdx}-${bIdx}`;
+                        const isItemActive = isEditing && (hoveredItemId === itemKey || activeFocus?.id === itemKey);
+                        return (
+                          <li
+                            key={bIdx}
+                            className="leading-relaxed group/bullet relative"
+                            onMouseEnter={() => setHoveredItemId(itemKey)}
+                            onMouseLeave={() => setHoveredItemId(null)}
+                          >
+                            {isEditing ? (
+                              <div className="flex items-start gap-1.5">
+                                <textarea
+                                  rows={2}
+                                  value={bullet}
+                                  onFocus={() =>
+                                    setActiveFocus({
+                                      id: itemKey,
                                       text: bullet,
                                       sectionType: "experience",
                                       context: `Role: ${exp.role} at ${exp.company}`,
                                       onApply: (improved) => handleUpdateBullet(expIdx, bIdx, improved),
                                     })
                                   }
-                                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
-                                  title="AI Improve this bullet"
-                                >
-                                  <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
-                                  <span>AI Improve</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveBullet(expIdx, bIdx)}
-                                  className="text-[#674E61] hover:text-rose-600 p-1"
-                                  aria-label={`Remove bullet ${bIdx + 1}`}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+                                  onChange={(e) => handleUpdateBullet(expIdx, bIdx, e.target.value)}
+                                  className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
+                                />
+
+                                {isItemActive && (
+                                  <div className="flex items-center gap-1 shrink-0 pt-1 animate-in fade-in duration-100">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openAiImprove({
+                                          id: itemKey,
+                                          text: bullet,
+                                          sectionType: "experience",
+                                          context: `Role: ${exp.role} at ${exp.company}`,
+                                          onApply: (improved) => handleUpdateBullet(expIdx, bIdx, improved),
+                                        })
+                                      }
+                                      className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
+                                      title="AI Improve this bullet"
+                                    >
+                                      <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
+                                      <span>AI Improve</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveBullet(expIdx, bIdx)}
+                                      className="text-[#674E61] hover:text-rose-600 p-1"
+                                      aria-label={`Remove bullet ${bIdx + 1}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ) : (
-                            <span>{bullet}</span>
-                          )}
-                        </li>
-                      ))}
+                            ) : (
+                              <span>{bullet}</span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     {isEditing && (
@@ -1317,59 +1462,70 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
 
                     {/* Project Bullets */}
                     <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs sm:text-sm text-[#291B32] pt-0.5">
-                      {(proj.bullets || []).map((bullet, bIdx) => (
-                        <li key={bIdx} className="leading-relaxed group/bullet">
-                          {isEditing ? (
-                            <div className="flex items-start gap-1.5">
-                              <textarea
-                                rows={2}
-                                value={bullet}
-                                onFocus={() =>
-                                  setActiveFocus({
-                                    id: `proj-${pIdx}-${bIdx}`,
-                                    text: bullet,
-                                    sectionType: "project",
-                                    context: `Project: ${proj.name}`,
-                                    onApply: (improved) => handleUpdateProjectBullet(pIdx, bIdx, improved),
-                                  })
-                                }
-                                onChange={(e) => handleUpdateProjectBullet(pIdx, bIdx, e.target.value)}
-                                className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
-                              />
-
-                              <div className="flex items-center gap-1 shrink-0 pt-1">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    openAiImprove({
-                                      id: `proj-${pIdx}-${bIdx}`,
+                      {(proj.bullets || []).map((bullet, bIdx) => {
+                        const itemKey = `proj-${pIdx}-${bIdx}`;
+                        const isItemActive = isEditing && (hoveredItemId === itemKey || activeFocus?.id === itemKey);
+                        return (
+                          <li
+                            key={bIdx}
+                            className="leading-relaxed group/bullet relative"
+                            onMouseEnter={() => setHoveredItemId(itemKey)}
+                            onMouseLeave={() => setHoveredItemId(null)}
+                          >
+                            {isEditing ? (
+                              <div className="flex items-start gap-1.5">
+                                <textarea
+                                  rows={2}
+                                  value={bullet}
+                                  onFocus={() =>
+                                    setActiveFocus({
+                                      id: itemKey,
                                       text: bullet,
                                       sectionType: "project",
                                       context: `Project: ${proj.name}`,
                                       onApply: (improved) => handleUpdateProjectBullet(pIdx, bIdx, improved),
                                     })
                                   }
-                                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
-                                  title="AI Improve this project bullet"
-                                >
-                                  <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
-                                  <span>AI Improve</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveProjectBullet(pIdx, bIdx)}
-                                  className="text-[#674E61] hover:text-rose-600 p-1"
-                                  aria-label={`Remove bullet ${bIdx + 1}`}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
+                                  onChange={(e) => handleUpdateProjectBullet(pIdx, bIdx, e.target.value)}
+                                  className="w-full border border-transparent hover:border-[#DDD0D7] focus:border-[#C45D39] focus:ring-1 focus:ring-[#C45D39] rounded px-1.5 py-1 text-xs sm:text-sm text-[#291B32] leading-relaxed bg-transparent outline-none resize-y transition-all"
+                                />
+
+                                {isItemActive && (
+                                  <div className="flex items-center gap-1 shrink-0 pt-1 animate-in fade-in duration-100">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        openAiImprove({
+                                          id: itemKey,
+                                          text: bullet,
+                                          sectionType: "project",
+                                          context: `Project: ${proj.name}`,
+                                          onApply: (improved) => handleUpdateProjectBullet(pIdx, bIdx, improved),
+                                        })
+                                      }
+                                      className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FBEFEA] hover:bg-[#F7E1D7] border border-[#C45D39]/30 text-[10px] font-bold text-[#C45D39] transition-all"
+                                      title="AI Improve this project bullet"
+                                    >
+                                      <Sparkles className="w-2.5 h-2.5 text-[#C45D39]" />
+                                      <span>AI Improve</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveProjectBullet(pIdx, bIdx)}
+                                      className="text-[#674E61] hover:text-rose-600 p-1"
+                                      aria-label={`Remove bullet ${bIdx + 1}`}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ) : (
-                            <span>{bullet}</span>
-                          )}
-                        </li>
-                      ))}
+                            ) : (
+                              <span>{bullet}</span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     {isEditing && (
@@ -1802,7 +1958,7 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
         </div>
       )}
 
-      {/* AI IMPROVE MODAL */}
+      {/* SINGLE AI IMPROVE MODAL */}
       {aiTarget && (
         <AIImproveModal
           isOpen={Boolean(aiTarget)}
@@ -1817,6 +1973,16 @@ export const InteractiveResumeEditor: React.FC<InteractiveResumeEditorProps> = (
           }}
         />
       )}
+
+      {/* MULTI-SECTION / WHOLE RESUME BATCH AI IMPROVE MODAL */}
+      <BatchAIImproveModal
+        isOpen={batchModalState.isOpen}
+        onClose={() => setBatchModalState((prev) => ({ ...prev, isOpen: false }))}
+        scope={batchModalState.scope}
+        jobDescription={jobDescription}
+        resumeData={draft}
+        onAcceptSelected={handleAcceptBatchImprovements}
+      />
     </div>
   );
 };

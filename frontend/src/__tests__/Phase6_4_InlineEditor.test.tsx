@@ -91,14 +91,16 @@ describe("Phase 6.4 - Inline ATS Document Resume Editor & Repeatable AI Improve"
       />
     );
 
-    // Toolbar persistent AI Improve button and contextual bullet buttons
-    const aiButtons = screen.getAllByRole("button", { name: /AI Improve/i });
-    expect(aiButtons.length).toBeGreaterThanOrEqual(2);
-    // The first one is the toolbar persistent action
-    expect(aiButtons[0]).toBeInTheDocument();
+    // Toolbar persistent AI Improve button is always available
+    const toolbarAiBtn = screen.getByRole("button", { name: /^AI Improve$/i });
+    expect(toolbarAiBtn).toBeInTheDocument();
 
-    // Contextual summary AI Improve button
-    expect(screen.getByRole("button", { name: /AI Improve Summary/i })).toBeInTheDocument();
+    // Focusing summary displays contextual AI Improve button
+    const summaryInput = screen.getByDisplayValue(sampleTailoredResume.tailored_summary);
+    fireEvent.focus(summaryInput);
+
+    const summaryAiBtn = screen.getByTitle(/AI Improve Summary wording/i);
+    expect(summaryAiBtn).toBeInTheDocument();
   });
 
   it("4. AI Improve: Accept updates only the targeted block, while Reject leaves original unchanged", async () => {
@@ -122,8 +124,11 @@ describe("Phase 6.4 - Inline ATS Document Resume Editor & Repeatable AI Improve"
       />
     );
 
-    // Click AI Improve Summary
-    const summaryAiBtn = screen.getByRole("button", { name: /AI Improve Summary/i });
+    // Focus summary to reveal contextual AI Improve button
+    const summaryInput = screen.getByDisplayValue(sampleTailoredResume.tailored_summary);
+    await user.click(summaryInput);
+
+    const summaryAiBtn = screen.getByTitle(/AI Improve Summary wording/i);
     await user.click(summaryAiBtn);
 
     // Modal opens with proposed wording
@@ -150,11 +155,12 @@ describe("Phase 6.4 - Inline ATS Document Resume Editor & Repeatable AI Improve"
       is_llm_generated: false,
     });
 
-    // Find and click the AI improve button for the first bullet
-    const bulletAiBtns = screen.getAllByRole("button", { name: /AI Improve/i });
-    // bulletAiBtns[0] is toolbar, bulletAiBtns[1] is summary or bullet
-    const firstBulletAiBtn = bulletAiBtns[bulletAiBtns.length - 1];
-    await user.click(firstBulletAiBtn);
+    // Focus the first bullet to reveal its contextual AI improve button
+    const bulletInput = screen.getByDisplayValue(firstBullet);
+    await user.click(bulletInput);
+
+    const bulletAiBtn = screen.getByTitle(/AI Improve this bullet/i);
+    await user.click(bulletAiBtn);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /Keep Original/i })).toBeInTheDocument();
@@ -199,8 +205,11 @@ describe("Phase 6.4 - Inline ATS Document Resume Editor & Repeatable AI Improve"
       />
     );
 
-    // 1st Round: AI Improve Summary
-    const summaryAiBtn = screen.getByRole("button", { name: /AI Improve Summary/i });
+    // 1st Round: Focus summary and click AI Improve
+    const summaryInput = screen.getByDisplayValue(sampleTailoredResume.tailored_summary);
+    await user.click(summaryInput);
+
+    const summaryAiBtn = screen.getByTitle(/AI Improve Summary wording/i);
     await user.click(summaryAiBtn);
 
     await waitFor(() => {
@@ -211,7 +220,7 @@ describe("Phase 6.4 - Inline ATS Document Resume Editor & Repeatable AI Improve"
     // Verify draft updated
     expect(screen.getByDisplayValue("First accepted iteration of summary.")).toBeInTheDocument();
 
-    // 2nd Round: Click AI Improve Summary AGAIN on the same block!
+    // 2nd Round: Click AI Improve Summary AGAIN on the same focused block!
     await user.click(summaryAiBtn);
 
     // The second API call must have been called with the FIRST ACCEPTED text as input!

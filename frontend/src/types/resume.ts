@@ -332,3 +332,28 @@ export interface RecheckScoreResponse {
   audit?: ResumeQualityAudit | null;
   ats_quality_assessment?: AtsQualityAssessment | null;
 }
+
+// --- Phase 6.5: Hybrid & Multi-Section AI Improvement Types ---
+
+export interface SectionImprovementItem {
+  id: string;
+  section_type: 'summary' | 'experience' | 'project';
+  location: string;
+  original_text: string;
+  improved_text: string;
+  rationale: string;
+  impact_keywords: string[];
+}
+
+export interface BatchImproveRequest {
+  scope: 'all' | 'summary' | 'experience' | 'projects';
+  job_description: string;
+  resume_data: TailoredResumeResponse;
+}
+
+export interface BatchImproveResponse {
+  scope: string;
+  total_items: number;
+  improvements: SectionImprovementItem[];
+  is_llm_generated: boolean;
+}

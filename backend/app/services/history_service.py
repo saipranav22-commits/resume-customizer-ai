@@ -121,10 +121,13 @@ class HistoryService:
         )
 
     def _map_row_to_detail(self, r: Dict[str, Any]) -> CustomizationHistoryDetail:
+        from app.services.name_normalizer import normalize_candidate_name
         base_item = self._map_row_to_item(r)
         res_json = r.get("tailored_result", {})
         if isinstance(res_json, str):
             res_json = json.loads(res_json)
+        if isinstance(res_json, dict) and res_json.get("candidate_name"):
+            res_json["candidate_name"] = normalize_candidate_name(res_json["candidate_name"])
 
         return CustomizationHistoryDetail(
             **base_item.model_dump(),
@@ -316,6 +319,9 @@ class HistoryService:
         )
         engine = request.tailored_result.customization_engine or "gemini"
         is_llm = bool(request.tailored_result.is_llm_generated)
+        from app.services.name_normalizer import normalize_candidate_name
+        if request.tailored_result.candidate_name:
+            request.tailored_result.candidate_name = normalize_candidate_name(request.tailored_result.candidate_name)
         tailored_json = request.tailored_result.model_dump()
 
         if self._is_production() and not self._use_supabase():

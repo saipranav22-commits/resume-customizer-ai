@@ -18,6 +18,7 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 from app.models.schemas import TailoredResumeResponse
+from app.services.name_normalizer import normalize_candidate_name
 
 # Palette for PDF
 COLOR_PRIMARY = HexColor("#1E293B")     # Slate 800 - Deep charcoal
@@ -84,7 +85,7 @@ def export_txt(resume: TailoredResumeResponse) -> str:
     is_fresher = is_fresher_profile(resume)
 
     # 1. Candidate Header
-    lines.append(resume.candidate_name.upper())
+    lines.append(normalize_candidate_name(resume.candidate_name).upper())
     contact_parts = []
     if resume.contact_info.email:
         contact_parts.append(resume.contact_info.email)
@@ -218,7 +219,7 @@ def export_docx(resume: TailoredResumeResponse) -> bytes:
     # 1. Candidate Name Header
     name_p = doc.add_paragraph()
     name_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    name_run = name_p.add_run(resume.candidate_name)
+    name_run = name_p.add_run(normalize_candidate_name(resume.candidate_name))
     name_run.bold = True
     name_run.font.name = "Calibri"
     name_run.font.size = Pt(20)
@@ -469,7 +470,7 @@ def export_pdf(resume: TailoredResumeResponse) -> bytes:
     elements = []
 
     # 1. Candidate Name
-    elements.append(Paragraph(clean_pdf_text(resume.candidate_name), title_style))
+    elements.append(Paragraph(clean_pdf_text(normalize_candidate_name(resume.candidate_name)), title_style))
 
     # 2. Contact Information
     contact_parts = []

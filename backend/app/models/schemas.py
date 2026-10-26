@@ -386,3 +386,25 @@ class RecheckScoreResponse(BaseModel):
         default=None,
         description="Detailed 6-factor ATS and document quality assessment"
     )
+
+# --- Phase 6.5: Hybrid & Multi-Section AI Improvement Schemas ---
+
+class SectionImprovementItem(BaseModel):
+    id: str = Field(..., description="Unique field identifier (e.g. 'summary', 'exp-0-bullet-1')")
+    section_type: str = Field(..., description="'summary' | 'experience' | 'project'")
+    location: str = Field(..., description="Human-readable location label (e.g. 'Professional Summary', 'Senior Backend Developer at TechCorp')")
+    original_text: str = Field(..., description="Original wording before AI improvement")
+    improved_text: str = Field(..., description="Proposed AI improvement")
+    rationale: str = Field(..., description="Explanation of why this edit improves recruiter impact/ATS")
+    impact_keywords: List[str] = Field(default_factory=list, description="Targeted keywords incorporated")
+
+class BatchImproveRequest(BaseModel):
+    scope: str = Field(default="all", description="'all' | 'summary' | 'experience' | 'projects'")
+    job_description: str = Field(..., min_length=20, description="Target job description")
+    resume_data: TailoredResumeResponse = Field(..., description="Current working draft resume")
+
+class BatchImproveResponse(BaseModel):
+    scope: str
+    total_items: int
+    improvements: List[SectionImprovementItem] = Field(default_factory=list)
+    is_llm_generated: bool = True
