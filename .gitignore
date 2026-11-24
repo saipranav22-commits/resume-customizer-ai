@@ -65,3 +65,15 @@ artifacts/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Large Media Files & Video Walkthrough Recordings
+*.mp4
+*.webm
+*.wav
+*.mp3
+docs/demo/recordings/
+docs/demo/**/*.mp4
+docs/demo/**/*.webm
+docs/demo/**/*.wav
+docs/demo/**/*.mp3
+

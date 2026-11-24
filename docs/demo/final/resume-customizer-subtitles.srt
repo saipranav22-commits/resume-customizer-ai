@@ -1,0 +1,188 @@
+1
+00:00:00,000 --> 00:00:07,500
+Welcome to Resume Customizer AI — an intelligent, full-stack application
+
+2
+00:00:07,500 --> 00:00:15,000
+that tailors candidate resumes to target job descriptions while enforcing strict anti-fabrication standards.
+
+3
+00:00:15,000 --> 00:00:23,500
+Most generative tools hallucinate unearned credentials or metrics to beat Applicant Tracking Systems.
+
+4
+00:00:23,500 --> 00:00:32,300
+Resume Customizer AI strategically aligns genuine candidate accomplishments without ever inventing false experience.
+
+5
+00:00:32,300 --> 00:00:38,500
+The application architecture is modern, resilient, and production-tested.
+
+6
+00:00:38,500 --> 00:00:47,000
+The frontend is built on Next.js 16 with the React 19 App Router, TypeScript, and Tailwind CSS version 4,
+
+7
+00:00:47,000 --> 00:00:53,500
+styled in an editorial Aubergine and Copper theme.
+
+8
+00:00:53,500 --> 00:01:01,500
+The backend is a high-performance Python 3.11 asynchronous microservice powered by FastAPI and Uvicorn.
+
+9
+00:01:01,500 --> 00:01:09,500
+Document processing is executed server-side via PyPDF, python-docx, and ReportLab Platypus.
+
+10
+00:01:09,500 --> 00:01:16,500
+Database persistence and authentication run on managed Supabase PostgreSQL with Row Level Security,
+
+11
+00:01:16,500 --> 00:01:20,990
+while the intelligence layer integrates Google Gemini with deterministic heuristic fallbacks.
+
+12
+00:01:20,990 --> 00:01:27,500
+Starting on our live production application deployed on Vercel, we upload a resume document.
+
+13
+00:01:27,500 --> 00:01:34,000
+Our ingestion pipeline supports both Adobe PDF and Microsoft Word DOCX files.
+
+14
+00:01:34,000 --> 00:01:42,000
+For this walkthrough, we are using a synthetic candidate profile: Alex Morgan, a Staff Full Stack Engineer.
+
+15
+00:01:42,000 --> 00:01:49,500
+The backend parser enforces a five-megabyte size ceiling, validates document streams,
+
+16
+00:01:49,500 --> 00:01:58,880
+strips dangerous control characters, and extracts both paragraphs and tables into normalized Unicode text.
+
+17
+00:01:58,880 --> 00:02:06,500
+Next, we enter a target Job Description for a Senior Backend and Cloud Infrastructure Engineer position.
+
+18
+00:02:06,500 --> 00:02:14,500
+The application validates the job description in real time, requiring at least fifty characters for keyword extraction.
+
+19
+00:02:14,500 --> 00:02:22,500
+Notice the granular section controls beneath the input. Candidates can independently toggle whether
+
+20
+00:02:22,500 --> 00:02:31,040
+the AI customizes the Professional Summary, aligns the Skills taxonomy, or rephrases Experience bullets.
+
+21
+00:02:31,040 --> 00:02:38,000
+Clicking Tailor Resume initiates an asynchronous workflow to our FastAPI backend on Render.
+
+22
+00:02:38,000 --> 00:02:46,000
+A live six-stage progress tracker visualizes the analysis: reading document structure, parsing target competencies,
+
+23
+00:02:46,000 --> 00:02:54,500
+evaluating multi-factor ATS alignment, generating evidence-grounded optimizations, verifying factual integrity,
+
+24
+00:02:54,500 --> 00:03:03,050
+and assembling the studio workspace. In production, this completes in under nine seconds.
+
+25
+00:03:03,050 --> 00:03:09,500
+Once processed, we enter the Interactive Resume Studio.
+
+26
+00:03:09,500 --> 00:03:17,500
+The resume is presented in an executive typography layout with clear section badges and bullet formatting.
+
+27
+00:03:17,500 --> 00:03:24,000
+Every field is fully editable inline. Candidates can refine their summary, adjust bullets, or add verified skills.
+
+28
+00:03:24,000 --> 00:03:31,000
+Clicking the Re-check Score button instantly recalculates ATS compatibility and match breakdown,
+
+29
+00:03:31,000 --> 00:03:36,600
+providing real-time feedback on how manual edits affect recruiter screening.
+
+30
+00:03:36,600 --> 00:03:43,500
+Switching to the ATS and Alignment Audit tab reveals our transparent evaluation dashboard.
+
+31
+00:03:43,500 --> 00:03:52,000
+Unlike black-box algorithms, Resume Customizer AI displays an objective weighted score: thirty-five percent for required skills,
+
+32
+00:03:52,000 --> 00:04:00,500
+fifteen percent for preferred skills, fifteen percent for experience, fifteen percent for responsibilities,
+
+33
+00:04:00,500 --> 00:04:08,000
+and ten percent each for domain keywords and formatting structure.
+
+34
+00:04:08,000 --> 00:04:15,380
+The heuristic audit grades technical parseability, readability, and reverse-chronological layout.
+
+35
+00:04:15,380 --> 00:04:23,000
+Here we see the core differentiator of our application: the isolated Skill-Gap Analysis panel.
+
+36
+00:04:23,000 --> 00:04:31,000
+Rather than hallucinating missing requirements into the resume, absent skills such as Kafka or Prometheus
+
+37
+00:04:31,000 --> 00:04:38,500
+are quarantined into this dedicated advisory section.
+
+38
+00:04:38,500 --> 00:04:46,140
+Candidates receive actionable recommendations on how to legitimately acquire or demonstrate these skills.
+
+39
+00:04:46,140 --> 00:04:54,000
+In the Change Diff Analysis tab, candidates can review a side-by-side comparison between original and tailored drafts.
+
+40
+00:04:54,000 --> 00:05:01,500
+This highlights how bullet points were rephrased with strong action verbs while preserving factual claims.
+
+41
+00:05:01,500 --> 00:05:08,500
+The application also generates an executive cover letter aligned with genuine qualifications,
+
+42
+00:05:08,500 --> 00:05:15,460
+complete with one-click clipboard copying and letterhead PDF download.
+
+43
+00:05:15,460 --> 00:05:23,000
+When ready, candidates can export their tailored resume in three production-ready formats:
+
+44
+00:05:23,000 --> 00:05:31,000
+an ATS-standard PDF generated with ReportLab, an editable Word DOCX file, or clean plain text.
+
+45
+00:05:31,000 --> 00:05:39,500
+Resume Customizer AI demonstrates full-stack software craftsmanship, combining Next.js, FastAPI, Supabase, and Gemini.
+
+46
+00:05:39,500 --> 00:05:47,000
+The code and test suites are open source on GitHub, and the live application is deployed on Vercel and Render.
+
+47
+00:05:47,000 --> 00:05:52,970
+Thank you for watching!
+

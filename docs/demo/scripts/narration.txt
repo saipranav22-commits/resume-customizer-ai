@@ -1,0 +1,75 @@
+# RESUME CUSTOMIZER AI — CONCISE TECHNICAL DEMONSTRATION SCRIPT
+# Target: 4.5 to 5.0 Minutes (~270 to 300 Seconds)
+# Voice: en-IN-PrabhatNeural (Professional, Neutral Indian English, Confident)
+
+---
+
+## SCENE 01: INTRODUCTION & THE ETHICAL AI PROBLEM
+Welcome to Resume Customizer AI — an intelligent, full-stack application that tailors candidate resumes to target job descriptions while enforcing strict anti-fabrication standards.
+Most generative tools hallucinate unearned credentials or metrics to beat Applicant Tracking Systems. Resume Customizer AI takes a different approach: it strategically aligns genuine candidate accomplishments with job requirements, without ever inventing false experience.
+
+---
+
+## SCENE 02: SYSTEM ARCHITECTURE & PRODUCTION TECH STACK
+The application architecture is modern, resilient, and production-tested.
+The frontend is built on Next.js 16 with the React 19 App Router, TypeScript, and Tailwind CSS version 4, styled in an editorial Aubergine and Copper theme.
+The backend is a high-performance Python 3.11 asynchronous microservice powered by FastAPI and Uvicorn.
+Document processing is executed server-side via PyPDF, python-docx, and ReportLab Platypus.
+Database persistence and authentication run on managed Supabase PostgreSQL with Row Level Security, while the intelligence layer integrates Google Gemini with deterministic heuristic fallbacks.
+
+---
+
+## SCENE 03: RESUME UPLOAD & DUAL-FORMAT PARSING
+Starting on our live production application deployed on Vercel, we upload a resume document.
+Our ingestion pipeline supports both Adobe PDF and Microsoft Word DOCX files.
+For this walkthrough, we are using a synthetic candidate profile: Alex Morgan, a Staff Full Stack and Cloud Systems Engineer.
+The backend parser enforces a five-megabyte size ceiling, validates document streams, strips dangerous control characters, and extracts both paragraphs and tables into normalized Unicode text.
+
+---
+
+## SCENE 04: JOB DESCRIPTION INPUT & GRANULAR SECTION CONTROLS
+Next, we enter a target Job Description for a Senior Backend and Cloud Infrastructure Engineer position.
+The application validates the job description in real time, requiring at least fifty characters for meaningful keyword extraction.
+Notice the granular section controls beneath the input. Candidates can independently toggle whether the AI customizes the Professional Summary, aligns the Skills taxonomy, or rephrases Experience bullets.
+
+---
+
+## SCENE 05: THE 6-STAGE ETHICAL AI OPTIMIZATION PIPELINE
+Clicking Tailor Resume initiates an asynchronous workflow to our FastAPI backend on Render.
+A live six-stage progress tracker visualizes the analysis: reading document structure, parsing target job competencies, evaluating multi-factor ATS alignment, generating evidence-grounded optimizations, verifying factual integrity against original credentials, and assembling the studio workspace. In production, this completes in under nine seconds.
+
+---
+
+## SCENE 06: INTERACTIVE RESUME STUDIO & INLINE ATS EDITOR
+Once processed, we enter the Interactive Resume Studio.
+The resume is presented in an executive typography layout with clear section badges and bullet formatting.
+Every field is fully editable inline. Candidates can refine their summary, adjust bullets, or add verified skills.
+Clicking the Re-check Score button instantly recalculates ATS compatibility and match breakdown, providing real-time feedback on how manual edits affect recruiter screening.
+
+---
+
+## SCENE 07: ATS QUALITY AUDIT & TRANSPARENT MATCH SCORING
+Switching to the ATS and Alignment Audit tab reveals our transparent evaluation dashboard.
+Unlike black-box algorithms, Resume Customizer AI displays an objective weighted score: thirty-five percent for required skills, fifteen percent for preferred skills, fifteen percent for experience alignment, fifteen percent for responsibilities, and ten percent each for domain keywords and formatting structure.
+The heuristic audit grades technical parseability, readability, and reverse-chronological layout, categorizing findings into actionable suggestions.
+
+---
+
+## SCENE 08: SKILL-GAP ANALYSIS & ANTI-FABRICATION SAFEGUARDS
+Here we see the core differentiator of our application: the isolated Skill-Gap Analysis panel.
+Rather than hallucinating missing requirements into the candidate's resume, absent skills such as Kafka or Prometheus are quarantined into this dedicated advisory section.
+Candidates receive actionable recommendations on how to legitimately acquire or demonstrate these skills through portfolio projects, certifications, or cover letters.
+
+---
+
+## SCENE 09: SIDE-BY-SIDE DIFF ANALYSIS & EXECUTIVE COVER LETTER
+In the Change Diff Analysis tab, candidates can review a side-by-side comparison between their original resume and the optimized draft.
+This highlights how bullet points were rephrased with strong action verbs while preserving factual claims.
+The application also generates an executive cover letter aligned with genuine qualifications, complete with one-click clipboard copying and letterhead PDF download.
+
+---
+
+## SCENE 10: MULTI-FORMAT EXPORTS & PRODUCTION CONCLUSION
+When ready, candidates can export their tailored resume in three production-ready formats: an ATS-standard PDF generated with ReportLab, an editable Word DOCX file, or clean plain text.
+Resume Customizer AI demonstrates full-stack software craftsmanship, combining Next.js, FastAPI, Supabase, and Google Gemini into a reliable career tool.
+The code and test suites are open source on GitHub, and the live application is deployed on Vercel and Render. Thank you for watching!
